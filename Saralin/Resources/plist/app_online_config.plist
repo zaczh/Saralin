@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>ConfigItems</key>
+    <dict>
+        <key>UserGroupInfo</key>
+        <dict>
+            <key>Version</key>
+            <string>1.0</string>
+            <key>DownloadUrl</key>
+            <string>https://raw.githubusercontent.com/zaczh/SaralinPub/master/user_group_info.plist</string>
+        </dict>
+        <key>ForumInfo</key>
+        <dict>
+            <key>Version</key>
+            <string>1.3</string>
+            <key>DownloadUrl</key>
+            <string>https://raw.githubusercontent.com/zaczh/SaralinPub/master/forum_info.plist</string>
+        </dict>
+        <key>MahjongEmoji</key>
+        <dict>
+            <key>ZipPath</key>
+            <string>~/Documents/Data</string>
+            <key>Version</key>
+            <string>1.0</string>
+            <key>DownloadUrl</key>
+            <string>https://raw.githubusercontent.com/zaczh/SaralinPub/master/Mahjong.zip</string>
+        </dict>
+    </dict>
+    <key>ConfigVersion</key>
+    <string>1.4</string>
+    <key>MinimumCompatibleAppVersion</key>
+    <string>2.0</string>
+    <key>MaximumCompatibleAppVersion</key>
+    <string>999.0</string>
+</dict>
+</plist>

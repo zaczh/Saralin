@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="16096" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16086"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="SALoginViewController" customModule="Saralin" customModuleProvider="target">
+            <connections>
+                <outlet property="formTable" destination="MuN-yE-i5J" id="J3V-ro-XG8"/>
+                <outlet property="forumDomainLabel" destination="Msr-RQ-mQa" id="U8T-C9-lfU"/>
+                <outlet property="loadingIndicator" destination="75h-XU-ci4" id="r9F-Al-fdq"/>
+                <outlet property="loginButton" destination="Var-g9-kLK" id="sR0-c1-XFP"/>
+                <outlet property="loginButtonBottomConstraint" destination="dQD-Wz-MMy" id="5PP-Sj-aAN"/>
+                <outlet property="titleLabel" destination="Msr-RQ-mQa" id="lJX-C3-aIx"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="MuN-yE-i5J">
+                    <rect key="frame" x="57" y="200" width="300" height="110"/>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="300" id="bDX-2f-7sE"/>
+                        <constraint firstAttribute="height" constant="110" id="qLL-YT-QHK"/>
+                    </constraints>
+                </tableView>
+                <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Var-g9-kLK">
+                    <rect key="frame" x="189.5" y="310" width="35" height="61"/>
+                    <accessibility key="accessibilityConfiguration">
+                        <bool key="isElement" value="NO"/>
+                    </accessibility>
+                    <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
+                    <inset key="contentEdgeInsets" minX="0.0" minY="20" maxX="0.0" maxY="20"/>
+                    <state key="normal" title="登录"/>
+                    <state key="disabled">
+                        <color key="titleColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    </state>
+                    <connections>
+                        <action selector="handleLoginAction:" destination="-1" eventType="touchUpInside" id="cou-aQ-Z3t"/>
+                    </connections>
+                </button>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="bbs.saraba1st.com" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Msr-RQ-mQa">
+                    <rect key="frame" x="131" y="139" width="152" height="21"/>
+                    <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
+                    <nil key="textColor"/>
+                    <nil key="highlightedColor"/>
+                </label>
+                <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="75h-XU-ci4">
+                    <rect key="frame" x="197" y="330.5" width="20" height="20"/>
+                </activityIndicatorView>
+            </subviews>
+            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <gestureRecognizers/>
+            <constraints>
+                <constraint firstItem="Msr-RQ-mQa" firstAttribute="top" secondItem="fnl-2z-Ty3" secondAttribute="top" priority="250" constant="95" id="EPX-A0-s9y"/>
+                <constraint firstItem="MuN-yE-i5J" firstAttribute="centerX" secondItem="fnl-2z-Ty3" secondAttribute="centerX" id="HXT-4I-LRT"/>
+                <constraint firstItem="Var-g9-kLK" firstAttribute="top" secondItem="MuN-yE-i5J" secondAttribute="bottom" id="Rfj-il-liL"/>
+                <constraint firstItem="Var-g9-kLK" firstAttribute="centerX" secondItem="fnl-2z-Ty3" secondAttribute="centerX" id="VWJ-p5-GFX"/>
+                <constraint firstItem="75h-XU-ci4" firstAttribute="centerY" secondItem="Var-g9-kLK" secondAttribute="centerY" id="Xxb-6y-bTE"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="Var-g9-kLK" secondAttribute="bottom" id="dQD-Wz-MMy"/>
+                <constraint firstItem="Msr-RQ-mQa" firstAttribute="centerX" secondItem="fnl-2z-Ty3" secondAttribute="centerX" id="fr5-cD-fUW"/>
+                <constraint firstItem="MuN-yE-i5J" firstAttribute="top" secondItem="Msr-RQ-mQa" secondAttribute="bottom" constant="40" id="sl0-AN-APl"/>
+                <constraint firstItem="75h-XU-ci4" firstAttribute="centerX" secondItem="Var-g9-kLK" secondAttribute="centerX" id="uAC-LL-Fr4"/>
+            </constraints>
+            <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
+            <connections>
+                <outletCollection property="gestureRecognizers" destination="ywn-Rt-JNC" appends="YES" id="0gw-hP-xVo"/>
+            </connections>
+            <point key="canvasLocation" x="24" y="51"/>
+        </view>
+        <tapGestureRecognizer enabled="NO" id="ywn-Rt-JNC">
+            <connections>
+                <action selector="handleViewTap:" destination="-1" id="l20-rp-qoq"/>
+            </connections>
+        </tapGestureRecognizer>
+    </objects>
+</document>

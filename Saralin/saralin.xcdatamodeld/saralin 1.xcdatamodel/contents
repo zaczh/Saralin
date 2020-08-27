@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="14886.2" systemVersion="18G87" minimumToolsVersion="Xcode 7.0" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="BlockedThread" representedClassName=".BlockedThread" syncable="YES">
+        <attribute name="authorid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="authorname" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="dateofadding" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="dateofcreating" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="fid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="icloudsourcedevice" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="tid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="title" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="uid" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="BlockedUser" representedClassName=".BlockedUser" syncable="YES">
+        <attribute name="blockreason" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="icloudsourcedevice" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="reporteruid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="reportingtime" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="uid" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="DirectMessage" representedClassName=".DirectMessage" syncable="YES">
+        <attribute name="authorid" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="dateline" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="icloudsourcedevice" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="isnew" optional="YES" attributeType="Boolean" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="lastauthor" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="lastauthorid" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="lastdateline" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="lastsummary" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="lastupdate" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="members" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="message" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="msgfrom" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="msgfromid" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="msgtoid" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="plid" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="pmnum" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="pmtype" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="sa_isread" optional="YES" attributeType="Boolean" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="subject" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="touid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="tousername" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="uid" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="ForumThread" representedClassName=".ForumThread" syncable="YES">
+        <attribute name="authorid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="authorname" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="containedimagescount" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="createdate" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="fid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="icloudsourcedevice" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="isnew" optional="YES" attributeType="Boolean" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="issettop" optional="YES" attributeType="Boolean" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="lastreplydate" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="lasttimeviewed" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="newreplycount" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="readlevel" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="replycount" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="tid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="timemodified" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="title" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="viewcount" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+    </entity>
+    <entity name="OnlineFavoriteThread" representedClassName=".OnlineFavoriteThread" syncable="YES">
+        <attribute name="authorname" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="favid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="favoriteddate" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="icloudsourcedevice" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="icon" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="replycount" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="tid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="title" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="uid" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="ReplyDraft" representedClassName=".ReplyDraft" syncable="YES">
+        <attribute name="attachedimagedata" optional="YES" attributeType="Binary" syncable="YES"/>
+        <attribute name="createdate" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="draftcontent" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="draftcontentdata" optional="YES" attributeType="Binary" syncable="YES"/>
+        <attribute name="fid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="icloudsourcedevice" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="quote_author" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="quote_content_urlencoded" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="quote_id" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="quote_name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="quote_textcontent" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="tid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="uid" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="SearchKeyword" representedClassName=".SearchKeyword" syncable="YES">
+        <attribute name="category" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="count" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="date" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="icloudsourcedevice" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="keyword" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="uid" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="ViewedBoard" representedClassName=".ViewedBoard" syncable="YES">
+        <attribute name="fid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="icloudsourcedevice" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="lastfetchedtid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="lastviewtime" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="typeid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="uid" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="ViewedThread" representedClassName=".ViewedThread" syncable="YES">
+        <attribute name="author" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="authorid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="fid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="icloudsourcedevice" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="lastviewfloor" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="lastviewpageisreverseloading" optional="YES" attributeType="Boolean" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="lastviewreplycount" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="lastviewreplyid" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="lastviewtime" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="page" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="subject" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="tid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="uid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="webviewyoffset" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+    </entity>
+    <entity name="WatchingThread" representedClassName=".WatchingThread" syncable="YES">
+        <attribute name="author" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="authorid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="cachedcontent" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="fid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="hasreplied" optional="YES" attributeType="Boolean" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="hotdegree" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="icloudsourcedevice" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="lastfetchreplycount" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="lastreplyupdatedtime" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="lastviewreplycount" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="lastviewtime" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="newreplycount" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="page" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="subject" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="tid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="timeadded" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="uid" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="BlockedThread" positionX="-594" positionY="-36" width="128" height="178"/>
+        <element name="BlockedUser" positionX="-191" positionY="-99" width="128" height="133"/>
+        <element name="DirectMessage" positionX="-594" positionY="-36" width="128" height="373"/>
+        <element name="ForumThread" positionX="-396" positionY="-180" width="128" height="298"/>
+        <element name="OnlineFavoriteThread" positionX="-342" positionY="-27" width="128" height="178"/>
+        <element name="ReplyDraft" positionX="-342" positionY="-27" width="128" height="238"/>
+        <element name="SearchKeyword" positionX="-585" positionY="-27" width="128" height="133"/>
+        <element name="ViewedBoard" positionX="-225" positionY="63" width="128" height="148"/>
+        <element name="ViewedThread" positionX="-792" positionY="-45" width="128" height="253"/>
+        <element name="WatchingThread" positionX="-279" positionY="-27" width="128" height="298"/>
+    </elements>
+</model>

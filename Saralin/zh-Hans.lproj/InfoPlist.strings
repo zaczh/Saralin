@@ -1,0 +1,8 @@
+/* (No Commment) */
+"CFBundleName" = "Saralin";
+
+/* Photo Library Usage Description */
+"NSPhotoLibraryUsageDescription" = "回帖的时候可以选择照片作为附件上传";
+
+shortcutTitle1 = "搜索论坛";
+shortcutSubtitle1 = "";

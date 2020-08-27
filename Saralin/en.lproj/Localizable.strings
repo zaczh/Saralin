@@ -1,0 +1,257 @@
+/* 
+  Localizable.strings
+  Saralin
+
+  Created by zhang on 11/30/15.
+  Copyright © 2015 zaczh. All rights reserved.
+*/
+"ACCOUNT_CENTER_VC_TITLE" = "Account";
+"FORUM_VC_TITLE" = "Forum";
+"FAVORITE_VC_TITLE" = "Favorites";
+"DIRECT_MESSAGE_VC_TITLE" = "Messages";
+"MY_THREADS_VC_TITLE" = "Threads";
+"OTHERS_THREADS_VC_TITLE" = "%@'s threads";
+
+
+"CHOOSE_CHILD_BOARD_VC_TITLE" = "Choose Board";
+"CHOOSE_CATEGORY_VC_TITLE" = "Choose Category";
+
+"HOT_THREADS_VC_TITLE" = "Hot";
+
+"CLOSE" = "Close";
+"SEND" = "Send";
+"DELETE" = "Delete";
+
+"ACCOUNT_VC_MY_MESSAGES" = "Messages";
+"ACCOUNT_VC_MY_THREADS" = "Threads";
+"ACCOUNT_VC_MY_NOTICES" = "Notices";
+
+"ACCOUNT_VC_BIND_SMS" = "You need to bind your SMS number before replying to threads.";
+
+
+"ACCOUNT_VC_SETTINGS" = "Settings";
+"ACCOUNT_VC_ABOUT" = "About";
+"ACCOUNT_VC_LOG_OUT" = "Log Out";
+"ACCOUNT_VC_ACCOUNT_DETAIL" = "Account Detail";
+"ACCOUNT_VC_BLACKLIST" = "Blocked";
+"LEGAL_NOTICE_VC_TITLE" = "Legal Notice";
+"EULA_VC_TITLE" = "EULA";
+
+
+"ACCOUNT_VC_CLICK_HERE_TO_LOG_IN" = "Click Here To Log In";
+
+"FAVORITE_VC_WATCH_LIST" = "Watching";
+
+"ABOUT_VC_TITLE" = "About";
+"ABOUT_VC_FEEDBACK" = "Feedback";
+"ABOUT_VC_LEGAL_LICENSE" = "Legal";
+"ABOUT_VC_APP_STORE_RATE" = "Rate in App Store";
+"ABOUT_VC_ELUA" = "User Agreement";
+"ABOUT_VC_DONATE" = "Donate to the developers❤";
+"ABOUT_VC_OPEN_SOURCE_PROJECT_URL" = "Project Source Code";
+
+"ALL"="All";
+"SIGN_IN" = "Sign in";
+"BOARD" = "Board";
+"ONLINE_COLLECTION_TITLE" = "Collections";
+"REPLY" = "Reply";
+"DONE" = "Done";
+"OK" = "OK";
+"SURE" = "YES";
+"CANCEL" = "Cancel";
+"HINT" = "Hint";
+"REPORT" = "Report";
+"REPORT_ABUSE" = "Report Abuse";
+"PLEASE_CHOOSE_TYPE_OF_ABUSE" = "What's wrong with this thread?";
+"SPAM"="SPAM";
+"TROLL"="Trolling";
+"OFFENDING"="Offending";
+"OTHERS"="Others";
+"APP_VERSION"="App Version";
+"CONFIG_VERSION"="Config Version";
+
+
+"OPTION_SAVE_NETWORK_TRAFFIC" = "Save Network Traffic";
+"OPTION_SAVE_NETWORK_TRAFFIC_DESCRIPTION" = "Set if automatically loads thread images only when connected to Wi-Fi.";
+
+"OPTION_THREAD_VIEW_SHOWS_AVATAR" = "Show Avatar In Thread View";
+"OPTION_THREAD_VIEW_SHOWS_AVATAR_DESCRIPTION" = "";
+
+"OPTION_INSERT_CLIENT_SIGNATURE" = "Show Saralin Signature";
+"OPTION_INSERT_CLIENT_SIGNATURE_DESCRIPTION" = "";
+
+"OPTION_THEME_SETTING" = "Theme";
+"OPTION_THEME_SETTING_DESCRIPTION" = "Choose your favorite theme.";
+
+"OPTION_BOARD_SETTING" = "Boards";
+"OPTION_BOARD_SETTING_DESCRIPTION" = "Set which boards to be displayed and arrange their order.";
+
+"OPTION_FONT_SETTING" = "Font Size";
+"OPTION_FONT_SETTING_DESCRIPTION" = "";
+
+"OPTION_THREADS_DISPLAY_ORDER" = "Threads Order";
+"OPTION_THREADS_DISPLAY_ORDER_DESCRIPTION" = "Set by which order threads are listed.";
+
+
+"OPTION_REMOVE_SIGNATURE_AND_LAST_EDITING_NOTICE" = "去掉小尾巴以及最后编辑信息";
+"OPTION_REMOVE_SIGNATURE_AND_LAST_EDITING_NOTICE_DESCRIPTION" = "";
+
+"OPTION_THREADS_DISPLAY_ORDER_REPLY_TIME" = "By Reply Time";
+"OPTION_THREADS_DISPLAY_ORDER_CREATE_TIME" = "By Creation Date";
+"OPTION_THREADS_DISPLAY_ORDER_CURRENT_OPTION_SUFFIX" = "(Current)";
+
+"OPTION_CLEAR_CACHE" = "Clear Cache";
+"OPTION_CLEAR_CACHE_DESCRIPTION" = "Cache will be cleared periodically. To see how much disk space Saralin takes, go to Settings->General->Storage & iCloud Usage";
+
+"SETTINGS_OPTION_TURN_ON_NOTIFICATION" = "Turn On Notifications";
+"SETTINGS_OPTION_TURN_ON_NOTIFICATION_DETAIL" = "Click To Turn On";
+"SETTINGS_OPTION_TURN_ON_NOTIFICATION_DESCRIPTION" = "Turn on notifications so you can get threads and watch list update notifications when in the background.";
+
+"SETTINGS_OPTION_ENABLE_MULTI_WINDOWS" = "Enable Multi-window Feature";
+"SETTINGS_OPTION_ENABLE_MULTI_WINDOWS_DETAIL" = "Click To Enable";
+"SETTINGS_OPTION_ENABLE_MULTI_WINDOWS_DESCRIPTION" = "When enabled, some interfaces(Replying, Composing and Image Viewing) will be opened in a new window.";
+
+"OPTION_DOMAIN_SETTING" = "Domain";
+"OPTION_DOMAIN_SETTING_DESCRIPTION" = "";
+
+"FAVORITE_DONE_HINT" = "Added to Favorites";
+"INTERFACE_LANGUAGE"="Language";
+"DEFAULT" = "Default";
+"USING_GOOGLE_SEARCH" = "Use Google Search";
+"DEFAULT_USING_SYSTEM_LANGUAGE" = "Default(Using System Language)";
+
+"CATEGORY_WORDING" = "Category";
+"CHILD_BOARD" = "Sub-Boards";
+
+
+"LOADING_HINT" = "LOADING...";
+"RETRY_INFO_HINT" = "loading failed due to error";
+"PROCESSING_HINT" = "Processing...";
+
+"NOT_LOGGED_IN_HINT" = "You haven't been logged in yet. Please click here to sign in.";
+
+"SHARE_TO_WEIBO" = "Share To Weibo";
+"COPY_LINK_TO_PASTEBOARD" = "Copy Link to Pasteboard";
+
+"CLEAR_APP_CACHE_CONFIRMATION" = "This will clear all stored cache. Are you sure?";
+"RETRY"="Retry";
+
+"THIS_BOARD_HAS_NO_CHILD" = "This board has no child boards";
+"CHOOSE_CHILD_BOARD_AND_CATEGORY" = "Choose Board/Category";
+"INPUT_PAGE_NUMBER" = "Input Page Number: ";
+
+"POST"="Post";
+"POST_ON" = "post";
+"UPDATE_ON" = "update";
+
+"COMPOSE_THREAD" = "New Thread";
+"LOGIN"="Log In";
+"CLOSE"="Close";
+"SEND_MESSAGE"="Send Message";
+"SEND"="Send";
+"INPUT_MESSAGE" = "Type a message";
+
+"HINT"="Hint";
+"LOGIN_NOW"="Login now";
+"TAB_ITEM_NEED_LOGIN"="You need to be logged in to see this.";
+"NO_DATA" = "No Data";
+"RECENTLY_VIEWED" = "Recent";
+
+"HINT_CLEANED" = "Cleaned";
+
+"READ_QUALIFICATION" = "Read Level";
+"NOT_QUALIFIED_TO_VIEW_THREAD_FORMATTED" = "Your are not qualified to view this thread. \nYour read access level: %@, qualified read access level: %@.";
+"VIEW_DESKTOP_PAGE" = "View Desktop Page";
+"SHARE_ACTIVITY_TITLE_OPEN_IN_SAFARI" = "Open In Safari";
+"SHARE_ACTIVITY_TITLE_SNAPSHOT_WEBPAGE" = "Snapshot This Page";
+
+"DESKTOP_PAGE" = "Desktop Page View";
+
+"EULA"="EULA";
+"AGREE"="Agree";
+
+"REGISTER" = "Register";
+"SETTING_VC_TITLE" = "Settings";
+
+"LOGIN_IN_PROGRESS" = "login in progress...";
+
+"AUTO_FILL_ACCOUNT_EXIST" = "Account Exist";
+"AUTO_FILL_ACCOUNT_IF_AUTO_FILL" = "Account existed. Please choose one to auto-fill this form.";
+
+"THREAD_ACTION_CHOOSE"="Please select an action";
+"THREAD_ACTION_VIEW_PLAIN_TEXT" = "Show plain text";
+"BLOCK" = "Block";
+"THREAD_ACTION_REPLY"="Reply";
+"THREAD_ACTION_SEND_DM" = "Send Message";
+"THREAD_ACTION_BLOCK" = "Block";
+"THREAD_ACTION_REPORT" = "Report";
+"ABOUT_VC_USER_GUIDE" = "User Guide";
+
+"IAP_DONATE_PURCHASE" = "Purchase";
+"IAP_DONATE_TITLE" = "Donate";
+"IAP_DONATE_FIVE_YUAN_DESCRIPTION" = "Would you like to donate a cup of coffee to the developers? A cup of coffee gives power to the developers, so they can make Saralin even better!";
+
+"THANK_YOU"="Thank You!";
+"IAP_DONATE_SUCCESS_THANK_YOU_LETTER"="The developers thank you for your donation. They will try his best to make Saralin even better.";
+"IAP_DONATE_FAIL_NOTICE"="Sorry, an error occurred when making your purchase.";
+"IAP_DONATE_IAP_CAN_NOT_PAY"="Sorry, we can not make a purchase on this device.";
+
+"HAVE_PUNCHED_IN_TODAY"="Punched";
+"CLICK_TO_PUNCH_IN_TODAY"="Punch in";
+
+"TABLE_CONTEXTUAL_ACTION_BLOCK_USER"="Block Author";
+"TABLE_CONTEXTUAL_ACTION_HIDE_THREAD"="Hide Thread";
+"TABLE_CONTEXTUAL_ACTION_ADD_TO_WATCH_LIST"="Add to watch list";
+
+"BOARD_VC_HIDE_THREAD_CONFIRM"="Are you sure that you want to hide this thread?";
+"BOARD_VC_BLOCK_USER_CONFIRM"="Are you sure that you want to block the author?";
+
+"TABLE_VC_BOTTOM_LOADER_LOADING"="Loading...";
+"TABLE_VC_BOTTOM_LOADER_LOAD_FAIL"="Loading failed. Tap to reload";
+"TABLE_VC_BOTTOM_LOADER_DRAG_UP_TO_LOAD_MORE"="Drag up to load more";
+"TABLE_VC_BOTTOM_LOADER_COMPLETED"="All loaded";
+
+"TEXT_REPLIED_ON"="replied on";
+
+"OPERATION_SUCCEEDED"="Done!";
+"OPERATION_FAILED"="Operation Failed.";
+
+"CHANGE_THREAD_LIST_ORDER_ALERT_TITLE"="Change Thread List Order";
+"DEBUG_ENTRY"="DEBUG";
+
+"OPEN_ATTACHMENT_HINT_TEXT"="This is an attachment, do you want to open it?";
+"OPEN"="OPEN";
+"FILE_NAME"="File Name";
+
+"FONT_CONFIGURE_VC_DEMO_TEXT" = "有人说不能excel的就不能叫生产力工具，这话在30年前应该是对的，但是也不严谨，应该是「没有电子表格的个人电脑就不应该叫生产力工具」。而Apple II时代，苹果还真的统治了相当大部分的企业市场，因为有一款领先的电子表格软件：visicalc\n后来，IBM PC那头出现了更先进的表格软件lotus 1-2-3，加上有老大哥光环加持，苹果这头的企业市场份额就走下坡路了。\n84年初代mac发布的时候，微软的multi**（excel的前身）和lotus\n1-2-3也是作为首发软件登场的。这一幕看起来很搞笑，但是当时的情况就是：大门和lotus也拿不准mac以后能不能成事，反正mac赢了的话也可以赚办公软件授权的钱。如果不清楚这里的逻辑，那也肯定不会理解30多年后微软给iPad Pro做适配。\n\nshow white时代，苹果搞过贴牌的激光打印机，在广告里嘲笑win稳定性差，显然是想挤回企业市场的，但是没有用。苹果决定搞一个新掌上的平台，叫newton，在20年前，这东西可以西文手写识别，做带笔迹的日程记录，红外通讯，远程连接打印机和传真，还可以插内存卡。苹果设计了许多可以靠newton应用的场景，比如警察开电子罚单，医生做电子病历，出行查看地图，访问时做录音笔记，进行财务计算等。显然，这东西是面向商用市场的。\n结果是，没有人买账。乔布斯上台后，这个项目被砍了。\n\nnewton，palm，iPaq，这是远古三大掌上生产力工具，也叫PDA。我要强调这一点的原因是，掌上生产力工具本质就是PDA，而不是PC。坐办公室和下一线干的活是两码事，对应的工具肯定也是两码事，所以这两个东西没什么交集。而在当时，长期的时间里，是缺乏所必要的环境，让PDA成为生产力工具的。直白点讲，这三个东西都属于前浪。\n\n09年砍掉xserve之后，苹果是完全和企业领域没什么关系了。当然，你愿意买mac pro组超算阵列你随意。\n苹果很清楚iPhone能干什么，能打电话，能当私人事物助理，能玩游戏，这都是智能手机该有的用法。但是苹果自己也不太清楚iPad这东西能干什么。虽然他们称这东西的开发周期甚至早于iPhone，但是这一款所谓「能用的平板电脑」，能干的也只是上网，看书，看照片视频，收发邮件。scott forstall在ipad intro里演示「你看，翻转ipad的时候照片也会跟着旋转哦」的一幕简直滑稽。\n但是有意思的是，各行各业很快找到了各种玩法。因为他们需要的是一款大小合适，具有易用的触摸交互功能，能像玩主机一样装上app即玩的万用设备。";
+
+"REFRESHING_TITLE" = "Refreshing...";
+
+"SEARCH_BAR_PLACEHOLDER_SEARCH_FORUM_THREADS"="Search Forum Threads";
+"SEARCH_BAR_PLACEHOLDER_SEARCH_HISTORY_RECORDS"="Search History Records";
+
+"LOADING_INDICATOR_TITLE_PROCESSING" = "Processing...";
+
+"ALERT_VIEW_CONTROLLER_VIEW_BOARD_REGULATION_TITLE" = "View Board Regulation";
+"ALERT_VIEW_CONTROLLER_POST_NEW_THREAD_TITLE" = "Post New Thread";
+
+"ALERT_VIEW_CONTROLLER_REQUIRE_LOGIN_TITLE" = "You must be logged in before posting new thread.";
+
+"DATE_FORMATTED_STYLE_FUTURE" = "future";
+"DATE_FORMATTED_STYLE_NOW" = "just now";
+"DATE_FORMATTED_STYLE_MINIUTES_AGO" = "%@ mintues ago";
+"DATE_FORMATTED_STYLE_HOUR_AGO" = "%@ hours ago";
+"DATE_FORMATTED_STYLE_DAY_AGO" = "%@ days ago";
+"DATE_FORMATTED_STYLE_MONTH_AGO" = "%@ months ago";
+"DATE_FORMATTED_STYLE_YEARS_AGO" = "%@ years ago";
+
+
+
+"FORMATTED_REPLY_COUNT" = "%@ reply(s)";
+"FORMATTED_VIEW_COUNT" = "%@ view(s)";
+"FORMATTED_NEW_REPLY_COUNT" = "%@ new reply(s)";
+
+"THREAD_BOTTOM_REFRESHER_TITLE_DRAG_UP_TO_REFRESH" = "Drag up to refresh";
+"THREAD_BOTTOM_REFRESHER_TITLE_RELEASE_TO_REFRESH" = "Release to refresh";
+
+"TAP_TO_INSERT_IMAGE" = "Tap To Insert Image";

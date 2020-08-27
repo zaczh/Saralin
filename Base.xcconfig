@@ -1,0 +1,15 @@
+//
+//  Base.xcconfig
+//  Saralin
+//
+//  Created by Junhui Zhang on 2020/4/12.
+//  Copyright © 2020 zaczh. All rights reserved.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+PRODUCT_NAME = Saralin
+PRODUCT_BUNDLE_IDENTIFIER = me.zaczh.saralin
+DEVELOPMENT_TEAM = NBQ74QRWC2
+CURRENT_PROJECT_VERSION = 2.5
+MARKETING_VERSION = 2.5

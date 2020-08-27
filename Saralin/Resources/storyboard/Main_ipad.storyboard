@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16096" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Upe-Lo-JWg">
+    <device id="mac" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16086"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Place Holder View Controller-->
+        <scene sceneID="WdT-6B-0V4">
+            <objects>
+                <viewController storyboardIdentifier="Main_ipad_place_holder" useStoryboardIdentifierAsRestorationIdentifier="YES" id="tw6-3P-h8Q" customClass="SAPlaceHolderViewController" customModule="Saralin" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="thm-z8-Ddv">
+                        <rect key="frame" x="0.0" y="0.0" width="478.5" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="请从左侧打开一个帖子" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VZL-pv-5ly">
+                                <rect key="frame" x="152" y="290" width="174" height="20"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <constraints>
+                            <constraint firstItem="VZL-pv-5ly" firstAttribute="centerX" secondItem="oog-Y3-btS" secondAttribute="centerX" id="1TO-3L-DTi"/>
+                            <constraint firstItem="VZL-pv-5ly" firstAttribute="centerY" secondItem="oog-Y3-btS" secondAttribute="centerY" id="IHa-sR-ssa"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="oog-Y3-btS"/>
+                    </view>
+                    <connections>
+                        <outlet property="infoLabel" destination="VZL-pv-5ly" id="fXp-OH-ct0"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="k3t-kA-jFt" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1391" y="8"/>
+        </scene>
+        <!--Catalyst Sidebar Controller-->
+        <scene sceneID="2GJ-od-gRj">
+            <objects>
+                <viewController id="0nF-7a-PBj" customClass="SACatalystSidebarController" customModule="Saralin" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Kg2-3r-0iD">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <viewLayoutGuide key="safeArea" id="TxL-x3-GY1"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="snB-Jv-f5y"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="JMj-DQ-VcG" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="252" y="-1540"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="G3f-BP-XRe">
+            <objects>
+                <navigationController id="mcC-5a-hAN" customClass="SANavigationController" customModule="Saralin" customModuleProvider="target" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="GQd-Dt-cJv">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="50"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="0nF-7a-PBj" kind="relationship" relationship="rootViewController" id="Asu-bT-yb2"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="868-Qi-XOr" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-571" y="-1540"/>
+        </scene>
+        <!--Split View Controller-->
+        <scene sceneID="k9E-TC-oXF">
+            <objects>
+                <splitViewController id="Upe-Lo-JWg" customClass="SASplitViewController" customModule="Saralin" customModuleProvider="target" sceneMemberID="viewController">
+                    <value key="contentSizeForViewInPopover" type="size" width="1200" height="800"/>
+                    <connections>
+                        <segue destination="mcC-5a-hAN" kind="relationship" relationship="masterViewController" id="4g1-Va-Oro"/>
+                        <segue destination="KBu-2x-PJZ" kind="relationship" relationship="detailViewController" id="miM-s0-3Cm"/>
+                    </connections>
+                </splitViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="9vx-TS-YzT" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1390" y="-1540"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="4uC-uz-GMB">
+            <objects>
+                <navigationController id="2Ru-bV-Bl3" customClass="SANavigationController" customModule="Saralin" customModuleProvider="target" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="Aib-DG-Pfp">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="50"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="ov1-zi-KLP" kind="relationship" relationship="rootViewController" id="qIb-A1-7CH"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="td7-Nn-BwX" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-571" y="-824"/>
+        </scene>
+        <!--Split View Controller-->
+        <scene sceneID="ilY-AW-EJ6">
+            <objects>
+                <splitViewController id="KBu-2x-PJZ" customClass="SASplitViewController" customModule="Saralin" customModuleProvider="target" sceneMemberID="viewController">
+                    <connections>
+                        <segue destination="2Ru-bV-Bl3" kind="relationship" relationship="masterViewController" id="3NW-jf-9P6"/>
+                        <segue destination="tw6-3P-h8Q" kind="relationship" relationship="detailViewController" id="az6-H6-exl"/>
+                    </connections>
+                </splitViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="O1C-Mw-T9d" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1391" y="-750"/>
+        </scene>
+        <!--Hot Threads View Controller-->
+        <scene sceneID="8yQ-HE-okl">
+            <objects>
+                <viewController id="ov1-zi-KLP" customClass="SAHotThreadsViewController" customModule="Saralin" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="bNB-YC-T1J">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <viewLayoutGuide key="safeArea" id="Bj0-Ss-1IO"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="8hI-3I-5FX"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="lAO-Ef-fqV" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="252" y="-824"/>
+        </scene>
+    </scenes>
+</document>

@@ -1,0 +1,8 @@
+/* (No Commment) */
+"CFBundleName" = "Saralin";
+
+/* Photo Library Usage Description */
+"NSPhotoLibraryUsageDescription" = "You can attach images when replying threads.";
+
+shortcutTitle1 = "Search Forum";
+shortcutSubtitle1 = "";

@@ -1,0 +1,355 @@
+/* account center view title */
+"ACCOUNT_CENTER_VC_TITLE" = "帐号";
+
+/* I Agree */
+"AGREE" = "同意";
+
+/* 全部 */
+"ALL" = "全部";
+
+/* board wording */
+"BOARD" = "版块";
+
+/* Cancel */
+"CANCEL" = "取消";
+
+/* (No Commment) */
+"CATEGORY_WORDING" = "分类";
+
+/* (No Commment) */
+"CHILD_BOARD" = "子版块";
+
+/* (No Commment) */
+"CHOOSE_CATEGORY_VC_TITLE" = "选择分类";
+
+/* 选择子板和分类 */
+"CHOOSE_CHILD_BOARD_AND_CATEGORY" = "选择子板和分类";
+
+/* (No Commment) */
+"CHOOSE_CHILD_BOARD_VC_TITLE" = "选择子版块";
+
+/* clear cache */
+"CLEAR_APP_CACHE_CONFIRMATION" = "确定要清除系统缓存吗？";
+
+/* 关闭 */
+"CLOSE" = "关闭";
+
+"DELETE" = "删除";
+
+/* 发表新帖 */
+"COMPOSE_THREAD" = "创建新帖";
+
+/* (No Commment) */
+"COPY_LINK_TO_PASTEBOARD" = "复制链接到剪贴板";
+
+/* (No Commment) */
+"DEFAULT" = "默认";
+
+/* (No Commment) */
+"DEFAULT_USING_SYSTEM_LANGUAGE" = "默认（跟随系统）";
+
+/* 桌面版页面 */
+"DESKTOP_PAGE" = "桌面版页面";
+
+/* direct message vc title */
+"DIRECT_MESSAGE_VC_TITLE" = "消息";
+
+/* account center done button */
+"DONE" = "完成";
+
+/* 用户协议 */
+"EULA" = "用户许可协议";
+
+/* content view controller favorite done hint */
+"FAVORITE_DONE_HINT" = "已加入收藏";
+
+/* favorite vc title
+   Favorites */
+"FAVORITE_VC_TITLE" = "收藏";
+
+/* forum vc title */
+"FORUM_VC_TITLE" = "论坛";
+
+"HOT_THREADS_VC_TITLE" = "热门";
+
+"ACCOUNT_VC_MY_MESSAGES" = "私信";
+"ACCOUNT_VC_MY_THREADS" = "帖子";
+"ACCOUNT_VC_MY_NOTICES" = "提醒";
+"ACCOUNT_VC_BIND_SMS" = "你需要绑定手机号才能在本论坛发表内容。";
+"ACCOUNT_VC_BLACKLIST" = "屏蔽";
+"ACCOUNT_VC_SETTINGS" = "设置";
+"ACCOUNT_VC_ABOUT" = "关于";
+"ACCOUNT_VC_LOG_OUT" = "退出当前账号";
+"ACCOUNT_VC_ACCOUNT_DETAIL" = "我的账号";
+
+"ACCOUNT_VC_CLICK_HERE_TO_LOG_IN" = "点击此处登录";
+
+"FAVORITE_VC_WATCH_LIST" = "观察列表";
+
+"ABOUT_VC_TITLE" = "关于";
+"ABOUT_VC_FEEDBACK" = "意见反馈";
+"ABOUT_VC_LEGAL_LICENSE" = "法律许可";
+"ABOUT_VC_APP_STORE_RATE" = "App Store评价";
+"ABOUT_VC_ELUA" = "用户许可协议";
+"ABOUT_VC_DONATE" = "捐赠开发者❤";
+"ABOUT_VC_OPEN_SOURCE_PROJECT_URL" = "代码开源地址";
+
+"LEGAL_NOTICE_VC_TITLE" = "法律许可";
+"EULA_VC_TITLE" = "用户许可协议";
+
+
+"CLOSE" = "关闭";
+"SEND" = "发送";
+"INPUT_MESSAGE" = "输入消息内容";
+
+"APP_VERSION"="程序版本";
+"CONFIG_VERSION"="配置版本";
+
+/* Hint */
+"HINT" = "提示";
+
+/* 输入页码： */
+"INPUT_PAGE_NUMBER" = "输入页码: ";
+
+/* (No Commment) */
+"INTERFACE_LANGUAGE" = "语言";
+
+/* loading */
+"LOADING_HINT" = "加载中...";
+"RETRY_INFO_HINT" = "加载过程中遇到了问题。";
+"PROCESSING_HINT" = "处理中...";
+/* Login */
+"LOGIN" = "登录";
+
+/* Login now */
+"LOGIN_NOW" = "现在登录";
+
+/* my threads vc title */
+"MY_THREADS_VC_TITLE" = "我的帖子";
+"OTHERS_THREADS_VC_TITLE" = "%@的帖子";
+
+/* (No Commment) */
+"NOT_LOGGED_IN_HINT" = "你尚未登录，点击这里登录";
+
+/* Not qualified to view thread */
+"NOT_QUALIFIED_TO_VIEW_THREAD_FORMATTED" = "你的阅读权限不够。当前阅读权限: %@, 需要阅读权限: %@。";
+
+/* 无数据 */
+"NO_DATA" = "无数据";
+
+/* Offending */
+"OFFENDING" = "内容不适当";
+
+/* OK */
+"OK" = "好的";
+
+/* OPTION_SAVE_NETWORK_TRAFFIC */
+"OPTION_SAVE_NETWORK_TRAFFIC" = "节省网络流量";
+/* OPTION_SAVE_NETWORK_TRAFFIC_DESCRIPTION */
+"OPTION_SAVE_NETWORK_TRAFFIC_DESCRIPTION" = "开启后将仅在Wi-Fi环境下自动加载帖子中的图片。";
+
+"OPTION_REMOVE_SIGNATURE_AND_LAST_EDITING_NOTICE" = "去掉小尾巴以及最后编辑信息";
+"OPTION_REMOVE_SIGNATURE_AND_LAST_EDITING_NOTICE_DESCRIPTION" = "";
+
+"OPTION_THREAD_VIEW_SHOWS_AVATAR" = "显示回帖人头像";
+"OPTION_THREAD_VIEW_SHOWS_AVATAR_DESCRIPTION" = "";
+
+"OPTION_INSERT_CLIENT_SIGNATURE" = "显示Saralin签名";
+"OPTION_INSERT_CLIENT_SIGNATURE_DESCRIPTION" = "";
+
+"OPTION_THEME_SETTING" = "主题";
+"OPTION_THEME_SETTING_DESCRIPTION" = "选择你最爱的主题";
+
+"OPTION_BOARD_SETTING" = "版块";
+"OPTION_BOARD_SETTING_DESCRIPTION" = "设置要展示的版块及其顺序。";
+
+"SETTINGS_OPTION_TURN_ON_NOTIFICATION" = "开启通知";
+"SETTINGS_OPTION_TURN_ON_NOTIFICATION_DETAIL" = "点击开启";
+"SETTINGS_OPTION_TURN_ON_NOTIFICATION_DESCRIPTION" = "开启通知，以便在后台收到帖子和观察列表的更新提示。";
+
+"SETTINGS_OPTION_ENABLE_MULTI_WINDOWS" = "开启多窗口";
+"SETTINGS_OPTION_ENABLE_MULTI_WINDOWS_DETAIL" = "点击开启";
+"SETTINGS_OPTION_ENABLE_MULTI_WINDOWS_DESCRIPTION" = "开启之后，App部分界面（回复帖子、新建帖子以及查看图片等）会在新窗口中打开。";
+
+/* 帖子显示顺序 */
+"OPTION_THREADS_DISPLAY_ORDER" = "帖子排序";
+"OPTION_THREADS_DISPLAY_ORDER_DESCRIPTION" = "设置帖子列表的排序规则。";
+
+/* OPTION_THREADS_DISPLAY_ORDER_CREATE_TIME */
+"OPTION_THREADS_DISPLAY_ORDER_CREATE_TIME" = "发表时间";
+
+/* OPTION_THREADS_DISPLAY_ORDER_REPLY_TIME */
+"OPTION_THREADS_DISPLAY_ORDER_REPLY_TIME" = "回复时间";
+
+"OPTION_THREADS_DISPLAY_ORDER_CURRENT_OPTION_SUFFIX" = "(当前选择)";
+
+"OPTION_FONT_SETTING" = "字体大小";
+"OPTION_FONT_SETTING_DESCRIPTION" = "";
+
+"OPTION_CLEAR_CACHE" = "清除缓存";
+"OPTION_CLEAR_CACHE_DESCRIPTION" = "缓存会定期被清理。要查看Saralin占用的磁盘空间，请去往设置->通用->储存空间。";
+
+"OPTION_DOMAIN_SETTING" = "域名";
+"OPTION_DOMAIN_SETTING_DESCRIPTION" = "";
+
+/* Others */
+"OTHERS" = "其他";
+
+/* Which Type Of Abuse Have You Encountered? */
+"PLEASE_CHOOSE_TYPE_OF_ABUSE" = "请选择举报理由";
+
+/* Post */
+"POST" = "发表";
+"POST_ON" = "发表于";
+
+"UPDATE_ON" = "更新于";
+
+/* Read Qualification */
+"READ_QUALIFICATION" = "阅读权限";
+
+/* Recently Viewed */
+"RECENTLY_VIEWED" = "最近浏览";
+
+"HINT_CLEANED" = "已清理";
+
+/* 注册 Register */
+"REGISTER" = "注册";
+
+/* reply wording */
+"REPLY" = "回复";
+
+/* (No Commment) */
+"REPORT" = "举报";
+
+/* Report Abuse */
+"REPORT_ABUSE" = "举报滥用";
+
+/* 重试 */
+"RETRY" = "重试";
+
+/* Send */
+"SEND" = "发送";
+
+/* (No Commment) */
+"SEND_MESSAGE" = "发消息";
+
+/* (No Commment) */
+"SHARE_TO_WEIBO" = "分享到新浪微博";
+
+/* sign in wording */
+"SIGN_IN" = "登录";
+
+/* Spam */
+"SPAM" = "广告/垃圾";
+
+/* Sure */
+"SURE" = "确定";
+
+/* You need to be logged in to see this. */
+"TAB_ITEM_NEED_LOGIN" = "这些内容需要登录后才能查看。";
+
+/* 当前版块没有子版块 */
+"THIS_BOARD_HAS_NO_CHILD" = "本版块没有子板";
+
+/* thread wording */
+"ONLINE_COLLECTION_TITLE" = "网络收藏";
+
+/* Troll */
+"TROLL" = "恶意灌水";
+
+/* Use Google For Searching */
+"USING_GOOGLE_SEARCH" = "使用Google搜索";
+
+/* 查看桌面版页面 */
+"VIEW_DESKTOP_PAGE" = "查看桌面版页面";
+"SHARE_ACTIVITY_TITLE_OPEN_IN_SAFARI" = "在Safari中打开";
+"SHARE_ACTIVITY_TITLE_SNAPSHOT_WEBPAGE" = "生成网页截图";
+
+"SETTING_VC_TITLE" = "设置";
+
+"LOGIN_IN_PROGRESS" = "正在登录...";
+
+"AUTO_FILL_ACCOUNT_EXIST" = "已有账号";
+"AUTO_FILL_ACCOUNT_IF_AUTO_FILL" = "检测到已有账号，请选择一个自动填写此表单。";
+
+
+"THREAD_ACTION_CHOOSE" = "请选择一个操作";
+"THREAD_ACTION_VIEW_PLAIN_TEXT" = "查看纯文本";
+"THREAD_ACTION_SEND_DM" = "发送消息";
+"BLOCK" = "屏蔽";
+"THREAD_ACTION_REPLY"="回复";
+"THREAD_ACTION_BLOCK" = "屏蔽";
+"THREAD_ACTION_REPORT" = "举报";
+"ABOUT_VC_USER_GUIDE" = "使用指南";
+
+"IAP_DONATE_PURCHASE" = "购买";
+"IAP_DONATE_TITLE" = "捐赠";
+"IAP_DONATE_FIVE_YUAN_DESCRIPTION" = "你是否愿意捐赠给开发者购买一杯咖啡的资金？ 一杯咖啡能让开发者更有动力，从而能把Saralin做的更好！";
+
+"THANK_YOU"="谢谢你！";
+"IAP_DONATE_SUCCESS_THANK_YOU_LETTER"="开发者非常感谢你的捐赠，接下来一定努力把Saralin做得更好。";
+"IAP_DONATE_FAIL_NOTICE"="很抱歉，购买出现了错误";
+"IAP_DONATE_IAP_CAN_NOT_PAY"="很抱歉，您的设备不支持此项购买。";
+
+"HAVE_PUNCHED_IN_TODAY"="已打卡";
+"CLICK_TO_PUNCH_IN_TODAY"="打卡";
+
+"TABLE_CONTEXTUAL_ACTION_BLOCK_USER"="屏蔽作者";
+"TABLE_CONTEXTUAL_ACTION_HIDE_THREAD"="隐藏帖子";
+"TABLE_CONTEXTUAL_ACTION_ADD_TO_WATCH_LIST"="加入观察列表";
+
+"BOARD_VC_HIDE_THREAD_CONFIRM"="确定要隐藏该贴？";
+"BOARD_VC_BLOCK_USER_CONFIRM"="确定要屏蔽此人？";
+
+"TABLE_VC_BOTTOM_LOADER_LOADING"="正在加载...";
+"TABLE_VC_BOTTOM_LOADER_LOAD_FAIL"="加载失败，点击重试";
+"TABLE_VC_BOTTOM_LOADER_DRAG_UP_TO_LOAD_MORE"="上拉加载更多内容";
+"TABLE_VC_BOTTOM_LOADER_COMPLETED"="已加载全部内容";
+
+"TEXT_REPLIED_ON"="发表于";
+
+
+"OPERATION_SUCCEEDED"="操作成功";
+"OPERATION_FAILED"="操作失败";
+
+"CHANGE_THREAD_LIST_ORDER_ALERT_TITLE"="更改列表排序规则";
+"DEBUG_ENTRY"="调试";
+
+"OPEN_ATTACHMENT_HINT_TEXT"="这是一个附件，是否打开？";
+"OPEN"="打开";
+"FILE_NAME"="文件名";
+
+
+"FONT_CONFIGURE_VC_DEMO_TEXT" = "有人说不能excel的就不能叫生产力工具，这话在30年前应该是对的，但是也不严谨，应该是「没有电子表格的个人电脑就不应该叫生产力工具」。而Apple II时代，苹果还真的统治了相当大部分的企业市场，因为有一款领先的电子表格软件：visicalc\n后来，IBM PC那头出现了更先进的表格软件lotus 1-2-3，加上有老大哥光环加持，苹果这头的企业市场份额就走下坡路了。\n84年初代mac发布的时候，微软的multi**（excel的前身）和lotus\n1-2-3也是作为首发软件登场的。这一幕看起来很搞笑，但是当时的情况就是：大门和lotus也拿不准mac以后能不能成事，反正mac赢了的话也可以赚办公软件授权的钱。如果不清楚这里的逻辑，那也肯定不会理解30多年后微软给iPad Pro做适配。\n\nshow white时代，苹果搞过贴牌的激光打印机，在广告里嘲笑win稳定性差，显然是想挤回企业市场的，但是没有用。苹果决定搞一个新掌上的平台，叫newton，在20年前，这东西可以西文手写识别，做带笔迹的日程记录，红外通讯，远程连接打印机和传真，还可以插内存卡。苹果设计了许多可以靠newton应用的场景，比如警察开电子罚单，医生做电子病历，出行查看地图，访问时做录音笔记，进行财务计算等。显然，这东西是面向商用市场的。\n结果是，没有人买账。乔布斯上台后，这个项目被砍了。\n\nnewton，palm，iPaq，这是远古三大掌上生产力工具，也叫PDA。我要强调这一点的原因是，掌上生产力工具本质就是PDA，而不是PC。坐办公室和下一线干的活是两码事，对应的工具肯定也是两码事，所以这两个东西没什么交集。而在当时，长期的时间里，是缺乏所必要的环境，让PDA成为生产力工具的。直白点讲，这三个东西都属于前浪。\n\n09年砍掉xserve之后，苹果是完全和企业领域没什么关系了。当然，你愿意买mac pro组超算阵列你随意。\n苹果很清楚iPhone能干什么，能打电话，能当私人事物助理，能玩游戏，这都是智能手机该有的用法。但是苹果自己也不太清楚iPad这东西能干什么。虽然他们称这东西的开发周期甚至早于iPhone，但是这一款所谓「能用的平板电脑」，能干的也只是上网，看书，看照片视频，收发邮件。scott forstall在ipad intro里演示「你看，翻转ipad的时候照片也会跟着旋转哦」的一幕简直滑稽。\n但是有意思的是，各行各业很快找到了各种玩法。因为他们需要的是一款大小合适，具有易用的触摸交互功能，能像玩主机一样装上app即玩的万用设备。";
+
+"REFRESHING_TITLE" = "正在刷新...";
+
+"SEARCH_BAR_PLACEHOLDER_SEARCH_FORUM_THREADS"="搜索论坛帖子";
+"SEARCH_BAR_PLACEHOLDER_SEARCH_HISTORY_RECORDS"="搜索历史记录";
+
+"LOADING_INDICATOR_TITLE_PROCESSING" = "正在处理...";
+
+
+"ALERT_VIEW_CONTROLLER_VIEW_BOARD_REGULATION_TITLE" = "查看版规";
+"ALERT_VIEW_CONTROLLER_POST_NEW_THREAD_TITLE" = "发表新帖";
+
+"ALERT_VIEW_CONTROLLER_REQUIRE_LOGIN_TITLE" = "登录以后才能发表帖子";
+
+"DATE_FORMATTED_STYLE_FUTURE" = "将来";
+"DATE_FORMATTED_STYLE_NOW" = "刚刚";
+"DATE_FORMATTED_STYLE_MINIUTES_AGO" = "%@分钟前";
+"DATE_FORMATTED_STYLE_HOUR_AGO" = "%@小时前";
+"DATE_FORMATTED_STYLE_DAY_AGO" = "%@天前";
+"DATE_FORMATTED_STYLE_MONTH_AGO" = "%@个月前";
+"DATE_FORMATTED_STYLE_YEARS_AGO" = "%@年前";
+
+
+"FORMATTED_REPLY_COUNT" = "回%@";
+"FORMATTED_VIEW_COUNT" = "看%@";
+"FORMATTED_NEW_REPLY_COUNT" = "%@条新回复";
+"TAP_TO_INSERT_IMAGE" = "点击插入图片";
+
+"THREAD_BOTTOM_REFRESHER_TITLE_RELEASE_TO_REFRESH" = "松开手刷新";
+"THREAD_BOTTOM_REFRESHER_TITLE_DRAG_UP_TO_REFRESH" = "上拉刷新";
+
+"TAP_TO_INSERT_IMAGE" = "Tap To Insert Image";

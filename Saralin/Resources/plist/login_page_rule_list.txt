@@ -1,0 +1,12 @@
+[
+    {
+        "trigger": {
+            "url-filter": ".*"
+        },
+        "action": {
+            "type": "css-display-none",
+            "selector": ".hd, .ft, .scrolltop, .addsbygoogle"
+        }
+    }
+]
+

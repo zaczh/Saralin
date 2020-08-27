@@ -1,0 +1,12 @@
+
+/* Class = "UITabBarItem"; title = "Hot"; ObjectID = "DG4-as-arH"; */
+"DG4-as-arH.title" = "热门";
+
+/* Class = "UITabBarItem"; title = "Forum"; ObjectID = "PZP-OK-yaI"; */
+"PZP-OK-yaI.title" = "论坛";
+
+/* Class = "UITabBarItem"; title = "Account"; ObjectID = "kBR-Nt-qjQ"; */
+"kBR-Nt-qjQ.title" = "账号";
+
+/* Class = "UITabBarItem"; title = "Favorites"; ObjectID = "u5T-QU-IoO"; */
+"u5T-QU-IoO.title" = "最近浏览";

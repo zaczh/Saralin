@@ -1,0 +1,313 @@
+html {
+    -webkit-text-size-adjust: 100%; /* Prevent font scaling in landscape while allowing user zoom */
+}
+* {
+    margin: 0;
+    padding: 0;
+    word-wrap: break-word;
+}
+
+table, tbody, tr, td {
+    display: block;
+}
+
+p {
+    line-height: unset !important;
+    text-indent: unset !important;
+    text-align: unset !important;
+}
+
+div {
+    text-align: unset !important;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", sans-serif !important;
+    font-size: ${normal-font-size} !important;
+    color: ${text-color};
+    background-color: ${background-color};
+    line-height: 1.3125;
+}
+
+.content_body {
+    padding: ${body-padding};
+    background-color: ${foreground-color};
+    ${ipad-body-style}
+}
+
+::-webkit-user-select {
+    text-decoration:none;
+    background:none;
+}
+
+font {
+    background-color: transparent !important;
+    color: unset !important;
+    font-family: unset !important;
+    font-size: unset !important;
+}
+
+ul {
+    padding-left:20px;
+}
+
+li {
+    line-height:1.2em;
+}
+
+a {
+    color: ${link-color};
+    text-decoration: none;
+}
+
+a img {
+    text-decoration: none;
+    border: 0px none;
+}
+
+img.sa_avatar {
+    margin-top: 0;
+    margin-bottom: 0;
+    height:100%;
+    object-fit: cover;
+}
+
+img {
+    border: 0;
+    display:block;
+    margin-left:auto;
+    margin-right:auto;
+    max-width:${img-max-width};
+    height:auto;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.post {
+    height: ${reply-header-height};
+    border-top: 1px solid ${table-cell-seperator-color};
+    padding-top: 10px;
+}
+
+.loading {
+    height: 40px;
+    padding-top: 10px;
+}
+
+.bm_h {
+    font-weight: bold;
+}
+
+.avatar {
+    float:left;
+    width: ${reply-header-height};
+    height: ${reply-header-height};
+    border-radius: 50%;
+    overflow: hidden;
+    display: ${avatar-display-style};
+    margin-right: 10px;
+}
+
+.pbody {
+    width:100%;
+    padding-top:10px;
+    padding-bottom: 10px;
+    overflow: hidden;
+}
+
+.post_wrapper {
+    position: relative;
+    background-color: ${foreground-color};
+}
+
+div.block_overlay {
+    width: 100%;
+    height: 100%;
+    background-color: ${block-quote-background-color};
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    z-index: 10;
+    font-weight: bold;
+    display: none;
+}
+
+span.blocked_author_name {
+    color: red;
+}
+
+.post_title {
+}
+
+.bm_user {
+    position: relative;
+    float:left;
+    font-weight: 500;
+}
+
+.bm_user.dm {
+    float: right;
+}
+
+.bm_user.group {
+    float:none;
+    margin: 0;
+    top: 4px;
+    color: #b055c2;
+}
+
+.bm_user.floor {
+    top: 0;
+    margin-left: 0;
+    width: 100%;
+}
+
+.post_footer {
+    height:20px;
+    font-size: ${small-font-size};
+}
+
+.post_footer_time {
+    float:left;
+}
+
+.post_footer_reply {
+    float:right;
+}
+
+.wp {
+    overflow: hidden;
+}
+
+div.attachmenttitle {
+    margin-top: 20px;
+}
+
+.reportabuse {
+    color:#99353d;
+}
+
+.unblock_abused_user {
+    color: red;
+    text-decoration: underline;
+}
+
+.bm_inf {
+    margin-top: 10px;
+    position:relative;
+    text-align:right !important;
+}
+
+i.pstatus {
+    display: block;
+    font-weight: 800;
+}
+
+.bm_c .bm_user {
+    padding: 1px 0 1px 0px;
+    line-height: 14px;
+}
+
+img.center {
+    display:block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+blockquote {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 0.25em 16px;
+    color: ${block-quote-text-color};
+    background: ${block-quote-background-color};
+    border-left: 2px  ${block-quote-text-color} solid;
+}
+
+fieldset {
+    padding:10px;
+}
+
+blockquote a {
+    color: ${block-quote-text-color};
+    text-decoration: underline;
+}
+
+div.loadMoreRetry {
+    height: 60px;
+    display: flex;
+    background-color: ${background-color};
+}
+
+blockquote img {
+    display: inline-block;
+}
+
+img[smileid], img[smilieid] {
+    display:inline-block;
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+blockquote font {
+    color: ${block-quote-text-color} !important;
+}
+
+blockquote a font {
+    color: ${block-quote-text-color} !important;
+}
+
+input {
+    height:1.2em;
+    font-size: ${normal-font-size};
+    margin: .4rem;
+}
+
+progress.poll {
+    width:60%;
+}
+
+span.xg1 > a {
+    color: #2f9299;
+}
+
+.expandArrow {
+    background-image: url("thread_page_expand_arrow.png");
+    width: 18px;
+    height: 18px;
+    background-size: cover;
+    filter: invert(${icon-invert-percent});
+}
+
+/* The container <div> - needed to position the dropdown content */
+.dropdown {
+    float: right;
+    display: inline-block;
+    position: relative;
+}
+
+.activityIndicator {
+    height: 30px;
+    width: 30px;
+    background-size: 30px 30px;
+    margin: 0px auto;
+    background-image: url("loading.gif");
+    filter: invert(${icon-invert-percent});
+}
+
+.flash {
+    animation-duration: 1s;
+    animation-name: flash;
+}
+
+@keyframes flash {
+    from {
+        background: rgba(255,99,102,1);
+    }
+    
+    to {
+        background: unset;
+    }
+}
+
