@@ -2058,6 +2058,7 @@
 		1F1ACB6E243AB2BF0044D2D6 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = CatalystExtension;
+			platformFilter = maccatalyst;
 			targetProxy = 1F1ACB6D243AB2BF0044D2D6 /* PBXContainerItemProxy */;
 		};
 		1FD17E941C6E04CB00008128 /* PBXTargetDependency */ = {
