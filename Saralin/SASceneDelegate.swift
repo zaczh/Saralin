@@ -33,7 +33,7 @@ class SASceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         if let userActivity = session.stateRestorationActivity {
             if !restore(window: window, with: userActivity) {
-                sa_log_v2("Failed to restore from %@", module: .ui, type: .fault, userActivity.description)
+                os_log("Failed to restore from %@", log: .ui, type: .fault, userActivity.description)
             }
         }
     }
@@ -60,11 +60,7 @@ class SASceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
   
     func stateRestorationActivity(for scene: UIScene) -> NSUserActivity? {
-        #if targetEnvironment(macCatalyst)
-        return nil
-        #else
         return scene.userActivity
-        #endif
     }
     
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
@@ -160,7 +156,7 @@ class SASceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         scene.title = nil
         
-        sa_log_v2("Failed to continue session from %@", module: .ui, type: .fault, userActivity.description)
+        os_log("Failed to continue session from %@", log: .ui, type: .fault, userActivity.description)
     }
     
     // MARK: Restoration
@@ -174,12 +170,33 @@ class SASceneDelegate: UIResponder, UIWindowSceneDelegate {
                 return false
             }
             
-            guard let navi = AppController.current.findDeailNavigationController(rootViewController: window.rootViewController!) else {
+            let split = window.rootViewController as! UISplitViewController
+            if UIDevice.current.userInterfaceIdiom == .phone {
+                let tab = split.viewController(for: .compact) as! UITabBarController
+                for vcs in tab.viewControllers ?? [] {
+                    if let navi = vcs as? UINavigationController, let vc = navi.topViewController, vc is SAForumViewController {
+                        tab.selectedViewController = navi
+                        break
+                    }
+                }
+                let navigation = (tab.selectedViewController ?? tab.viewControllers?.first) as! UINavigationController
+                if let fid = url.sa_queryString("fid") {
+                    let boardVCUrl = URL(string: SAGlobalConfig().forum_base_url + "forum.php?mod=forumdisplay&fid=\(fid)&mobile=1")!
+                    let board = SABoardViewController(url: boardVCUrl)
+                    navigation.pushViewController(board, animated: false)
+                    return true
+                }
                 return false
             }
             
+            if let fid = url.sa_queryString("fid") {
+                let boardVCUrl = URL(string: SAGlobalConfig().forum_base_url + "forum.php?mod=forumdisplay&fid=\(fid)&mobile=1")!
+                let board = SABoardViewController(url: boardVCUrl)
+                split.setViewController(SANavigationController(rootViewController: board), for: .supplementary)
+            }
+            
             let thread = SAThreadContentViewController(url: url)
-            navi.pushViewController(thread, animated: false)
+            split.setViewController(SANavigationController(rootViewController: thread), for: .secondary)
             return true
         } else if activity.title == SAActivityType.replyThread.title() {
             
@@ -238,7 +255,6 @@ class SASceneDelegate: UIResponder, UIWindowSceneDelegate {
         #endif
     }
     
-    #if targetEnvironment(macCatalyst)
     @objc func toolbarActionAdd(sender: UIBarButtonItem) {
         print("Button add")
     }
@@ -262,15 +278,10 @@ class SASceneDelegate: UIResponder, UIWindowSceneDelegate {
                 navigation.popViewController(animated: true)
                 return
             }
-            
-            return
-        }
-                
-        guard let rightSplit = sidebarSplit.viewControllers[1] as? UISplitViewController else {
             return
         }
         
-        guard let rightNavigation = rightSplit.viewControllers[1] as? UINavigationController else {
+        guard let rightNavigation = sidebarSplit.viewController(for: .secondary) as? UINavigationController else {
             return
         }
         
@@ -281,7 +292,7 @@ class SASceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
         
         // check master
-        guard let selected = sidebarSplit.viewControllers.first as? UINavigationController else {
+        guard let selected = sidebarSplit.viewController(for: .supplementary) as? UINavigationController else {
             return
         }
 
@@ -294,7 +305,6 @@ class SASceneDelegate: UIResponder, UIWindowSceneDelegate {
     @objc func toolbarActionSendMessage(sender: UIBarButtonItem) {
         print("Button submit")
     }
-    #endif
 }
 
 #if targetEnvironment(macCatalyst)
@@ -308,7 +318,8 @@ extension SASceneDelegate: NSToolbarDelegate {
             return button
         } else if (itemIdentifier == SAToolbarItemIdentifierTitle) {
             var titleStr: String?
-            if let root = window?.rootViewController as? UISplitViewController, root.viewControllers.count > 1, let rightSplit = root.viewControllers[1] as? UISplitViewController, let rightMaster = rightSplit.viewControllers.first as? UINavigationController {
+            if let root = window?.rootViewController as? UISplitViewController,
+               let rightMaster = root.viewController(for: .secondary) as? UINavigationController {
                 titleStr = rightMaster.topViewController?.title
             } else if let root = window?.rootViewController as? UINavigationController, let top = root.viewControllers.first {
                 titleStr = top.title ?? top.navigationItem.title

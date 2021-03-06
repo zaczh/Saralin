@@ -7,45 +7,54 @@
 //
 
 import Foundation
+import WebKit
 
 class SACookieManager {
-    private var cookieChangedNotificationObject: NSObjectProtocol?
     private var logoutNotificationObject: NSObjectProtocol?
     private var loginNotificationObject: NSObjectProtocol?
     private var lastTimeRefreshCookie: Date?
+    private var lastTimeRefreshCookieLock = NSLock()
     init() {
         let center = NotificationCenter.default
-        cookieChangedNotificationObject = center.addObserver(forName: NSNotification.Name.NSHTTPCookieManagerCookiesChanged, object: nil, queue: nil) { [weak self] (notication) in
-            sa_log_v2("Cookie changed", module: .cookie, type: .debug)
-            self?.syncCookiesAcrossDomains()
-        }
-        
         logoutNotificationObject = center.addObserver(forName: Notification.Name.SAUserLoggedOutNotification, object: nil, queue: nil, using: { [weak self] (notification) in
-            self?.lastTimeRefreshCookie = nil
+            guard let self = self else {
+                return
+            }
+            self.lastTimeRefreshCookieLock.lock()
+            self.lastTimeRefreshCookie = nil
+            self.lastTimeRefreshCookieLock.unlock()
         })
         
         loginNotificationObject = center.addObserver(forName: Notification.Name.SAUserLoggedInNotification, object: nil, queue: nil, using: { [weak self] (notification) in
-            self?.lastTimeRefreshCookie = Date()
+            guard let self = self else {
+                return
+            }
+            self.lastTimeRefreshCookieLock.lock()
+            self.lastTimeRefreshCookie = Date()
+            self.lastTimeRefreshCookieLock.unlock()
         })
     }
     
-    private func syncCookiesAcrossDomains() {
+    func syncWKCookiesToNSCookieStorage(completion:(() -> Void)?) {
         let cookieStorage = HTTPCookieStorage.shared
-        guard let _ = cookieStorage.cookies else {
-            sa_log_v2("Cookie storage was emptied", module: .cookie, type: .info)
-            return
+        WKWebsiteDataStore.default().httpCookieStore.getAllCookies { (cookies) in
+            for cookie in cookies {
+                if !(cookieStorage.cookies?.contains(cookie) ?? false) {
+                    cookieStorage.setCookie(cookie)
+                }
+            }
+            completion?()
         }
-        
-        //TODO: sync cookie?
     }
     
     deinit {
         let center = NotificationCenter.default
-        if let object = self.cookieChangedNotificationObject {
+        
+        if let object = logoutNotificationObject {
             center.removeObserver(object)
         }
         
-        if let object = logoutNotificationObject {
+        if let object = loginNotificationObject {
             center.removeObserver(object)
         }
     }
@@ -58,10 +67,13 @@ class SACookieManager {
             return
         }
         
+        lastTimeRefreshCookieLock.lock()
         if let lastTimeRefreshCookie = lastTimeRefreshCookie as NSDate?, lastTimeRefreshCookie.timeIntervalSinceNow > -8 * 3600 {
+            lastTimeRefreshCookieLock.unlock()
             return
         }
-        sa_log_v2("refresh cookie", module: .cookie, type: .debug)
+        lastTimeRefreshCookieLock.unlock()
+        os_log("refresh cookie", log: .cookie, type: .info)
         
         var request = URLRequest(url: URL(string: SAGlobalConfig().forum_url)!)
         request.setValue(SAGlobalConfig().pc_useragent_string, forHTTPHeaderField: "User-Agent");
@@ -69,7 +81,9 @@ class SACookieManager {
             guard error == nil else {
                 return
             }
+            self.lastTimeRefreshCookieLock.lock()
             self.lastTimeRefreshCookie = Date()
+            self.lastTimeRefreshCookieLock.unlock()
         }
         task.resume()
     }

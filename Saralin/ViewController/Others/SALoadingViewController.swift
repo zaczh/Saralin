@@ -40,7 +40,7 @@ class SALoadingViewController: UIViewController {
     fileprivate let containerView = UIStackView()
     fileprivate let emptyLabel = UILabel()
     fileprivate let errorInfoLabel = UILabel()
-    fileprivate let indicatorView = LoadingView()
+    fileprivate let indicatorView = UIActivityIndicatorView(style: .medium)
     fileprivate let hintLabel = UILabel()
     fileprivate let retryButton = UIButton()
     fileprivate let retryInfoLabel = UILabel()
@@ -103,7 +103,6 @@ class SALoadingViewController: UIViewController {
         view.backgroundColor = UIColor.sa_colorFromHexString(newTheme.foregroundColor)
         retryButton.backgroundColor = newTheme.tableCellHighlightColor.sa_toColor()
         emptyLabel.textColor =  UIColor.sa_colorFromHexString(newTheme.tableCellGrayedTextColor)
-        indicatorView.strokeColor = UIColor.sa_colorFromHexString(newTheme.tableCellGrayedTextColor)
         hintLabel.textColor =  UIColor.sa_colorFromHexString(newTheme.tableCellGrayedTextColor)
         retryInfoLabel.textColor =  UIColor.sa_colorFromHexString(newTheme.tableCellGrayedTextColor)
         retryButton.setTitleColor(newTheme.globalTintColor.sa_toColor(), for: .normal)
@@ -120,7 +119,7 @@ class SALoadingViewController: UIViewController {
         state = .failed
         view.isHidden = false
         emptyLabel.isHidden = true
-        indicatorView.isHidden = true
+        indicatorView.stopAnimating()
         hintLabel.isHidden = true
         retryButton.isHidden = false
         retryInfoLabel.isHidden = false
@@ -136,7 +135,7 @@ class SALoadingViewController: UIViewController {
         view.isHidden = false
         emptyLabel.isHidden = false
         retryButton.isHidden = true
-        indicatorView.isHidden = true
+        indicatorView.stopAnimating()
         hintLabel.isHidden = true
         retryInfoLabel.isHidden = true
         errorInfoLabel.text = nil
@@ -146,7 +145,7 @@ class SALoadingViewController: UIViewController {
         state = .loading
         view.isHidden = false
         emptyLabel.isHidden = true
-        indicatorView.isHidden = false
+        indicatorView.startAnimating()
         hintLabel.isHidden = false
         retryButton.isHidden = true
         retryInfoLabel.isHidden = true

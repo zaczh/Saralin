@@ -25,8 +25,10 @@ class SAFontConfigureViewController: SABaseViewController {
             slider.translatesAutoresizingMaskIntoConstraints = false
             slider.minimumValue = -10
             slider.maximumValue = 10
+            #if !targetEnvironment(macCatalyst)
             slider.minimumTrackTintColor = UIColor.lightGray
             slider.maximumTrackTintColor = UIColor.lightGray
+            #endif
             slider.leftAnchor.constraint(equalTo: minimalFontLabel.rightAnchor, constant: 10).isActive = true
             slider.rightAnchor.constraint(equalTo: maximumFontLabel.leftAnchor, constant: -10).isActive = true
             slider.bottomAnchor.constraint(equalTo: bottomAnchor, constant: 0).isActive = true

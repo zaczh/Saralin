@@ -223,20 +223,25 @@ class SABlockedListConfigureViewController: SABaseTableViewController, NSFetched
         if segmentedControl.selectedSegmentIndex == 0 {
             let managedObject = fetchController!.object(at: indexPath) as! BlockedUser
             guard let uid = managedObject.uid else {return}
-            let url = SAGlobalConfig().profile_url_template.replacingOccurrences(of: "%{UID}", with: uid)
-            let page = SAAccountInfoViewController(url: URL(string: url)!)
+            guard let url = URL(string: SAGlobalConfig().profile_url_template.replacingOccurrences(of: "%{UID}", with: uid)) else {
+                os_log("bad record in db of type `BlockedUser` uid: %@", log: .database, type:.fault, uid)
+                return
+            }
+            let page = SAAccountInfoViewController(url: url)
             navigationController?.pushViewController(page, animated: true)
         } else if segmentedControl.selectedSegmentIndex == 1 {
             let managedObject = fetchController!.object(at: indexPath) as! BlockedThread
             guard let tid = managedObject.tid else {return}
-            let link = SAGlobalConfig().forum_base_url + "forum.php?mod=viewthread&tid=\(tid)&page=1&mobile=1&simpletype=no"
-            let url = URL(string: link)!
+            guard let url = URL(string: SAGlobalConfig().forum_base_url + "forum.php?mod=viewthread&tid=\(tid)&page=1&mobile=1&simpletype=no") else {
+                os_log("bad record in db of type `BlockedThread` tid: %@", log: .database, type:.fault, tid)
+                return
+            }
             let contentViewer = SAThreadContentViewController(url: url)
             navigationController?.pushViewController(contentViewer, animated: true)
         }
     }
     
-    override func tableView(_ tableView: UITableView, titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
+    func tableView(_ tableView: UITableView, titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
         return "移除"
     }
 

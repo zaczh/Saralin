@@ -154,7 +154,9 @@ class SAThreadCompositionViewController: SAUITableViewController {
     private var formData: [String:AnyObject] = [:]
     private var typeIDList: [[String:String]] = []
     private var selectedTypeIndex = -1
+    #if !targetEnvironment(macCatalyst)
     private let typePickerView = UIPickerView()
+    #endif
     
     func config(fid: String) {
         self.fid = fid
@@ -190,7 +192,8 @@ class SAThreadCompositionViewController: SAUITableViewController {
         
         tableView.separatorInset = .zero
         tableView.tableFooterView = UIView()
-                
+        
+        #if !targetEnvironment(macCatalyst)
         typePickerView.isHidden = true
         tableView.addSubview(typePickerView)
         typePickerView.translatesAutoresizingMaskIntoConstraints = false
@@ -200,6 +203,7 @@ class SAThreadCompositionViewController: SAUITableViewController {
         typePickerView.heightAnchor.constraint(equalTo: tableView.frameLayoutGuide.heightAnchor, multiplier: 0.33).isActive = true
         typePickerView.dataSource = self
         typePickerView.delegate = self
+        #endif
         
         let leftItem = UIBarButtonItem(title: NSLocalizedString("CANCEL", comment: "Cancel"), style: .plain, target: self, action: #selector(SAThreadCompositionViewController.handleLeftButtonItemClick(_:)))
         let rightItem = UIBarButtonItem(title: NSLocalizedString("POST", comment: "Post"), style: .plain, target: self, action: #selector(SAThreadCompositionViewController.handleRightButtonItemClick(_:)))
@@ -255,7 +259,9 @@ class SAThreadCompositionViewController: SAUITableViewController {
         let theme = Theme()
         tableView.backgroundColor = theme.backgroundColor.sa_toColor()
         
+        #if !targetEnvironment(macCatalyst)
         typePickerView.backgroundColor = theme.foregroundColor.sa_toColor()
+        #endif
         
         let titleCell = findCellOfType(TitleCell.self)!
         titleCell.backgroundColor = theme.backgroundColor.sa_toColor()
@@ -294,9 +300,7 @@ class SAThreadCompositionViewController: SAUITableViewController {
             }
             
             guard let formhash = parser.body()?.findChild(withAttribute: "name", matchingName: "formhash", allowPartial: false)?.getAttributeNamed("value"),
-                let posttime = parser.body()?.findChild(withAttribute: "name", matchingName: "posttime", allowPartial: false)?.getAttributeNamed("value"),
-                let hash = parser.body()?.findChild(withAttribute: "name", matchingName: "hash", allowPartial: false)?.getAttributeNamed("value"),
-                let uid = parser.body()?.findChild(withAttribute: "name", matchingName: "uid", allowPartial: false)?.getAttributeNamed("value") else {
+                let posttime = parser.body()?.findChild(withAttribute: "name", matchingName: "posttime", allowPartial: false)?.getAttributeNamed("value") else {
                     DispatchQueue.main.async {
                         let error = NSError(domain: SAHTTPAPIErrorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey:"无法解析服务器数据"])
                         self?.loadingController.setFailed(with: error)
@@ -316,10 +320,10 @@ class SAThreadCompositionViewController: SAUITableViewController {
                 self?.formData.removeAll()
                 self?.typeIDList.append(contentsOf: typeIDArr)
                 self?.formData["formhash"] = formhash as AnyObject
-                self?.formData["hash"] = hash as AnyObject
                 self?.formData["posttime"] = posttime as AnyObject
-                self?.formData["uid"] = uid as AnyObject
+                #if !targetEnvironment(macCatalyst)
                 self?.typePickerView.reloadComponent(0)
+                #endif
                 self?.loadingController.setFinished()
                 let titleCell = self?.findCellOfType(TitleCell.self)
                 titleCell?.textField.becomeFirstResponder()
@@ -390,7 +394,7 @@ class SAThreadCompositionViewController: SAUITableViewController {
                     let options = UIWindowSceneDestructionRequestOptions()
                     options.windowDismissalAnimation = .commit
                     UIApplication.shared.requestSceneSessionDestruction(sceneSession, options: options, errorHandler: { (error) in
-                        sa_log_v2("request scene session destruction returned: %@", error.localizedDescription)
+                        os_log("request scene session destruction returned: %@", error.localizedDescription)
                     })
                 }
             } else {
@@ -424,50 +428,52 @@ class SAThreadCompositionViewController: SAUITableViewController {
         self.present(modalActivity, animated: true, completion: nil)
         
         let attatchedImage = insertImageCell.insertImageButton.image(for: .normal)
+        let queryParam: [String:String] = [
+            "subject": titleCell.textField.text!,
+            "typeid": typeIDList[selectedTypeIndex]["value"] ?? "0",
+            "message": bodyCell.textView.text,
+            "type": "image",
+            "formhash": formData["formhash"] as! String,
+            "posttime": formData["posttime"] as! String
+        ]
         URLSession.saCustomized.submitComposingThreadForm(to: fid,
-                                        uid: formData["uid"] as! String,
-                                        subject: titleCell.textField.text!,
-                                        message: bodyCell.textView.text,
-                                        typeid: typeIDList[selectedTypeIndex]["value"] ?? "0",
-                                        formhash: formData["formhash"] as! String,
-                                        hash: formData["hash"] as! String,
-                                        posttime: formData["posttime"] as! String,
-                                        attachment: attatchedImage) { (object, error) in
-                                            guard error == nil, let html = object as? String else {
-                                                DispatchQueue.main.async {
-                                                    let modalActivity = self.presentedViewController as? SAModalActivityViewController
-                                                    modalActivity?.hideAndShowResult(of: true, info: "失败") { () in
-                                                    }
-                                                }
-                                                return
-                                            }
+                                                          queryParam: queryParam,
+                                                          attachment: attatchedImage) { (object, error) in
+            guard error == nil, let html = object as? String else {
+                DispatchQueue.main.async {
+                    let modalActivity = self.presentedViewController as? SAModalActivityViewController
+                    modalActivity?.hideAndShowResult(of: true, info: "失败") { () in
+                    }
+                }
+                return
+            }
                                             
-                                            DispatchQueue.main.async {
-                                                let modalActivity = self.presentedViewController as? SAModalActivityViewController
-                                                if html.contains("非常感谢") {
-                                                    modalActivity?.hideAndShowResult(of: true, info: "已发表") { () in
-                                                        if let presenting = self.navigationController!.presentingViewController {
-                                                            presenting.dismiss(animated: true, completion: nil)
-                                                        } else {
-                                                            if #available(iOS 13.0, *) {
-                                                                if let sceneSession = self.view.window?.windowScene?.session {
-                                                                    self.view.window?.resignFirstResponder()
-                                                                    let options = UIWindowSceneDestructionRequestOptions()
-                                                                    options.windowDismissalAnimation = .commit
-                                                                    UIApplication.shared.requestSceneSessionDestruction(sceneSession, options: options, errorHandler:{ (error) in
-                                                                        sa_log_v2("request scene session destruction returned: %@", error.localizedDescription)
-                                                                    })
-                                                                }
-                                                            } else {
-                                                                fatalError("This view controller must be presented if not in a new scene.")
-                                                            }
-                                                        }
-                                                    }
-                                                } else {
-                                                    modalActivity?.hideAndShowResult(of: false, info: "失败") { () in
-                                                    }
-                                                }
-                                            }
+            DispatchQueue.main.async {
+                let modalActivity = self.presentedViewController as? SAModalActivityViewController
+                if html.contains("非常感谢") {
+                    modalActivity?.hideAndShowResult(of: true, info: "已发表") { () in
+                        if let presenting = self.navigationController!.presentingViewController {
+                            presenting.dismiss(animated: true, completion: nil)
+                        } else {
+                            if #available(iOS 13.0, *) {
+                                if let sceneSession = self.view.window?.windowScene?.session {
+                                    self.view.window?.resignFirstResponder()
+                                    let options = UIWindowSceneDestructionRequestOptions()
+                                    options.windowDismissalAnimation = .commit
+                                    UIApplication.shared.requestSceneSessionDestruction(sceneSession, options: options, errorHandler:{ (error) in
+                                        os_log("request scene session destruction returned: %@", error.localizedDescription)
+                                    })
+                                }
+                            } else {
+                                fatalError("This view controller must be presented if not in a new scene.")
+                            }
+                        }
+                    }
+                } else {
+                    modalActivity?.hideAndShowResult(of: false, info: "失败") { () in
+                    }
+                }
+            }
         }
     }
     
@@ -495,7 +501,23 @@ class SAThreadCompositionViewController: SAUITableViewController {
         case 0:
              break
         case 1:
+            #if !targetEnvironment(macCatalyst)
             typePickerView.isHidden = false
+            #else
+            let cell = tableView.cellForRow(at: indexPath)!
+            let alert = UIAlertController(title: "选择主题分类", message: nil, preferredStyle: .actionSheet)
+            alert.popoverPresentationController?.sourceView = cell
+            alert.popoverPresentationController?.sourceRect = cell.bounds
+            for (row, item) in typeIDList.enumerated() {
+                alert.addAction(UIAlertAction.init(title: item["name"], style: .default, handler: { (action) in
+                    let categoryCell = self.findCellOfType(CategoryCell.self)!
+                    categoryCell.selectedCategoryLabel.text = item["name"]
+                    self.selectedTypeIndex = row
+                }))
+            }
+            alert.addAction(UIAlertAction.init(title: NSLocalizedString("CANCEL", comment: "Cancel"), style: .cancel, handler: nil))
+            present(alert, animated: false, completion: nil)
+            #endif
             _ = resignFirstResponder()
             break
         case 2:

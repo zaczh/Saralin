@@ -137,7 +137,7 @@ class SASearchResultViewController: SABaseTableViewController {
                 }
             } else {
                 // anonymous thread
-                sa_log_v2("anonymous thread", module: .search, type: .info)
+                os_log("anonymous thread", log: .search, type: .info)
             }
         } else {
             let data = localData[indexPath.row]

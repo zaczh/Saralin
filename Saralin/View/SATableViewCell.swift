@@ -89,7 +89,7 @@ class SAMessageInboxTableViewCell: SABoardTableViewCell {
 
         avatarImageView.translatesAutoresizingMaskIntoConstraints = false
         avatarImageView.backgroundColor = UIColor.gray
-        avatarImageView.layer.cornerRadius = avatarImageViewSize.width/2.0
+        avatarImageView.layer.cornerRadius = 2
         avatarImageView.layer.masksToBounds = true
         contentView.addSubview(avatarImageView)
         
@@ -171,7 +171,7 @@ class SABoardTableViewCell: SAThemedTableViewCell {
         customNameLabel.centerYAnchor.constraint(equalTo: timeLabelStack.centerYAnchor).isActive = true
         
         // customReplyLabel
-        NSLayoutConstraint.activate(NSLayoutConstraint.constraints(withVisualFormat: "H:[customReplyLabel]-4-[customViewLabel]", options: [], metrics: nil, views: views))
+        NSLayoutConstraint.activate(NSLayoutConstraint.constraints(withVisualFormat: "H:[customReplyLabel]-8-[customViewLabel]", options: [], metrics: nil, views: views))
         NSLayoutConstraint(item: customReplyLabel, attribute: .lastBaseline, relatedBy: .equal, toItem: customViewLabel, attribute: .lastBaseline, multiplier: 1.0, constant: 0).isActive = true
         NSLayoutConstraint(item: customViewLabel, attribute: .right, relatedBy: .equal, toItem: timeLabelStack, attribute: .right, multiplier: 1.0, constant: 0).isActive = true
         
@@ -303,7 +303,7 @@ class SAAccountCenterHeaderCell: SAThemedTableViewCell {
         customImageView.tag = 1
         customImageView.backgroundColor = UIColor.clear
         customImageView.translatesAutoresizingMaskIntoConstraints = false
-        customImageView.layer.cornerRadius = CGFloat(imageHeightWidth)/2.0
+        customImageView.layer.cornerRadius = 2.0
         customImageView.layer.masksToBounds = true
         contentView.addSubview(customImageView)
         
@@ -466,6 +466,7 @@ class SAAccountInfoHeaderCell: SAThemedTableViewCell {
 // MARK: - UITableViewHeaderFooterView
 class SAThemedTableHeaderFooterView: UITableViewHeaderFooterView, UITextViewDelegate {
     var delegate: UIViewController?
+    private var textViewHeightConstraint: NSLayoutConstraint!
     func setTitleWith(description: String?, link: String?, url: String?) {
         let attributedStr = NSMutableAttributedString.init()
         if let description = description {
@@ -479,6 +480,7 @@ class SAThemedTableHeaderFooterView: UITableViewHeaderFooterView, UITextViewDele
         }
         attributedStr.addAttributes([NSAttributedString.Key.font : UIFont.sa_preferredFont(forTextStyle: .subheadline)], range: NSMakeRange(0, attributedStr.length))
         summaryTextView.attributedText = attributedStr
+        textViewHeightConstraint.isActive = attributedStr.length == 0
     }
     
     let summaryTextView = UITextView(frame: CGRect.zero)
@@ -493,9 +495,11 @@ class SAThemedTableHeaderFooterView: UITableViewHeaderFooterView, UITextViewDele
         summaryTextView.isSelectable = true
         summaryTextView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(summaryTextView)
-        summaryTextView.leftAnchor.constraint(equalTo: layoutMarginsGuide.leftAnchor, constant: 0).isActive = true
-        summaryTextView.rightAnchor.constraint(equalTo: layoutMarginsGuide.rightAnchor, constant: 0).isActive = true
-        NSLayoutConstraint.activate(NSLayoutConstraint.constraints(withVisualFormat: "V:|[l]|", options: [], metrics: nil, views: ["l":summaryTextView]))
+        summaryTextView.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 15).isActive = true
+        summaryTextView.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -15).isActive = true
+        NSLayoutConstraint.activate(NSLayoutConstraint.constraints(withVisualFormat: "V:|-8-[l]-8-|", options: [], metrics: nil, views: ["l":summaryTextView]))
+        textViewHeightConstraint = summaryTextView.heightAnchor.constraint(equalToConstant: 0)
+        textViewHeightConstraint.isActive = true
     }
     
     required init?(coder aDecoder: NSCoder) {

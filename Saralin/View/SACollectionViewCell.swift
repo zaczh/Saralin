@@ -101,7 +101,7 @@ class SAEmojiCollectionWrapperView: UICollectionViewCell, UICollectionViewDataSo
             }
         }
         
-        sa_log_v2("emoji image not found", module: .ui, type: .error)
+        os_log("emoji image not found", log: .ui, type: .error)
         cell.imageView.image = nil
         return cell
     }

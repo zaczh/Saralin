@@ -50,7 +50,7 @@ class SACoreDataManager {
         } else {
             persistentContainer.loadPersistentStores { [weak self] (description, error) in
                 guard error == nil else {
-                    sa_log_v2("error occured when loadPersistentStores", module: .ui, type: .error)
+                    os_log("error occured when loadPersistentStores", log: .ui, type: .error)
                     return
                 }
                 
@@ -135,7 +135,7 @@ class SACoreDataManager {
                     for object in objects {
                         if object != objects.first {
                             context.delete(object)
-                            sa_log_v2("delete redundant object of %@", module: .ui, type: .error, className)
+                            os_log("delete redundant object of %@", log: .ui, type: .error, className)
                         }
                     }
                     
@@ -181,7 +181,7 @@ class SACoreDataManager {
             try context.save()
         } catch {
             let nserror = error as NSError
-            sa_log_v2("Unresolved error %@", module: .ui, type: .fault, nserror)
+            os_log("Unresolved error %@", log: .ui, type: .fault, nserror)
         }
     }
     
@@ -221,7 +221,7 @@ class SACoreDataManager {
                 for object in objects {
                     if object != objects.first {
                         context.delete(object)
-                        sa_log_v2("delete redundant object of %@", module: .ui, type: .info, className)
+                        os_log("delete redundant object of %@", log: .ui, type: .info, className)
                     }
                 }
                 
@@ -268,7 +268,7 @@ class SACoreDataManager {
                 for object in objects {
                     context.delete(object as NSManagedObject)
                 }
-                sa_log_v2("core data cleaned up %@ records", module: .database, type: .info, "\(objects.count)")
+                os_log("core data cleaned up %@ records", log: .database, type: .info, "\(objects.count)")
             }
         }
     }
@@ -296,7 +296,7 @@ class SACoreDataManager {
                 fetch.predicate = NSPredicate(format: "(uid == %@)", uid)
                 fetch.sortDescriptors = []
                 guard let objects = try? context.fetch(fetch) else {
-                    sa_log_v2("no history of this thread", module: .ui, type: .debug)
+                    os_log("no history of this thread", log: .ui, type: .debug)
                     DispatchQueue.main.async {
                         completion?([])
                     }
@@ -331,7 +331,7 @@ class SACoreDataManager {
                 fetch.predicate = NSPredicate(format: "reporteruid==%@", uid)
                 fetch.sortDescriptors = []
                 guard let objects = try? context.fetch(fetch) else {
-                    sa_log_v2("error occured when fetching viewed threads", module: .ui, type: .debug)
+                    os_log("error occured when fetching viewed threads", log: .ui, type: .debug)
                     DispatchQueue.main.async {
                         completion?([])
                     }
@@ -365,7 +365,7 @@ class SACoreDataManager {
                 fetch.predicate = NSPredicate(format: "uid==%@", uid)
                 fetch.sortDescriptors = []
                 guard let objects = try? context.fetch(fetch) else {
-                    sa_log_v2("error occured when fetching blocked threads", module: .ui, type: .debug)
+                    os_log("error occured when fetching blocked threads", log: .ui, type: .debug)
                     DispatchQueue.main.async {
                         completion?([])
                     }
@@ -446,7 +446,7 @@ class SACoreDataManager {
                     }
                     NotificationCenter.default.post(name: NSNotification.Name.SABlockedUserListDidChange, object: self, userInfo: ["reportedUid":uid])
                 }
-                sa_log_v2("delete BlockedUser")
+                os_log("delete BlockedUser")
             }
         }
     }
@@ -517,7 +517,7 @@ class SACoreDataManager {
                     }
                     NotificationCenter.default.post(name: NSNotification.Name.SABlockedThreadListDidChange, object: self, userInfo: ["tid":tid])
                 }
-                sa_log_v2("delete BlockedThread")
+                os_log("delete BlockedThread")
             }
         }
     }

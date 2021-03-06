@@ -7,8 +7,10 @@
 //
 
 import UIKit
+#if !targetEnvironment(macCatalyst)
+import MetricKit
+#endif
 
-@UIApplicationMain
 class SAAppDelegate: UIResponder, UIApplicationDelegate, UITabBarControllerDelegate {
     
     var window: UIWindow?
@@ -22,36 +24,32 @@ class SAAppDelegate: UIResponder, UIApplicationDelegate, UITabBarControllerDeleg
     private var launchedShortcutItem: UIApplicationShortcutItem?
 
     func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-        sa_log_v2("application willFinishLaunchingWithOptions", module: .ui, type: .debug)
+        os_log("application willFinishLaunchingWithOptions", log: .ui, type: .debug)
         self.launchOptions = launchOptions
         return true
     }
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        sa_log_v2("application didFinishLaunchingWithOptions", module: .ui, type: .debug)
+        os_log("application didFinishLaunchingWithOptions", log: .ui, type: .debug)
         
-        #if DEBUG
-        setSavingLogTypes(SALogType.allTypes)
+        #if !targetEnvironment(macCatalyst)
+        let shared = MXMetricManager.shared
+        shared.add(self)
         #endif
         
-        application.setMinimumBackgroundFetchInterval(3600)
-        
+        #if DEBUG
+        setSavingLogTypes(OSLogType.allTypes)
+        #endif
+                
         URLCache.shared.diskCapacity = 1024 * 1024 * 400 //400M
         
         // do the runtime hook
         UIViewController.sa_swizzleMethods()
         UIView.sa_swizzleMethods()
+        UIView.debugging_swizzleMethods()
+        UIViewController.debugging_swizzleMethods()
 
         appController.applicationDidFinishLaunching()
-        
-        #if targetEnvironment(macCatalyst)
-        let macCatalystExtensionBundlePath = Bundle.main.builtInPlugInsPath! + "/CatalystExtension.bundle"
-        let bundle = Bundle.init(path: macCatalystExtensionBundlePath)!
-        if let cls = bundle.principalClass as? NSObject.Type {
-            let instance = cls.init()
-            instance.perform(NSSelectorFromString("run"))
-        }
-        #endif
         
         var result = true
         
@@ -81,7 +79,7 @@ class SAAppDelegate: UIResponder, UIApplicationDelegate, UITabBarControllerDeleg
     }
     
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-        return appController.open(url: url, sender: app.keyWindow?.rootViewController)
+        return appController.open(url: url, sender: nil)
     }
         
     func applicationDidReceiveMemoryWarning(_ application: UIApplication) {
@@ -143,13 +141,13 @@ class SAAppDelegate: UIResponder, UIApplicationDelegate, UITabBarControllerDeleg
                 config.storyboard = UIStoryboard(name: "ComposeThread", bundle: nil)
             case .settings:
                 config.storyboard = UIStoryboard(name: "Settings", bundle: nil)
+            case .viewBoard:
+                config.storyboard = UIStoryboard(name: "ViewBoard", bundle: nil)
+            case .login:
+                config.storyboard = UIStoryboard(name: "Login", bundle: nil)
             }
         } else {
-            if UIDevice.current.userInterfaceIdiom == .phone {
-                config.storyboard = UIStoryboard(name: "Main", bundle: nil)
-            } else {
-                config.storyboard = UIStoryboard(name: "Main_ipad", bundle: nil)
-            }
+            config.storyboard = UIStoryboard(name: "Main", bundle: nil)
         }
         
         return config
@@ -165,17 +163,67 @@ class SAAppDelegate: UIResponder, UIApplicationDelegate, UITabBarControllerDeleg
         let handledShortCutItem = appController.handleShortCutItem(shortcutItem, window: window)
         completionHandler(handledShortCutItem)
     }
-    
-    func application(_ application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool {
-        return appController.applicationShouldSaveApplicationState(coder: coder)
-    }
-    
-    func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
-        return appController.applicationShouldRestoreApplicationState(coder: coder)
-    }
-    
-    func application(_ application: UIApplication, viewControllerWithRestorationIdentifierPath identifierComponents: [String], coder: NSCoder) -> UIViewController? {
-        return appController.applicationViewControllerWithRestorationIdentifierPath(identifierComponents: identifierComponents, coder:coder)
-    }
 }
 
+#if !targetEnvironment(macCatalyst)
+extension SAAppDelegate: MXMetricManagerSubscriber {
+    func didReceive(_ payloads: [MXMetricPayload]) {
+        os_log("Receive new metric report.", log: .ui, type: .info)
+        // clean first
+        let directoryURL = AppController.current.diagnosticsReportFilesDirectory
+        FileManager.default.sa_removeAllFilesIn(dir: directoryURL) { (name) -> Bool in
+            return name.lowercased().contains("metric_report_")
+        }
+        for (i, payload) in payloads.enumerated() {
+            let diagnosticFileName = "metric_report_\(i).log"
+            let diagnosticFileUrl = AppController.current.diagnosticsReportFilesDirectory.appendingPathComponent(diagnosticFileName)
+            do {
+                try payload.jsonRepresentation().write(to: diagnosticFileUrl)
+            } catch {
+                os_log("fail to write report", log: .ui, type: .fault)
+            }
+        }
+    }
+    
+    func didReceive(_ payloads: [MXDiagnosticPayload]) {
+        os_log("Receive new diagnostic report.", log: .ui, type: .info)
+        // clean first
+        let directoryURL = AppController.current.diagnosticsReportFilesDirectory
+        FileManager.default.sa_removeAllFilesIn(dir: directoryURL) { (name) -> Bool in
+            return name.lowercased().contains("diagnostic_report_")
+        }
+        for (i, payload) in payloads.enumerated() {
+            let diagnosticFileName = "diagnostic_report_\(i).log"
+            let diagnosticFileUrl = AppController.current.diagnosticsReportFilesDirectory.appendingPathComponent(diagnosticFileName)
+            do {
+                try payload.jsonRepresentation().write(to: diagnosticFileUrl)
+            } catch {
+                os_log("fail to write report", log: .ui, type: .fault)
+            }
+        }
+    }
+}
+#endif
+
+extension SAAppDelegate {
+    override func buildMenu(with builder: UIMenuBuilder) {
+        super.buildMenu(with: builder)
+        
+        guard builder.system == UIMenuSystem.main else { return }
+        
+        let penPreferencesPanelCommand = UIKeyCommand(title: "Preferencs...",
+                                            action: #selector(openPreferencesPanel(_:)),
+                                            input: ",",
+                                            modifierFlags: [.command])
+        let settingsMenu = UIMenu(title: "", options: .displayInline, children: [penPreferencesPanelCommand])
+        builder.insertSibling(settingsMenu, afterMenu: .about)
+    }
+    
+    @objc func requestNewScene(_ sender: Any?) {
+        NotificationCenter.default.post(name: .macKeyCommandNewThread, object: self, userInfo: nil)
+    }
+    
+    @objc func openPreferencesPanel(_ sender: Any?) {
+        NotificationCenter.default.post(name: .macKeyCommandPreferencesPanel, object: self, userInfo: nil)
+    }
+}

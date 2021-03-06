@@ -18,6 +18,7 @@
 #import "HTMLParser.h"
 
 #import "SSZipArchive.h"
-#import <CrashReporter/CrashReporter.h>
+
+#import <os/log.h>
 
 #endif /* Saralin_Bridging_Header_h */

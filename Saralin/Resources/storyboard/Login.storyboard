@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="SDa-dv-0vp">
+    <device id="mac" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Login View Controller-->
+        <scene sceneID="NUo-AW-1tX">
+            <objects>
+                <viewController id="SDa-dv-0vp" customClass="SALoginViewController" customModule="Saralin" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="nwn-mp-ydh">
+                        <rect key="frame" x="0.0" y="0.0" width="800" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="Ejf-En-E7n">
+                                <rect key="frame" x="250" y="181" width="300" height="220"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="300" id="UOw-qO-qXU"/>
+                                    <constraint firstAttribute="height" constant="220" id="uae-fK-fBo"/>
+                                </constraints>
+                            </tableView>
+                            <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="k0B-lh-wuv">
+                                <rect key="frame" x="378" y="401" width="45" height="60"/>
+                                <accessibility key="accessibilityConfiguration">
+                                    <bool key="isElement" value="NO"/>
+                                </accessibility>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
+                                <inset key="contentEdgeInsets" minX="0.0" minY="20" maxX="0.0" maxY="20"/>
+                                <state key="normal" title="Login"/>
+                                <state key="disabled">
+                                    <color key="titleColor" white="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                                <connections>
+                                    <action selector="handleLoginAction:" destination="SDa-dv-0vp" eventType="touchUpInside" id="gjr-MK-OBu"/>
+                                </connections>
+                            </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="bbs.saraba1st.com" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IXf-p6-NcT">
+                                <rect key="frame" x="325" y="120" width="151" height="21"/>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="gm4-Tv-sxI">
+                                <rect key="frame" x="390" y="421" width="20" height="20"/>
+                            </activityIndicatorView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="GxP-8o-WPU">
+                                <rect key="frame" x="463" y="418" width="87" height="28"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                                <state key="normal" title="Login Via Web"/>
+                                <connections>
+                                    <action selector="handleWebLoginAction:" destination="SDa-dv-0vp" eventType="touchUpInside" id="F7K-Xc-U4V"/>
+                                </connections>
+                            </button>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="cdo-US-ymE">
+                                <rect key="frame" x="360" y="32" width="80" height="80"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="80" id="ajI-EW-fAr"/>
+                                    <constraint firstAttribute="width" secondItem="cdo-US-ymE" secondAttribute="height" multiplier="1:1" id="lXS-4V-3aZ"/>
+                                </constraints>
+                            </imageView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="6bW-2Q-lXc"/>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <gestureRecognizers/>
+                        <constraints>
+                            <constraint firstItem="GxP-8o-WPU" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="k0B-lh-wuv" secondAttribute="trailing" constant="8" symbolic="YES" id="IFc-Bu-TFT"/>
+                            <constraint firstItem="gm4-Tv-sxI" firstAttribute="centerY" secondItem="k0B-lh-wuv" secondAttribute="centerY" id="JwR-Tx-eLt"/>
+                            <constraint firstItem="6bW-2Q-lXc" firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="k0B-lh-wuv" secondAttribute="bottom" id="Kvz-Yc-80y"/>
+                            <constraint firstItem="IXf-p6-NcT" firstAttribute="centerX" secondItem="6bW-2Q-lXc" secondAttribute="centerX" id="Q7i-kA-8jv"/>
+                            <constraint firstItem="k0B-lh-wuv" firstAttribute="centerX" secondItem="6bW-2Q-lXc" secondAttribute="centerX" id="Rqd-KY-3jv"/>
+                            <constraint firstItem="GxP-8o-WPU" firstAttribute="trailing" secondItem="Ejf-En-E7n" secondAttribute="trailing" id="YOu-G6-1n9"/>
+                            <constraint firstItem="k0B-lh-wuv" firstAttribute="top" secondItem="Ejf-En-E7n" secondAttribute="bottom" id="a44-GZ-opb"/>
+                            <constraint firstItem="cdo-US-ymE" firstAttribute="centerX" secondItem="6bW-2Q-lXc" secondAttribute="centerX" id="blk-gF-cXP"/>
+                            <constraint firstItem="GxP-8o-WPU" firstAttribute="firstBaseline" secondItem="k0B-lh-wuv" secondAttribute="firstBaseline" id="ch6-Yj-AOd"/>
+                            <constraint firstItem="Ejf-En-E7n" firstAttribute="centerX" secondItem="6bW-2Q-lXc" secondAttribute="centerX" id="hfN-3b-rya"/>
+                            <constraint firstItem="Ejf-En-E7n" firstAttribute="top" secondItem="IXf-p6-NcT" secondAttribute="bottom" constant="40" id="nZY-hL-bti"/>
+                            <constraint firstItem="gm4-Tv-sxI" firstAttribute="centerX" secondItem="k0B-lh-wuv" secondAttribute="centerX" id="ppG-H5-VCU"/>
+                            <constraint firstItem="IXf-p6-NcT" firstAttribute="top" secondItem="cdo-US-ymE" secondAttribute="bottom" constant="8" id="uEK-71-vP3"/>
+                            <constraint firstItem="IXf-p6-NcT" firstAttribute="top" secondItem="6bW-2Q-lXc" secondAttribute="top" priority="250" constant="120" id="uut-99-fgl"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="formTable" destination="Ejf-En-E7n" id="UMN-IN-MXx"/>
+                        <outlet property="forumLogoImageView" destination="cdo-US-ymE" id="9qv-70-uXB"/>
+                        <outlet property="loadingIndicator" destination="gm4-Tv-sxI" id="ejz-ov-d5P"/>
+                        <outlet property="loginButton" destination="k0B-lh-wuv" id="rtG-sJ-PIk"/>
+                        <outlet property="loginButtonBottomConstraint" destination="Kvz-Yc-80y" id="ex5-gI-lKS"/>
+                        <outlet property="tableHeightConstraint" destination="uae-fK-fBo" id="8AV-g7-RnK"/>
+                        <outlet property="titleLabel" destination="IXf-p6-NcT" id="AHC-B4-odu"/>
+                        <outlet property="webLoginButton" destination="GxP-8o-WPU" id="zug-RG-5ZO"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="jAM-ag-08Y" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="267" y="-410"/>
+        </scene>
+    </scenes>
+</document>

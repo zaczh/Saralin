@@ -7,14 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1F1ACBB4243AB5D10044D2D6 /* CatalystExtensionLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F1ACBB3243AB5D10044D2D6 /* CatalystExtensionLoader.m */; };
+		1FD4E6F52561124B00298A36 /* MacSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FD4E6F32561124B00298A36 /* MacSettingsViewController.swift */; };
+		1FD4E6F62561124B00298A36 /* MacSettingsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1FD4E6F42561124B00298A36 /* MacSettingsViewController.xib */; };
+		1FD4E6FD2561171900298A36 /* CatalystExtensionLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FD4E6FC2561171900298A36 /* CatalystExtensionLoader.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		1F1ACBAC243AB5B80044D2D6 /* CatalystExtension.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CatalystExtension.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		1F1ACBAE243AB5B80044D2D6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		1F1ACBB2243AB5D10044D2D6 /* CatalystExtensionLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CatalystExtensionLoader.h; sourceTree = "<group>"; };
-		1F1ACBB3243AB5D10044D2D6 /* CatalystExtensionLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CatalystExtensionLoader.m; sourceTree = "<group>"; };
+		1FD4E6F32561124B00298A36 /* MacSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacSettingsViewController.swift; sourceTree = "<group>"; };
+		1FD4E6F42561124B00298A36 /* MacSettingsViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MacSettingsViewController.xib; sourceTree = "<group>"; };
+		1FD4E6FC2561171900298A36 /* CatalystExtensionLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalystExtensionLoader.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -47,8 +50,9 @@
 		1F1ACBAD243AB5B80044D2D6 /* CatalystExtension */ = {
 			isa = PBXGroup;
 			children = (
-				1F1ACBB2243AB5D10044D2D6 /* CatalystExtensionLoader.h */,
-				1F1ACBB3243AB5D10044D2D6 /* CatalystExtensionLoader.m */,
+				1FD4E6FC2561171900298A36 /* CatalystExtensionLoader.swift */,
+				1FD4E6F32561124B00298A36 /* MacSettingsViewController.swift */,
+				1FD4E6F42561124B00298A36 /* MacSettingsViewController.xib */,
 				1F1ACBAE243AB5B80044D2D6 /* Info.plist */,
 			);
 			path = CatalystExtension;
@@ -85,6 +89,7 @@
 				TargetAttributes = {
 					1F1ACBAB243AB5B80044D2D6 = {
 						CreatedOnToolsVersion = 11.4;
+						LastSwiftMigration = 1220;
 					};
 				};
 			};
@@ -111,6 +116,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1FD4E6F62561124B00298A36 /* MacSettingsViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -121,7 +127,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1F1ACBB4243AB5D10044D2D6 /* CatalystExtensionLoader.m in Sources */,
+				1FD4E6FD2561171900298A36 /* CatalystExtensionLoader.swift in Sources */,
+				1FD4E6F52561124B00298A36 /* MacSettingsViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -246,14 +253,22 @@
 		1F1ACBB0243AB5B80044D2D6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = NBQ74QRWC2;
 				INFOPLIST_FILE = CatalystExtension/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = me.zaczh.saralin.catalystextension.CatalystExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 				WRAPPER_EXTENSION = bundle;
 			};
 			name = Debug;
@@ -261,14 +276,21 @@
 		1F1ACBB1243AB5B80044D2D6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = NBQ74QRWC2;
 				INFOPLIST_FILE = CatalystExtension/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = me.zaczh.saralin.catalystextension.CatalystExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
 				WRAPPER_EXTENSION = bundle;
 			};
 			name = Release;

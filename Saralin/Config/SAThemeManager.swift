@@ -62,7 +62,7 @@ class SAThemeManager {
                 oldTheme = getThemeOf(id: oldThemeID)
             }
             
-            if let t = oldTheme {
+            if let t = oldTheme, t.matchesTraitCollection(traitCollection) {
                 activeTheme = t
                 return
             }
@@ -108,6 +108,32 @@ class SAThemeManager {
             let toTheme = SATheme.whiteTheme
             switchToNewTheme(toTheme)
         } else {
+            // change to night
+            let toTheme = SATheme.darkTheme
+            switchToNewTheme(toTheme)
+        }
+    }
+    
+    func switchThemeBySystemStyleChange() {
+        let switchToNewTheme: ((SATheme) -> Void) = { (theme) in
+            if let oldThemeID = Account().preferenceForkey(.theme_id_before_night_switch) as? Int,
+               let olodTheme = self.getThemeOf(id: oldThemeID),
+               olodTheme.colorScheme == theme.colorScheme {
+                self.activeTheme = olodTheme
+                Account().savePreferenceValue(olodTheme.identifier as AnyObject, forKey: .theme_id)
+                return
+            }
+            
+            Account().savePreferenceValue(self.activeTheme.identifier as AnyObject, forKey: .theme_id_before_night_switch)
+            self.activeTheme = theme
+            Account().savePreferenceValue(theme.identifier as AnyObject, forKey: .theme_id)
+        }
+        
+        if UITraitCollection.current.userInterfaceStyle == .light {
+            // change to day
+            let toTheme = SATheme.whiteTheme
+            switchToNewTheme(toTheme)
+        } else if UITraitCollection.current.userInterfaceStyle == .dark {
             // change to night
             let toTheme = SATheme.darkTheme
             switchToNewTheme(toTheme)
@@ -160,7 +186,12 @@ class SATheme: NSObject {
     var threadTitleFontSizeInPt: CGFloat = 12
     var keyboardAppearence: UIKeyboardAppearance = .default
     var visualBlurEffectStyle: UIBlurEffect.Style = .dark
-    var activityIndicatorStyle: UIActivityIndicatorView.Style = .gray
+    var activityIndicatorStyle: UIActivityIndicatorView.Style = UIActivityIndicatorView.Style.medium
+    
+    func matchesTraitCollection(_ traitCollection: UITraitCollection) -> Bool {
+        return (colorScheme == 0 && traitCollection.userInterfaceStyle == .light) ||
+            (colorScheme == 1 && traitCollection.userInterfaceStyle == .dark)
+    }
     
     static let defaultTheme: SATheme = { () in
         let theme = SATheme()
@@ -196,7 +227,7 @@ class SATheme: NSObject {
         theme.keyboardAppearence = .default
         
         theme.visualBlurEffectStyle = .light
-        theme.activityIndicatorStyle = .gray
+        theme.activityIndicatorStyle = .medium
         
         return theme
     }()
@@ -217,7 +248,7 @@ class SATheme: NSObject {
         theme.htmlLinkColor = "#8d9abc"
         
         theme.tableCellHighlightColor = "#222222"
-        theme.backgroundColor = "#171717"
+        theme.backgroundColor = "#000000"
         theme.foregroundColor = "#1C1C1D"
         theme.tableCellSeperatorColor = "#434345" // RGBA
         theme.tableCellTextColor = "#BBBBBB"
@@ -234,7 +265,7 @@ class SATheme: NSObject {
         theme.keyboardAppearence = .dark
         
         theme.visualBlurEffectStyle = .dark
-        theme.activityIndicatorStyle = .white
+        theme.activityIndicatorStyle = .medium
         
         return theme
     }()
@@ -273,7 +304,7 @@ class SATheme: NSObject {
         theme.keyboardAppearence = .default
         
         theme.visualBlurEffectStyle = .light
-        theme.activityIndicatorStyle = .gray
+        theme.activityIndicatorStyle = .medium
         
         return theme
     }()

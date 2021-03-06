@@ -199,7 +199,7 @@ class SABoardFilterViewController: UITableViewController {
                     }
                 }
                 guard forum != nil else {
-                    sa_log_v2("forum is nil. Showing all", module: .ui, type: .debug)
+                    os_log("forum is nil. Showing all", log: .ui, type: .debug)
                     return 1
                 }
                 
@@ -242,7 +242,7 @@ class SABoardFilterViewController: UITableViewController {
             }
         }
         guard forum != nil else {
-            sa_log_v2("forum is nil", module: .ui, type: .debug)
+            os_log("forum is nil", log: .ui, type: .debug)
             return cell
         }
         
@@ -279,7 +279,7 @@ class SABoardFilterViewController: UITableViewController {
             }
         }
         guard forum != nil else {
-            sa_log_v2("forum is nil", module: .ui, type: .debug)
+            os_log("forum is nil", log: .ui, type: .debug)
             return
         }
         
@@ -311,7 +311,7 @@ class SABoardFilterViewController: UITableViewController {
         
         var categorylist: [[String:String]]!
         if forum == nil {
-            sa_log_v2("forum is nil", module: .ui, type: .debug)
+            os_log("forum is nil", log: .ui, type: .debug)
             categorylist = []
         } else {
             categorylist = (forum["types"] as! [[String:String]])

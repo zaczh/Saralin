@@ -92,6 +92,11 @@
 "OPTION_THREADS_DISPLAY_ORDER" = "Threads Order";
 "OPTION_THREADS_DISPLAY_ORDER_DESCRIPTION" = "Set by which order threads are listed.";
 
+"OPTION_HOT_TAB_SHOW_BOARD_FID" = "Hot Tab Shows Board fid";
+"OPTION_HOT_TAB_SHOW_BOARD_FID_DESCRIPTION" = "Set which board to be shown in the hot tab.";
+
+"OPTION_ENABLE_PASTEBOARD_MONITORING" = "Enable Pasteboard Monitoring";
+"OPTION_ENABLE_PASTEBOARD_MONITORING_DESCRIPTION" = "When enabled, Saralin will check if there is a link in the pasteboard, and ask if to open it within.";
 
 "OPTION_REMOVE_SIGNATURE_AND_LAST_EDITING_NOTICE" = "去掉小尾巴以及最后编辑信息";
 "OPTION_REMOVE_SIGNATURE_AND_LAST_EDITING_NOTICE_DESCRIPTION" = "";
@@ -101,7 +106,7 @@
 "OPTION_THREADS_DISPLAY_ORDER_CURRENT_OPTION_SUFFIX" = "(Current)";
 
 "OPTION_CLEAR_CACHE" = "Clear Cache";
-"OPTION_CLEAR_CACHE_DESCRIPTION" = "Cache will be cleared periodically. To see how much disk space Saralin takes, go to Settings->General->Storage & iCloud Usage";
+"OPTION_CLEAR_CACHE_DESCRIPTION" = "Cache will be cleared periodically. To see how much disk space Saralin takes, go to Settings->General->Storage & iCloud Usage.";
 
 "SETTINGS_OPTION_TURN_ON_NOTIFICATION" = "Turn On Notifications";
 "SETTINGS_OPTION_TURN_ON_NOTIFICATION_DETAIL" = "Click To Turn On";
@@ -141,7 +146,6 @@
 "INPUT_PAGE_NUMBER" = "Input Page Number: ";
 
 "POST"="Post";
-"POST_ON" = "post";
 "UPDATE_ON" = "update";
 
 "COMPOSE_THREAD" = "New Thread";
@@ -255,3 +259,10 @@
 "THREAD_BOTTOM_REFRESHER_TITLE_RELEASE_TO_REFRESH" = "Release to refresh";
 
 "TAP_TO_INSERT_IMAGE" = "Tap To Insert Image";
+
+"USER_NAME" = "User Name";
+"PASSWORD" = "Password";
+"LOGIN_FORM_SECURITY_QUESTION" = "Security Question";
+"LOGIN_FORM_SECURITY_QUESTION_ANSWER" = "Answer";
+
+"CONTEXT_MENU_TITLE" = "Shortcuts";

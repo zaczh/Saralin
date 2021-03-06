@@ -199,7 +199,7 @@ class ImageViewController: UIViewController, UIViewControllerTransitioningDelega
     override var prefersStatusBarHidden: Bool {return forcesStatusBarHidden}
     override var preferredStatusBarUpdateAnimation: UIStatusBarAnimation {return .fade}
     
-    private var circleLoadingView: LoadingView!
+    private var loadingIndicatorView = UIActivityIndicatorView(style: .medium)
     struct ImageItem {
         var imageURL: URL
         var fullSizeImage: UIImage?
@@ -281,9 +281,7 @@ class ImageViewController: UIViewController, UIViewControllerTransitioningDelega
         updateScrollView(size: view.frame.size)
         setupTransitioning()
         setupLoadingView()
-        
-        circleLoadingView.isHidden = false
-        
+                
         guard let _ = imageURL else {
             return
         }
@@ -298,7 +296,7 @@ class ImageViewController: UIViewController, UIViewControllerTransitioningDelega
             strongSelf.imageView.image = image
             strongSelf.updateTintColor()
             strongSelf.updateScrollView(size: strongSelf.view.frame.size)
-            strongSelf.circleLoadingView.isHidden = true
+            strongSelf.loadingIndicatorView.stopAnimating()
         }
         syncDatabaseAndUI()
     }
@@ -375,14 +373,11 @@ class ImageViewController: UIViewController, UIViewControllerTransitioningDelega
     }
     
     private func setupLoadingView() {
-        circleLoadingView = LoadingView.init(frame: CGRect.init(x: 0, y: 0, width: 60, height: 60))
-        circleLoadingView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(circleLoadingView)
-        circleLoadingView.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 0).isActive = true
-        circleLoadingView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 0).isActive = true
-        circleLoadingView.widthAnchor.constraint(equalToConstant: circleLoadingView.frame.size.width).isActive = true
-        circleLoadingView.heightAnchor.constraint(equalToConstant: circleLoadingView.frame.size.height).isActive = true
-        circleLoadingView.isHidden = true
+        loadingIndicatorView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(loadingIndicatorView)
+        loadingIndicatorView.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 0).isActive = true
+        loadingIndicatorView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 0).isActive = true
+        loadingIndicatorView.startAnimating()
     }
     
     private let buttonDemension: CGFloat = 30
@@ -592,7 +587,7 @@ class ImageViewController: UIViewController, UIViewControllerTransitioningDelega
                     let options = UIWindowSceneDestructionRequestOptions()
                     options.windowDismissalAnimation = .standard
                     UIApplication.shared.requestSceneSessionDestruction(sceneSession, options: options, errorHandler: { (error) in
-                        sa_log_v2("request scene session destruction returned: %@", error.localizedDescription)
+                        os_log("request scene session destruction returned: %@", error.localizedDescription)
                     })
                 }
             } else {
@@ -615,7 +610,7 @@ class ImageViewController: UIViewController, UIViewControllerTransitioningDelega
     }
     
     @objc func handleDoubleTap(_ sender: AnyObject) {
-        if !circleLoadingView.isHidden {
+        if !loadingIndicatorView.isHidden {
             return
         }
         
@@ -634,7 +629,7 @@ class ImageViewController: UIViewController, UIViewControllerTransitioningDelega
     }
     
     func showShareActionSheet(senderView: UIView?, senderItem: UIBarButtonItem?) {
-        if !circleLoadingView.isHidden {
+        if !loadingIndicatorView.isHidden {
             return
         }
         
@@ -722,7 +717,7 @@ extension ImageViewController {
         let query = CKQuery(recordType: recordType, predicate: predicate)
         database.perform(query, inZoneWith: nil) { (returnedRecords, error) in
             guard error == nil else {
-                sa_log_v2("query database failed: %@", module: .cloudkit, type:.error, error!.localizedDescription)
+                os_log("query database failed: %@", log: .cloudkit, type:.error, error!.localizedDescription)
                 return
             }
             
@@ -781,19 +776,19 @@ extension ImageViewController {
                         recordType: CKRecord.RecordType,
                         retryAttempt: Int = 0) {
         if retryAttempt >= SACloudKitSyncRequestMaxAttempt {
-            sa_log_v2("retry reaches limit", module: .cloudkit, type:.info)
+            os_log("retry reaches limit", log: .cloudkit, type:.info)
             return
         }
         
         if retryAttempt > 0 {
-            sa_log_v2("retry syncing ui and cloudkit", module: .cloudkit, type:.info)
+            os_log("retry syncing ui and cloudkit", log: .cloudkit, type:.info)
         }
         
         let predicate = NSPredicate(format: "url = %@", imageURL)
         let query = CKQuery(recordType: recordType, predicate: predicate)
         database.perform(query, inZoneWith: nil) { (returnedRecords, error) in
             guard error == nil else {
-                sa_log_v2("save database failed: %@", module: .cloudkit, type:.error, error!.localizedDescription)
+                os_log("save database failed: %@", log: .cloudkit, type:.error, error!.localizedDescription)
                 DispatchQueue.global().asyncAfter(deadline: .now() + 1) {
                     ImageViewController.doSync(uid: uid, upvoted: upvoted, imageURL: imageURL, database: database, recordType: recordType, retryAttempt: retryAttempt + 1)
                 }
@@ -801,7 +796,7 @@ extension ImageViewController {
             }
             
             guard let record = returnedRecords?.first else {
-                sa_log_v2("no record. Create new one.", module: .cloudkit, type:.info)
+                os_log("no record. Create new one.", log: .cloudkit, type:.info)
                 let recordID = CKRecord.ID(recordName: imageURL)
                 let record = CKRecord(recordType: recordType, recordID: recordID)
                 record["url"] = imageURL
@@ -810,7 +805,7 @@ extension ImageViewController {
                 record["upvoted"] = upvoted ? [uid] : [String]()
                 database.save(record) { (returnedRecord, error) in
                     guard error == nil else {
-                        sa_log_v2("save database failed: %@", module: .cloudkit, type:.error, error!.localizedDescription)
+                        os_log("save database failed: %@", log: .cloudkit, type:.error, error!.localizedDescription)
                         DispatchQueue.global().asyncAfter(deadline: .now() + 1) {
                             ImageViewController.doSync(uid: uid, upvoted: upvoted, imageURL: imageURL, database: database, recordType: recordType, retryAttempt: retryAttempt + 1)
                         }
@@ -845,7 +840,7 @@ extension ImageViewController {
                     return
                 }
                 
-                sa_log_v2("save database failed: %@", module: .cloudkit, type:.error, error!.localizedDescription)
+                os_log("save database failed: %@", log: .cloudkit, type:.error, error!.localizedDescription)
                 DispatchQueue.global().asyncAfter(deadline: .now() + 1) {
                     ImageViewController.doSync(uid: uid, upvoted: upvoted, imageURL: imageURL, database: database, recordType: recordType, retryAttempt: retryAttempt + 1)
                 }

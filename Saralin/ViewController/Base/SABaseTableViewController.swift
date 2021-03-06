@@ -12,7 +12,9 @@ import CoreData
 class SABaseTableViewController: SABaseViewController, UITableViewDataSource, UITableViewDelegate, UIScrollViewDelegate, UITableViewDataSourcePrefetching, UISearchBarDelegate {
     var showsSearchItem: Bool {return false}
     var showsRefreshControl: Bool {return true}
+    #if !targetEnvironment(macCatalyst)
     var refreshControl: UIRefreshControl?
+    #endif
     var tableView: UITableView!
     
     var showsBottomRefreshView: Bool {return false}
@@ -41,7 +43,7 @@ class SABaseTableViewController: SABaseViewController, UITableViewDataSource, UI
     }
     
     var isFetchingMoreThreads: Bool = false
-    var fetchingMoreAction: (() -> Void)?
+    var fetchingMoreAction: ((SABaseTableViewController) -> Void)?
     var isFetchingMoreNoMoreData: Bool = false
     var isFetchingMoreFailed: Bool = false
     
@@ -51,9 +53,11 @@ class SABaseTableViewController: SABaseViewController, UITableViewDataSource, UI
     // This is used to updating refresh title
     var thisTimeReloadingDate: Date? {
         didSet {
+            #if !targetEnvironment(macCatalyst)
             if thisTimeReloadingDate == nil { return }
             let attributes = [NSAttributedString.Key.font:UIFont.sa_preferredFont(forTextStyle: UIFont.TextStyle.body), NSAttributedString.Key.foregroundColor:UIColor.sa_colorFromHexString(Theme().textColor)]
             refreshControl?.attributedTitle = NSAttributedString(string: "上次刷新时间：\(thisTimeReloadingDate!.sa_prettyDate())", attributes: attributes)
+            #endif
         }
     }
     
@@ -106,6 +110,7 @@ class SABaseTableViewController: SABaseViewController, UITableViewDataSource, UI
         tableView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
         tableView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
         
+        #if !targetEnvironment(macCatalyst)
         if showsRefreshControl {
             refreshControl = UIRefreshControl()
             if #available(iOS 10.0, *) {
@@ -115,6 +120,7 @@ class SABaseTableViewController: SABaseViewController, UITableViewDataSource, UI
             }
             refreshControl!.addTarget(self, action: #selector(SABaseTableViewController.handleRefreshControlValueChanged(_:)), for: .valueChanged)
         }
+        #endif
         
         if showsBottomRefreshView {
             tableView.tableFooterView = bottomRefreshView
@@ -138,7 +144,7 @@ class SABaseTableViewController: SABaseViewController, UITableViewDataSource, UI
         NotificationCenter.default.addObserver(self, selector: #selector(SABaseTableViewController.handleGetUserLogoutNotification(_:)), name: Notification.Name.SAUserLoggedOutNotification, object: nil)
         
         _ = NotificationCenter.default.addObserver(forName: UIApplication.significantTimeChangeNotification, object: nil, queue: nil, using: { [weak self] (notification) in
-            sa_log_v2("significantTimeChangeNotification", module: .ui, type: .info)
+            os_log("significantTimeChangeNotification", log: .ui, type: .info)
             self?.shouldRefreshTableWhenNextTimeViewAppear = true
         })
     }
@@ -205,7 +211,9 @@ class SABaseTableViewController: SABaseViewController, UITableViewDataSource, UI
         tableView.backgroundColor = newTheme.backgroundColor.sa_toColor()
         tableView.separatorColor = UIColor.sa_colorFromHexString(newTheme.tableCellSeperatorColor)
         tableView.tintColor = UIColor.sa_colorFromHexString(newTheme.globalTintColor)
+        #if !targetEnvironment(macCatalyst)
         refreshControl?.tintColor = UIColor.sa_colorFromHexString(newTheme.textColor)
+        #endif
         
         bottomRefreshView.loadingLabel.textColor = UIColor.sa_colorFromHexString(newTheme.textColor)
         bottomRefreshView.loadingView.style = newTheme.activityIndicatorStyle
@@ -215,6 +223,7 @@ class SABaseTableViewController: SABaseViewController, UITableViewDataSource, UI
     
     override func viewFontDidChange(_ newTheme: SATheme) {
         super.viewFontDidChange(newTheme)
+        assert(isViewLoaded, "view must be loaded")
         bottomRefreshView.loadingLabel.font = UIFont.sa_preferredFont(forTextStyle: .body)
         tableView.reloadData()
     }
@@ -294,7 +303,7 @@ class SABaseTableViewController: SABaseViewController, UITableViewDataSource, UI
     }
     
     open func refreshControllWillShow() {
-        sa_log_v2("refreshControllWillShow", module: .ui, type: .debug)
+        os_log("refreshControllWillShow", log: .ui, type: .debug)
         if let lastView = thisTimeReloadingDate {
             thisTimeReloadingDate = lastView
         }
@@ -356,14 +365,6 @@ class SABaseTableViewController: SABaseViewController, UITableViewDataSource, UI
         return indexPath
     }
     
-    func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        return nil
-    }
-    
-    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        return nil
-    }
-    
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
         return UIView()
     }
@@ -392,15 +393,7 @@ class SABaseTableViewController: SABaseViewController, UITableViewDataSource, UI
     }
     
     func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
-        return .delete
-    }
-    
-    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
-        return nil
-    }
-    
-    func tableView(_ tableView: UITableView, titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
-        return "移除"
+        return .none
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
@@ -431,6 +424,7 @@ class SABaseTableViewController: SABaseViewController, UITableViewDataSource, UI
         handleUserLoggedOut()
     }
     
+    #if !targetEnvironment(macCatalyst)
     @objc func handleRefreshControlValueChanged(_ refreshControl: UIRefreshControl) {
         guard refreshControl.isRefreshing else {
             return
@@ -440,6 +434,7 @@ class SABaseTableViewController: SABaseViewController, UITableViewDataSource, UI
             self.refreshControl?.endRefreshing()
         }
     }
+    #endif
     
     // MARK: - UIScrollViewDelegate
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -496,7 +491,7 @@ class SABaseTableViewController: SABaseViewController, UITableViewDataSource, UI
     
     func callFetchMoreHandlerAndSetNil() {
         if fetchingMoreAction != nil {
-            fetchingMoreAction!()
+            fetchingMoreAction!(self)
             fetchingMoreAction = nil
         }
     }
@@ -508,8 +503,9 @@ class SABaseTableViewController: SABaseViewController, UITableViewDataSource, UI
             guard self != nil else {
                 return
             }
-            
+            #if !targetEnvironment(macCatalyst)
             self!.refreshControl?.endRefreshing()
+            #endif
             if success == .newData {
                 self!.loadingController.setFinished()
             } else if success == .emptyData {

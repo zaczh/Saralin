@@ -1,0 +1,49 @@
+
+Summary
+URL: https://bbs.saraba1st.com/2b/misc.php?mod=swfupload&operation=upload&type=attach&inajax=yes&infloat=yes&simple=2
+Status: 200
+Source: Network
+Address: 118.31.65.90:443
+Initiator:
+webuploader.html5only.min.js:2313
+
+
+Request
+:method: POST
+:scheme: https
+:authority: bbs.saraba1st.com
+:path: /2b/misc.php?mod=swfupload&operation=upload&type=attach&inajax=yes&infloat=yes&simple=2
+Accept: */*
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryK2bQCaB9h74JB4h3
+Origin: https://bbs.saraba1st.com
+Cookie: B7Y9_2132_lastact=1613268686%09forum.php%09post; B7Y9_2132_lip=124.156.225.242%2C1613268557; B7Y9_2132_pc_size_c=0; B7Y9_2132_popadv=a%3A0%3A%7B%7D; B7Y9_2132_sid=aB5IX1; B7Y9_2132_st_t=445568%7C1613268686%7C5cb250b9ae99aac51184718d4d79d230; B7Y9_2132_ulastactivity=cc1cBzlRrayXNzQ1XE73UKv7Rgrhy8hZd1idxWU1YRmDzBEY1Hhw; B7Y9_2132_yfe_in=1; B7Y9_2132_forum_lastvisit=D_74_1613181968D_48_1613182013D_51_1613182602; B7Y9_2132_visitedfid=51D48D74; B7Y9_2132_auth=7737iOyZpv55N%2FdO7MBy0hpFFf5w9rSr6MBPMhE4Z4sKSbuz2ExTfLXqwvlXaKIPGkV6%2FyZ6jy8hjk7I0KrDXouXDfk; B7Y9_2132_lastcheckfeed=445568%7C1613181960; __yjs_duid=1_82f23016750796e313a5c33afce8cee91612448782984; __cfduid=d77c2e343f977f40ef4cdf926ecadcf271611964238; B7Y9_2132_lastvisit=1611960637; B7Y9_2132_saltkey=NX62MMsM
+Content-Length: 44721
+Accept-Language: zh-cn
+Host: bbs.saraba1st.com
+User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Mobile/15E148 Safari/604.1
+Referer: https://bbs.saraba1st.com/2b/forum.php?mod=post&action=newthread&fid=51&mobile=2
+Accept-Encoding: gzip, deflate, br
+Connection: keep-alive
+
+Response
+:status: 200
+Content-Encoding: gzip
+Date: Sun, 14 Feb 2021 02:12:31 GMT
+Content-Type: text/html; charset=utf-8
+Set-Cookie: B7Y9_2132_lastact=1613268750%09misc.php%09swfupload; expires=Mon, 15-Feb-2021 02:12:30 GMT; Max-Age=86400; path=/; secure
+Set-Cookie: B7Y9_2132_creditnotice=0D0D0D0D0D0D0D0D0D445568; path=/; secure
+Set-Cookie: B7Y9_2132_creditbase=0D-1D0D0D0D128D0D0D0; path=/; secure
+Server: nginx
+
+Query String Parameters
+mod: swfupload
+operation: upload
+type: attach
+inajax: yes
+infloat: yes
+simple: 2
+
+Request Data
+MIME Type: multipart/form-data
+Boundary: ----WebKitFormBoundaryK2bQCaB9h74JB4h3
+Request Data: 

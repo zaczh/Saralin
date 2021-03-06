@@ -29,6 +29,10 @@ class SAPasteboardMonitor: NSObject {
     }
     
     private func doCheck() {
+        if !((Account().preferenceForkey(.enable_pasteboard_monitoring) as? Bool) ?? false) {
+            return
+        }
+        
         let pasteboard = UIPasteboard.general
         if pasteboard.hasURLs {
             processURLs()
@@ -82,7 +86,7 @@ class SAPasteboardMonitor: NSObject {
             return
         }
         
-        guard let window = UIApplication.shared.keyWindow else {
+        guard let window = AppController.current.currentActiveWindow else {
             return
         }
         

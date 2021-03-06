@@ -35,9 +35,6 @@ class SAFavouriteBoardsViewController: SABaseTableViewController {
         if #available(iOS 13.0, *) {
             let contextMenuInteraction = UIContextMenuInteraction(delegate: self)
             view.addInteraction(contextMenuInteraction)
-        } else {
-            // Fallback on earlier versions
-            registerForPreviewing(with: self, sourceView: view)
         }
         
         if segmentedControl.selectedSegmentIndex == UISegmentedControl.noSegment {
@@ -186,116 +183,6 @@ class SAFavouriteBoardsViewController: SABaseTableViewController {
         return true
     }
     
-    override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        var actions: [UIContextualAction] = []
-        let deleteAction = UIContextualAction.init(style: .normal, title: NSLocalizedString("DELETE", comment: "Delete")) { (action, cell, completionHandler) in
-            if self.segmentedControl.selectedSegmentIndex == SegmentedControlIndex.recent.rawValue {
-                guard !self.historyThreadsData.isEmpty else {
-                    completionHandler(false)
-                    return
-                }
-                
-                AppController.current.getService(of: SACoreDataManager.self)!.withMainContext { (context) in
-                    let object = self.historyThreadsData[indexPath.row]
-                    context.delete(object)
-                    tableView.beginUpdates()
-                    self.historyThreadsData.remove(at: indexPath.row)
-                    tableView.deleteRows(at: [indexPath], with: .automatic)
-                    tableView.endUpdates()
-                    completionHandler(true)
-                }
-            } else if self.segmentedControl.selectedSegmentIndex == SegmentedControlIndex.thread.rawValue {
-                guard let favid = self.favoriteThreadsData[indexPath.row].favid else {
-                    completionHandler(false)
-                    return
-                }
-                
-                let activity = SAModalActivityViewController()
-                self.present(activity, animated: true, completion: nil)
-                URLSession.saCustomized.unfavorite(favid: favid, formhash: Account().formhash, completion: { [weak self] (object, error) in
-                    guard let self = self else {
-                        completionHandler(false)
-                        return
-                    }
-                    
-                    if error == nil {
-                        sa_log_v2("已取消收藏")
-                        tableView.beginUpdates()
-                        self.favoriteThreadsData.remove(at: indexPath.row)
-                        self.tableView.deleteRows(at: [indexPath], with: .automatic)
-                        tableView.endUpdates()
-                        activity.hideAndShowResult(of: true, info: NSLocalizedString("OPERATION_SUCCEEDED", comment: ""), completion: nil)
-                        completionHandler(true)
-                    } else {
-                        sa_log_v2("取消收藏失败 error: %@", type: .error, error! as CVarArg)
-                        activity.hideAndShowResult(of: false, info: NSLocalizedString("OPERATION_FAILED", comment: ""), completion: nil)
-                        completionHandler(false)
-                    }
-                })
-            } else if self.segmentedControl.selectedSegmentIndex == SegmentedControlIndex.watchList.rawValue {
-                AppController.current.getService(of: SACoreDataManager.self)!.withMainContext { (context) in
-                    let object = self.watchingThreadsData[indexPath.row]
-                    context.delete(object)
-                    tableView.beginUpdates()
-                    self.watchingThreadsData.remove(at: indexPath.row)
-                    tableView.deleteRows(at: [indexPath], with: .automatic)
-                    tableView.endUpdates()
-                    completionHandler(true)
-                }
-            }
-        }
-        deleteAction.backgroundColor = UIColor.red
-        actions.append(deleteAction)
-        
-        if #available(iOS 13.0, *) {
-            let iCloudAction = UIContextualAction.init(style: .normal, title: "iCloud同步信息") { (action, cell, completionHandler) in
-                defer {
-                    completionHandler(true)
-                }
-                
-                let showDataDevice:((String?, String?, Date?) -> Void) = { (device, id, date) in
-                    guard let d = device, let i = id, let t = date else {
-                        return
-                    }
-                    
-                    let alert = UIAlertController(title: "iCloud同步信息", message: "设备名：\(d)\n设备ID：\(i)\n时间：\(t.description)", preferredStyle: .alert)
-                    alert.popoverPresentationController?.sourceView = cell
-                    alert.popoverPresentationController?.sourceRect = cell.bounds
-                    let openAction = UIAlertAction(title: NSLocalizedString("OK", comment: "OK"), style: .cancel, handler: { (action) in
-                        
-                    })
-                    alert.addAction(openAction)
-                    self.present(alert, animated: true, completion: nil)
-                }
-                
-                if self.segmentedControl.selectedSegmentIndex == SegmentedControlIndex.recent.rawValue {
-                    guard !self.historyThreadsData.isEmpty else {
-                        return
-                    }
-                    
-                    let data = self.historyThreadsData[indexPath.row]
-                    showDataDevice(data.createdevicename, data.createdeviceidentifier, data.lastviewtime)
-                } else if self.segmentedControl.selectedSegmentIndex == SegmentedControlIndex.thread.rawValue {
-                    guard !self.favoriteThreadsData.isEmpty else {
-                        return
-                    }
-                    let data = self.favoriteThreadsData[indexPath.row]
-                    showDataDevice(data.createdevicename, data.createdeviceidentifier, data.favoriteddate)
-                } else if self.segmentedControl.selectedSegmentIndex == SegmentedControlIndex.watchList.rawValue {
-                    let data = self.watchingThreadsData[indexPath.row]
-                    showDataDevice(data.createdevicename, data.createdeviceidentifier, data.lastviewtime)
-                }
-            }
-            iCloudAction.image = UIImage(systemName: "icloud.fill")
-            iCloudAction.backgroundColor = UIColor.blue
-            actions.append(iCloudAction)
-        } else {
-           // Fallback on earlier versions
-        }
-        let config = UISwipeActionsConfiguration(actions: actions)
-        return config
-    }
-    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! SABoardTableViewCell
         
@@ -387,7 +274,7 @@ class SAFavouriteBoardsViewController: SABaseTableViewController {
                 return nil
             }
             
-            let link = SAGlobalConfig().forum_base_url + "forum.php?mod=viewthread&tid=\(object.tid!)&page=1&mobile=1"
+            let link = SAGlobalConfig().forum_base_url + "forum.php?mod=viewthread&tid=\(object.tid!)&fid=\(object.fid!)&page=1&mobile=1"
             if let url = URL(string: link) {
                 return SAThreadContentViewController(url: url)
             }
@@ -398,7 +285,7 @@ class SAFavouriteBoardsViewController: SABaseTableViewController {
             
             let url = SAGlobalConfig().forum_base_url + "forum.php?mod=viewthread&tid=\(tid)&page=1&mobile=1"
             
-            sa_log_v2("url: %@", module: .ui, type: .debug, url)
+            os_log("url: %@", log: .ui, type: .debug, url)
             if let URL = URL(string: url) {
                 return SAThreadContentViewController(url: URL)
             }
@@ -419,7 +306,13 @@ class SAFavouriteBoardsViewController: SABaseTableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         if let thread = detailViewControllerForCell(at: indexPath) {
-            splitViewController?.showDetailViewController(thread, sender: self)
+            if splitViewController!.isCollapsed {
+                navigationController?.pushViewController(thread, animated: true)
+            } else {
+                // wrap with a navigation so that new secondary vc replacing old one.
+                let navi = SANavigationController(rootViewController: thread)
+                splitViewController?.setViewController(navi, for: .secondary)
+            }
         }
     }
     
@@ -462,30 +355,6 @@ class SAFavouriteBoardsViewController: SABaseTableViewController {
     }
 }
 
-extension SAFavouriteBoardsViewController: UIViewControllerPreviewingDelegate {
-    // MARK: UIViewControllerPreviewingDelegate
-    func previewingContext(_ previewingContext: UIViewControllerPreviewing, viewControllerForLocation location: CGPoint) -> UIViewController? {
-        let tableLocation = previewingContext.sourceView.convert(location, to: tableView)
-        let sourceView = previewingContext.sourceView
-        
-        guard let indexPath = tableView.indexPathForRow(at: tableLocation), let cell = tableView.cellForRow(at: indexPath) else {
-            return nil
-        }
-        
-        guard let contentViewer = detailViewControllerForCell(at: indexPath) else {
-            return nil
-        }
-        // Set the source rect to the cell frame, so surrounding elements are blurred.
-        previewingContext.sourceRect = cell.convert(cell.bounds, to: sourceView)
-        return contentViewer
-    }
-    
-    func previewingContext(_ previewingContext: UIViewControllerPreviewing, commit viewControllerToCommit: UIViewController) {
-        splitViewController?.showDetailViewController(viewControllerToCommit, sender: self)
-    }
-}
-
-
 @available(iOS 13.0, *)
 extension SAFavouriteBoardsViewController: UIContextMenuInteractionDelegate {
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
@@ -494,21 +363,103 @@ extension SAFavouriteBoardsViewController: UIContextMenuInteractionDelegate {
             return nil
         }
         currentPreviewCellIndexPath = indexPath
-
-        let provider: UIContextMenuContentPreviewProvider = { [weak self] () in
-            guard let self = self else { return nil }
-            
-            guard let indexPath = self.currentPreviewCellIndexPath else {
-                return nil
+        
+        let actionProvider: UIContextMenuActionProvider = { (menu) in
+            let deleteAction = UIAction.init(title: NSLocalizedString("DELETE", comment: "Delete"), image: UIImage(systemName: "delete.right"), identifier: SAContextActionTitleDelete, discoverabilityTitle: nil, attributes: UIMenuElement.Attributes.destructive, state: .off) { [weak self] (action) in
+                guard let self = self else {
+                    return
+                }
+                
+                if self.segmentedControl.selectedSegmentIndex == SegmentedControlIndex.recent.rawValue {
+                    guard !self.historyThreadsData.isEmpty else {
+                        return
+                    }
+                    
+                    AppController.current.getService(of: SACoreDataManager.self)!.withMainContext { (context) in
+                        let object = self.historyThreadsData[indexPath.row]
+                        context.delete(object)
+                        self.tableView.beginUpdates()
+                        self.historyThreadsData.remove(at: indexPath.row)
+                        self.tableView.deleteRows(at: [indexPath], with: .automatic)
+                        self.tableView.endUpdates()
+                    }
+                    return
+                } else if self.segmentedControl.selectedSegmentIndex == SegmentedControlIndex.thread.rawValue {
+                    guard let favid = self.favoriteThreadsData[indexPath.row].favid else {
+                        return
+                    }
+                    
+                    let activity = SAModalActivityViewController()
+                    self.present(activity, animated: true, completion: nil)
+                    URLSession.saCustomized.unfavorite(favid: favid, formhash: Account().formhash, completion: { [weak self] (object, error) in
+                        guard let self = self else {
+                            return
+                        }
+                        
+                        if error == nil {
+                            os_log("已取消收藏")
+                            self.tableView.beginUpdates()
+                            self.favoriteThreadsData.remove(at: indexPath.row)
+                            self.tableView.deleteRows(at: [indexPath], with: .automatic)
+                            self.tableView.endUpdates()
+                            activity.hideAndShowResult(of: true, info: NSLocalizedString("OPERATION_SUCCEEDED", comment: ""), completion: nil)
+                        } else {
+                            os_log("取消收藏失败 error: %@", type: .error, error! as CVarArg)
+                            activity.hideAndShowResult(of: false, info: NSLocalizedString("OPERATION_FAILED", comment: ""), completion: nil)
+                        }
+                    })
+                } else if self.segmentedControl.selectedSegmentIndex == SegmentedControlIndex.watchList.rawValue {
+                    AppController.current.getService(of: SACoreDataManager.self)!.withMainContext { (context) in
+                        let object = self.watchingThreadsData[indexPath.row]
+                        context.delete(object)
+                        self.tableView.beginUpdates()
+                        self.watchingThreadsData.remove(at: indexPath.row)
+                        self.tableView.deleteRows(at: [indexPath], with: .automatic)
+                        self.tableView.endUpdates()
+                    }
+                }
             }
             
-            guard let contentViewer = self.detailViewControllerForCell(at: indexPath) else {
-                return nil
+            let iCloudAction = UIAction.init(title: "查看iCloud同步信息", image: UIImage(systemName: "icloud.fill"), identifier: SAContextActionTitleICloudInfo, discoverabilityTitle: nil, attributes: [], state: .off) { (action) in
+                let showDataDevice:((String?, String?, Date?) -> Void) = { (device, id, date) in
+                    guard let d = device, let i = id, let t = date else {
+                        return
+                    }
+                    
+                    let alert = UIAlertController(title: "iCloud同步信息", message: "设备名：\(d)\n设备ID：\(i)\n时间：\(t.description)", preferredStyle: .alert)
+                    alert.popoverPresentationController?.sourceView = self.tableView
+                    alert.popoverPresentationController?.sourceRect = self.tableView.bounds
+                    let openAction = UIAlertAction(title: NSLocalizedString("OK", comment: "OK"), style: .cancel, handler: { (action) in
+                        
+                    })
+                    alert.addAction(openAction)
+                    self.present(alert, animated: true, completion: nil)
+                }
+                
+                if self.segmentedControl.selectedSegmentIndex == SegmentedControlIndex.recent.rawValue {
+                    guard !self.historyThreadsData.isEmpty else {
+                        return
+                    }
+                    
+                    let data = self.historyThreadsData[indexPath.row]
+                    showDataDevice(data.createdevicename, data.createdeviceidentifier, data.lastviewtime)
+                } else if self.segmentedControl.selectedSegmentIndex == SegmentedControlIndex.thread.rawValue {
+                    guard !self.favoriteThreadsData.isEmpty else {
+                        return
+                    }
+                    let data = self.favoriteThreadsData[indexPath.row]
+                    showDataDevice(data.createdevicename, data.createdeviceidentifier, data.favoriteddate)
+                } else if self.segmentedControl.selectedSegmentIndex == SegmentedControlIndex.watchList.rawValue {
+                    let data = self.watchingThreadsData[indexPath.row]
+                    showDataDevice(data.createdevicename, data.createdeviceidentifier, data.lastviewtime)
+                }
             }
-            return contentViewer
+            
+            let amenu = UIMenu(title: "可选操作", image: nil, identifier: nil, options: [], children: [iCloudAction, deleteAction])
+            return amenu
         }
         
-        let contextMenuConfiguration = UIContextMenuConfiguration(identifier: nil, previewProvider: provider, actionProvider: nil)
+        let contextMenuConfiguration = UIContextMenuConfiguration(identifier: nil, previewProvider: nil, actionProvider: actionProvider)
         return contextMenuConfiguration
     }
     

@@ -12,3 +12,11 @@
 2. Supports bottom refresh
 3. Supports macOS
 4. iPad user interfaces mimic mac's
+
+
+## Version 2.6
+1. Thread page rewritten with more HTML code and new reply content user interface
+2. Removed the Hot tab since hot data api is no longer supported
+3. Added ability to disable pasteboard probing
+4. Support new iOS 14 Metrics API
+5. Added support for Mac Catalyst

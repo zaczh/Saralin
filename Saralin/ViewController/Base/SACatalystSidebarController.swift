@@ -10,7 +10,6 @@ import UIKit
 
 
 enum CatelystSidebarSectionID: Int {
-    case hot = 0
     case forums
     case others
     case max
@@ -19,15 +18,6 @@ enum CatelystSidebarSectionID: Int {
 class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, UITableViewDelegate {
 
     class SidebarCell: UITableViewCell {
-        override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-            super.init(style: style, reuseIdentifier: reuseIdentifier)
-            selectionStyle = .none
-            backgroundColor = .clear
-        }
-        
-        required init?(coder: NSCoder) {
-            fatalError("init(coder:) has not been implemented")
-        }
         
         private func doUpdateForTheme(_ newTheme: SATheme) {
             imageView?.tintColor = newTheme.textColor.sa_toColor()
@@ -46,7 +36,7 @@ class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, 
     }
     
     class AvatarView: UIView {
-        let contentView = UIView()
+        let contentView = UIVisualEffectView(effect: UIBlurEffect(style: .regular))
         let customImageView = UIButton(type: .custom)
         let uin = UILabel()
         let name = UILabel()
@@ -64,14 +54,14 @@ class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, 
             contentView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
             
             customImageView.translatesAutoresizingMaskIntoConstraints = false
-            contentView.addSubview(customImageView)
+            contentView.contentView.addSubview(customImageView)
             
             // contentview height constraint here
             customImageView.setBackgroundImage(UIImage(named: "noavatar_middle"), for: .normal)
-            customImageView.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 10).isActive = true
+            customImageView.leftAnchor.constraint(equalTo: contentView.contentView.leftAnchor, constant: 10).isActive = true
             customImageView.heightAnchor.constraint(equalToConstant: 40).isActive = true
             customImageView.widthAnchor.constraint(equalTo: customImageView.heightAnchor, multiplier: 1).isActive = true
-            customImageView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor, constant: 0).isActive = true
+            customImageView.centerYAnchor.constraint(equalTo: contentView.contentView.centerYAnchor, constant: 0).isActive = true
             customImageView.layer.cornerRadius = 40/2.0
 
             
@@ -79,12 +69,12 @@ class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, 
             name.text = Account().name
             let stack = UIStackView(arrangedSubviews: [name, uin])
             stack.axis = .vertical
-            contentView.addSubview(stack)
+            contentView.contentView.addSubview(stack)
             stack.translatesAutoresizingMaskIntoConstraints = false
             stack.leftAnchor.constraint(equalTo: customImageView.rightAnchor, constant: 16).isActive = true
-            stack.centerYAnchor.constraint(equalTo: contentView.centerYAnchor).isActive = true
+            stack.centerYAnchor.constraint(equalTo: contentView.contentView.centerYAnchor).isActive = true
             
-            contentView.addSubview(settingsButton)
+            contentView.contentView.addSubview(settingsButton)
             if #available(iOS 13.0, *) {
                 settingsButton.setBackgroundImage(UIImage(systemName: "gear"), for: .normal)
             } else {
@@ -92,10 +82,10 @@ class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, 
                 settingsButton.setBackgroundImage(UIImage(named: "Settings-44"), for: .normal)
             }
             settingsButton.translatesAutoresizingMaskIntoConstraints = false
-            settingsButton.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -8).isActive = true
+            settingsButton.rightAnchor.constraint(equalTo: contentView.contentView.rightAnchor, constant: -8).isActive = true
             settingsButton.heightAnchor.constraint(equalToConstant: 24).isActive = true
             settingsButton.widthAnchor.constraint(equalTo: settingsButton.heightAnchor, multiplier: 1).isActive = true
-            settingsButton.centerYAnchor.constraint(equalTo: contentView.centerYAnchor).isActive = true
+            settingsButton.centerYAnchor.constraint(equalTo: contentView.contentView.centerYAnchor).isActive = true
         }
         
         required init?(coder: NSCoder) {
@@ -141,34 +131,20 @@ class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, 
         super.viewDidLoad()
         
         // Do any additional setup after loading the view.
-        #if targetEnvironment(macCatalyst)
-        splitViewController?.primaryBackgroundStyle = .sidebar
-        #endif
-        
-        let horizontalDimension = max(UIScreen.main.bounds.size.width, UIScreen.main.bounds.size.height)
-        let sidebarWidth = min(180, ceil(horizontalDimension * 0.2))
-        
-        splitViewController?.minimumPrimaryColumnWidth = sidebarWidth
-        splitViewController?.maximumPrimaryColumnWidth = sidebarWidth
-        
-        if splitViewController?.viewControllers.count ?? 0 > 1, let rightSplit = splitViewController?.viewControllers[1] as? UISplitViewController {
-            rightSplit.preferredDisplayMode = .allVisible
-            rightSplit.minimumPrimaryColumnWidth = sidebarWidth
-            rightSplit.maximumPrimaryColumnWidth = sidebarWidth + 80
-        }
 
         view.addSubview(avatarView)
         avatarView.translatesAutoresizingMaskIntoConstraints = false
-        avatarView.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 4).isActive = true
-        avatarView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -4).isActive = true
+        avatarView.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor, constant: 4).isActive = true
+        avatarView.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor, constant: -4).isActive = true
         avatarView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
         avatarView.heightAnchor.constraint(equalToConstant: 50).isActive = true
         avatarView.customImageView.addTarget(self, action: #selector(handleAvatarViewTap(_:)), for: .touchUpInside)
         avatarView.settingsButton.addTarget(self, action: #selector(handleAvatarViewSettingsGearClick(_:)), for: .touchUpInside)
 
-        view.addSubview(upperTableView)
+        view.insertSubview(upperTableView, belowSubview: avatarView)
         
         upperTableView.showsVerticalScrollIndicator = false
+        upperTableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
         upperTableView.showsHorizontalScrollIndicator = false
         upperTableView.separatorStyle = .none
         upperTableView.rowHeight = 40
@@ -182,20 +158,54 @@ class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, 
             upperTableView.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 4),
             upperTableView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -4),
             upperTableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
-            upperTableView.bottomAnchor.constraint(equalTo: avatarView.topAnchor, constant: 0)
+            upperTableView.bottomAnchor.constraint(equalTo: avatarView.bottomAnchor, constant: 0)
         ])
         
         NotificationCenter.default.addObserver(self, selector: #selector(handleUserLoggedIn(_:)), name: .SAUserLoggedInNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleUserLoggedOut(_:)), name: .SAUserLoggedOutNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleUserPreferenceChange(_:)), name: .SAUserPreferenceChangedNotification, object: nil)
         
+        navigationItem.leftBarButtonItems = [
+            UIBarButtonItem(barButtonSystemItem: .compose, target: self, action: #selector(toolbarActionCompose(sender:))),
+            UIBarButtonItem(image: UIImage.imageWithSystemName("arrow.up.arrow.down", fallbackName: "Descending-Sorting"), style: .plain, target: self, action: #selector(toolbarActionChangeOrder(sender:)))
+        ]
         
+        let searchBar = UISearchBar(frame: CGRect(x: 0, y: 0, width: 0, height: 44))
+        searchBar.delegate = self
+        if UIDevice.current.userInterfaceIdiom == .mac {
+            upperTableView.tableHeaderView = searchBar
+        }
         refreshTableViewCompletion(nil)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(true, animated: animated)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleMacKeyCommandPreferences(_:)), name: .macKeyCommandPreferencesPanel, object: nil)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        NotificationCenter.default.removeObserver(self, name: .macKeyCommandPreferencesPanel, object: nil)
+    }
+    
+    @objc func handleMacKeyCommandPreferences(_ sender: AnyObject) {
+        let userActivity = NSUserActivity(activityType: SAActivityType.settings.rawValue)
+        userActivity.isEligibleForHandoff = true
+        userActivity.title = SAActivityType.viewImage.title()
+        userActivity.userInfo = nil
+        let options = UIScene.ActivationRequestOptions()
+        options.requestingScene = view.window?.windowScene
+        UIApplication.shared.requestSceneSessionActivation(AppController.current.findSceneSession(), userActivity: userActivity, options: options) { (error) in
+            os_log("request new scene returned: %@", error.localizedDescription)
+        }
+    }
+        
+    @objc func toolbarActionCompose(sender: UIBarButtonItem) {
+        NotificationCenter.default.post(name: .padToolBarActionCompose, object: self, userInfo: ["barButtonItem":sender])
+    }
+    
+    @objc func toolbarActionChangeOrder(sender: UIBarButtonItem) {
+        NotificationCenter.default.post(name: .padToolBarActionReorder, object: self, userInfo: ["barButtonItem":sender])
     }
     
     func refreshTableViewCompletion(_ completion: ((SALoadingViewController.LoadingResult, NSError?) -> Void)?) {
@@ -255,9 +265,7 @@ class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, 
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if section == CatelystSidebarSectionID.hot.rawValue {
-            return 1
-        } else if section == CatelystSidebarSectionID.forums.rawValue {
+        if section == CatelystSidebarSectionID.forums.rawValue {
             return dataSource.count
         } else {
             return 3
@@ -267,11 +275,7 @@ class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "SidebarCell", for: indexPath) as! SidebarCell
         
-        if indexPath.section == CatelystSidebarSectionID.hot.rawValue {
-            if indexPath.row == 0 {
-                cell.textLabel?.text = "热门"
-            }
-        } else if indexPath.section == CatelystSidebarSectionID.forums.rawValue {
+        if indexPath.section == CatelystSidebarSectionID.forums.rawValue {
             cell.textLabel?.text = dataSource[indexPath.row]["name"] as? String
             if let forumIDStr = dataSource[indexPath.row]["fid"] as? String,
                 let forumID = Int(forumIDStr),
@@ -281,11 +285,11 @@ class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, 
             }
         } else {
             if indexPath.row == 0 {
-                cell.textLabel?.text = "浏览历史"
+                cell.textLabel?.text = NSLocalizedString("RECENTLY_VIEWED", comment: "Recently viewed")
             } else if indexPath.row == 1 {
-                cell.textLabel?.text = "网络收藏夹"
+                cell.textLabel?.text = NSLocalizedString("ONLINE_COLLECTION_TITLE", comment: "Online collection")
             } else if indexPath.row == 2 {
-                cell.textLabel?.text = "观察列表"
+                cell.textLabel?.text = NSLocalizedString("FAVORITE_VC_WATCH_LIST", comment: "Watch list")
             }
             
         }
@@ -293,50 +297,48 @@ class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, 
     }
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        if section == CatelystSidebarSectionID.hot.rawValue {
-            return "热门"
-        } else if section == CatelystSidebarSectionID.forums.rawValue {
-            return "论坛"
+        if section == CatelystSidebarSectionID.forums.rawValue {
+            return NSLocalizedString("FORUM_VC_TITLE", comment: "Forum")
         } else {
-            return "其他"
+            return NSLocalizedString("OTHERS", comment: "Others")
         }
     }
     
     func tableView(_ tableView: UITableView, indentationLevelForRowAt indexPath: IndexPath) -> Int {
-        return 2
+        return 1
+    }
+    
+    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        return UIView()
+    }
+    
+    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        return 0
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard splitViewController?.viewControllers.count ?? 0 > 1, let split = self.splitViewController?.viewControllers[1] as? UISplitViewController else {
-            return
-        }
-        
-        if indexPath.section == CatelystSidebarSectionID.hot.rawValue {
-            let board = SAHotThreadsViewController(url: URL(string: SAGlobalConfig().forum_base_url + "forum.php?mod=forumdisplay&fid=0&mobile=1")!)
-            let navi = SANavigationController(rootViewController: board)
-            split.viewControllers[0] = navi
-        } else if indexPath.section == CatelystSidebarSectionID.forums.rawValue {
+        if indexPath.section == CatelystSidebarSectionID.forums.rawValue {
             let fid = dataSource[indexPath.row]["fid"] as! String
             let url = URL(string: SAGlobalConfig().forum_base_url + "forum.php?mod=forumdisplay&fid=\(fid)&mobile=1")!
             let board = SABoardViewController(url: url)
             let navi = SANavigationController(rootViewController: board)
-            split.viewControllers[0] = navi
+            splitViewController?.setViewController(navi, for: .supplementary)
         } else if indexPath.section == CatelystSidebarSectionID.others.rawValue {
             if indexPath.row == 0 {
                 let vc = SAFavouriteBoardsViewController()
                 vc.segmentedControl.selectedSegmentIndex = SAFavouriteBoardsViewController.SegmentedControlIndex.recent.rawValue
                 let navi = SANavigationController(rootViewController: vc)
-                split.viewControllers[0] = navi
+                splitViewController?.setViewController(navi, for: .supplementary)
             } else if indexPath.row == 1 {
                 let vc = SAFavouriteBoardsViewController()
                 vc.segmentedControl.selectedSegmentIndex = SAFavouriteBoardsViewController.SegmentedControlIndex.thread.rawValue
                 let navi = SANavigationController(rootViewController: vc)
-                split.viewControllers[0] = navi
+                splitViewController?.setViewController(navi, for: .supplementary)
             } else if indexPath.row == 2 {
                 let vc = SAFavouriteBoardsViewController()
                 vc.segmentedControl.selectedSegmentIndex = SAFavouriteBoardsViewController.SegmentedControlIndex.watchList.rawValue
                 let navi = SANavigationController(rootViewController: vc)
-                split.viewControllers[0] = navi
+                splitViewController?.setViewController(navi, for: .supplementary)
             }
         }
     }
@@ -365,10 +367,6 @@ class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, 
             return
         }
         
-        guard splitViewController?.viewControllers.count ?? 0 > 1, let split = self.splitViewController?.viewControllers[1] as? UISplitViewController else {
-            return
-        }
-        
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         alert.addAction(UIAlertAction(title: NSLocalizedString("SURE", comment: "Sure"), style: .cancel, handler: nil))
         
@@ -381,7 +379,7 @@ class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, 
             let page = SAAccountInfoViewController(url: URL(string: url)!)
             page.isAccountManager = true
             let navi = SANavigationController(rootViewController: page)
-            split.viewControllers[1] = navi
+            self.splitViewController?.setViewController(navi, for: .secondary)
         }))
         
         if !Account().hasCheckedInToday {
@@ -407,7 +405,7 @@ class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, 
             }
             let vc = SAMessageInboxViewController()
             let navi = SANavigationController(rootViewController: vc)
-            split.viewControllers[1] = navi
+            self.splitViewController?.setViewController(navi, for: .secondary)
         }))
         
         alert.addAction(UIAlertAction(title: NSLocalizedString("ACCOUNT_VC_MY_THREADS", comment: "Threads"), style: .default, handler: { (action) in
@@ -417,7 +415,7 @@ class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, 
             }
             let vc = AppController.current.createMyThreadsPage()
             let navi = SANavigationController(rootViewController: vc)
-            split.viewControllers[1] = navi
+            self.splitViewController?.setViewController(navi, for: .secondary)
         }))
         
         alert.addAction(UIAlertAction(title: NSLocalizedString("ACCOUNT_VC_MY_NOTICES", comment: "Notices"), style: .default, handler: { (action) in
@@ -427,19 +425,19 @@ class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, 
             }
             let vc = SAUserNoticeViewController()
             let navi = SANavigationController(rootViewController: vc)
-            split.viewControllers[1] = navi
+            self.splitViewController?.setViewController(navi, for: .secondary)
         }))
         
         alert.addAction(UIAlertAction(title: NSLocalizedString("ACCOUNT_VC_BLACKLIST", comment: "Blocked"), style: .default, handler: { (action) in
             let vc = SABlockedListConfigureViewController()
             let navi = SANavigationController(rootViewController: vc)
-            split.viewControllers[1] = navi
+            self.splitViewController?.setViewController(navi, for: .secondary)
         }))
         
         alert.addAction(UIAlertAction(title: NSLocalizedString("ACCOUNT_VC_ABOUT", comment: "Abount"), style: .default, handler: { (action) in
             let vc = SAAboutViewController()
             let navi = SANavigationController(rootViewController: vc)
-            split.viewControllers[1] = navi
+            self.splitViewController?.setViewController(navi, for: .secondary)
         }))
         
         alert.addAction(UIAlertAction(title: NSLocalizedString("ACCOUNT_VC_LOG_OUT", comment: "Log out"), style: .destructive, handler: { (action) in
@@ -452,6 +450,15 @@ class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, 
     }
     
     @objc func handleAvatarViewSettingsGearClick(_ sender: UIButton) {
+        if UIDevice.current.userInterfaceIdiom == .mac {
+            let macCatalystExtensionBundlePath = Bundle.main.builtInPlugInsPath! + "/CatalystExtension.bundle"
+            let bundle = Bundle.init(path: macCatalystExtensionBundlePath)!
+            if let cls = bundle.principalClass as? NSObject.Type {
+                cls.perform(NSSelectorFromString("runCommand:context:"), with: "ShowSettingsWindow", with: nil)
+            }
+            return
+        }
+        
         if #available(iOS 13.0, *) {
             if UIApplication.shared.supportsMultipleScenes && (Account().preferenceForkey(.enable_multi_windows, defaultValue: false as AnyObject) as! Bool) {
                 let userActivity = NSUserActivity(activityType: SAActivityType.settings.rawValue)
@@ -461,7 +468,7 @@ class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, 
                 let options = UIScene.ActivationRequestOptions()
                 options.requestingScene = view.window?.windowScene
                 UIApplication.shared.requestSceneSessionActivation(AppController.current.findSceneSession(), userActivity: userActivity, options: options) { (error) in
-                    sa_log_v2("request new scene returned: %@", error.localizedDescription)
+                    os_log("request new scene returned: %@", error.localizedDescription)
                 }
             } else {
                 let navi = UIStoryboard(name: "Settings", bundle: nil).instantiateInitialViewController() as! UINavigationController

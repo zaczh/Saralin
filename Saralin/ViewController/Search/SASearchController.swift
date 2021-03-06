@@ -33,7 +33,7 @@ class SASearchController: SABaseViewController {
     let searchBar = UISearchBar(frame: .zero)
 
     deinit {
-        sa_log_v2("SASearchController deinit")
+        os_log("SASearchController deinit")
     }
     
     override func viewDidLoad() {
@@ -97,7 +97,7 @@ class SASearchController: SABaseViewController {
         let resultController = searchResultsController
         
         guard !keyword.isEmpty else {
-            sa_log_v2("keyword isEmpty", module: .search, type: .info)
+            os_log("keyword isEmpty", log: .search, type: .info)
             searchingTimer?.fireDate = Date.distantFuture
             resultController.data.removeAll()
             resultController.localData.removeAll()
@@ -106,7 +106,7 @@ class SASearchController: SABaseViewController {
         }
         
         if currentSearchingKeyword == keyword {
-            sa_log_v2("keyword same", module: .search, type: .info)
+            os_log("keyword same", log: .search, type: .info)
             return
         }
         resultController.loadingController.setLoading()
@@ -115,12 +115,12 @@ class SASearchController: SABaseViewController {
     }
     
     @objc func searchingTimerFired(_ timer: Timer) {
-        sa_log_v2("searchingTimerFired", module: .search, type: .info)
+        os_log("searchingTimerFired", log: .search, type: .info)
         searchingTimer?.fireDate = Date.distantFuture
         let resultController = searchResultsController
         guard let keyword = currentSearchingKeyword else { return }
         saveSearchHistory(keyword)
-        sa_log_v2("begin searching keyword: %@", module: .search, type: .info, keyword)
+        os_log("begin searching keyword: %@", log: .search, type: .info, keyword)
         let group = DispatchGroup()
         if resultType == .onlineGlobalSearch {
             // only online searching needs show this
@@ -132,7 +132,7 @@ class SASearchController: SABaseViewController {
                 }
                 
                 guard let self = self else {
-                    sa_log_v2("self is nil, searching canceled", module: .search, type: .error)
+                    os_log("self is nil, searching canceled", log: .search, type: .error)
                     return
                 }
                 
@@ -142,16 +142,16 @@ class SASearchController: SABaseViewController {
                 }
                 
                 guard let result = result else {
-                    sa_log_v2("Error occurs when doing search", module: .search, type: .error)
+                    os_log("Error occurs when doing search", log: .search, type: .error)
                     return
                 }
                 
                 if self.currentSearchingKeyword != keyword {
-                    sa_log_v2("currentSearchingKeyword not match", module: .search, type: .error)
+                    os_log("currentSearchingKeyword not match", log: .search, type: .error)
                     return
                 }
                 resultController.data = result
-                sa_log_v2("finished online searching: %@", module: .search, type: .info, keyword)
+                os_log("finished online searching: %@", log: .search, type: .info, keyword)
             }
         } else {
             group.enter()
@@ -161,7 +161,7 @@ class SASearchController: SABaseViewController {
                 }
                 
                 guard error == nil, let result = result else {
-                    sa_log_v2("Error occurs when doing search")
+                    os_log("Error occurs when doing search")
                     return
                 }
                 
@@ -169,7 +169,7 @@ class SASearchController: SABaseViewController {
                     return
                 }
                 resultController.localData = result
-                sa_log_v2("finished local searching: %@", module: .search, type: .info, keyword)
+                os_log("finished local searching: %@", log: .search, type: .info, keyword)
             }
         }
         
@@ -263,7 +263,13 @@ extension SASearchController: UISearchBarDelegate {
 extension SASearchController: SASearchResultViewControllerDelegate {
     func searchResultViewController(_ searchResultViewController: SASearchResultViewController, didSelectSearchResultURL url: URL) {
         if let vc = SAContentViewController.viewControllerForURL(url: url, sender: self) {
-            splitViewController?.showDetailViewController(vc, sender: self)
+            if splitViewController!.isCollapsed {
+                navigationController?.pushViewController(vc, animated: true)
+            } else {
+                // wrap with a navigation so that new secondary vc replacing old one.
+                let navi = SANavigationController(rootViewController: vc)
+                splitViewController?.setViewController(navi, for: .secondary)
+            }
         }
     }
     
@@ -308,7 +314,8 @@ extension SASearchController: SASearchResultViewControllerDelegate {
             previous_list.append(contentsOf: now_list)
             data["results"] = previous_list as AnyObject
             
-            resultController.fetchingMoreAction = { () in
+            resultController.fetchingMoreAction = { (vc) in
+                let resultController = vc as! SASearchResultViewController
                 if resultController.resultType == .localViewHistory {
                     resultController.isFetchingMoreFailed = false
                     resultController.isFetchingMoreThreads = false

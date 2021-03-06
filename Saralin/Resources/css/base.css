@@ -21,6 +21,12 @@ div {
     text-align: unset !important;
 }
 
+span[style] {
+    float:unset !important;
+    margin-left:unset !important;
+    margin-right:unset !important;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", sans-serif !important;
     font-size: ${normal-font-size} !important;
@@ -30,7 +36,6 @@ body {
 }
 
 .content_body {
-    padding: ${body-padding};
     background-color: ${foreground-color};
     ${ipad-body-style}
 }
@@ -42,9 +47,12 @@ body {
 
 font {
     background-color: transparent !important;
-    color: unset !important;
     font-family: unset !important;
     font-size: unset !important;
+}
+
+hr {
+    display:none;
 }
 
 ul {
@@ -56,8 +64,7 @@ li {
 }
 
 a {
-    color: ${link-color};
-    text-decoration: none;
+    color: unset;
 }
 
 a img {
@@ -65,11 +72,20 @@ a img {
     border: 0px none;
 }
 
+a font {
+    color: unset !important;
+}
+
+blockquote font {
+    color: unset !important;
+}
+
 img.sa_avatar {
     margin-top: 0;
     margin-bottom: 0;
     height:100%;
     object-fit: cover;
+    border-radius:2px;
 }
 
 img {
@@ -85,39 +101,53 @@ img {
     margin-bottom: 10px;
 }
 
-.post {
-    height: ${reply-header-height};
-    border-top: 1px solid ${table-cell-seperator-color};
+div.post_header {
+    color: ${block-quote-text-color};
+    height: 40pt;
     padding-top: 10px;
+    padding-left:15px;
+    padding-right:15px;
+    font-size: ${small-font-size};
 }
 
 .loading {
-    height: 40px;
+    height: 20px;
     padding-top: 10px;
+    background-color: ${background-color};
 }
 
 .bm_h {
     font-weight: bold;
 }
 
+span.edit_time {
+    color:red;
+}
+
 .avatar {
     float:left;
-    width: ${reply-header-height};
-    height: ${reply-header-height};
-    border-radius: 50%;
+    width: 35pt;
+    height: 35pt;
     overflow: hidden;
     display: ${avatar-display-style};
     margin-right: 10px;
 }
 
 .pbody {
-    width:100%;
+    padding-left:15px;
+    padding-right:15px;
     padding-top:10px;
     padding-bottom: 10px;
-    overflow: hidden;
+}
+
+div.seperator_line {
+    height:0.5px;
+    background-color:${table-cell-seperator-color};
+    margin-left:15px;
 }
 
 .post_wrapper {
+    overflow:hidden;
     position: relative;
     background-color: ${foreground-color};
 }
@@ -134,17 +164,27 @@ div.block_overlay {
     display: none;
 }
 
-span.blocked_author_name {
-    color: red;
+div.post_footer {
+    color: ${block-quote-text-color};
+    margin-top:4px;
+    margin-bottom:10px;
+    padding-left:15px;
+    padding-right:15px;
+    font-size: ${small-font-size};
+    height:1em;
+}
+
+span.span_padding {
+    margin-right:10px;
 }
 
 .post_title {
+    padding:15px;
 }
 
 .bm_user {
-    position: relative;
     float:left;
-    font-weight: 500;
+    width:150px;
 }
 
 .bm_user.dm {
@@ -158,23 +198,12 @@ span.blocked_author_name {
     color: #b055c2;
 }
 
-.bm_user.floor {
-    top: 0;
-    margin-left: 0;
-    width: 100%;
-}
-
-.post_footer {
-    height:20px;
-    font-size: ${small-font-size};
-}
-
-.post_footer_time {
-    float:left;
-}
-
-.post_footer_reply {
+.float_right {
     float:right;
+}
+
+.float_left {
+    float:left;
 }
 
 .wp {
@@ -194,6 +223,10 @@ div.attachmenttitle {
     text-decoration: underline;
 }
 
+.footer-error-info {
+    margin:1em;
+}
+
 .bm_inf {
     margin-top: 10px;
     position:relative;
@@ -202,7 +235,7 @@ div.attachmenttitle {
 
 i.pstatus {
     display: block;
-    font-weight: 800;
+    font-size: ${small-font-size};
 }
 
 .bm_c .bm_user {
@@ -219,19 +252,12 @@ img.center {
 blockquote {
     margin-top: 10px;
     margin-bottom: 10px;
-    padding: 0.25em 16px;
-    color: ${block-quote-text-color};
-    background: ${block-quote-background-color};
-    border-left: 2px  ${block-quote-text-color} solid;
+    padding-left: 10px;
+    border-left: 2px  ${text-color} solid;
 }
 
 fieldset {
     padding:10px;
-}
-
-blockquote a {
-    color: ${block-quote-text-color};
-    text-decoration: underline;
 }
 
 div.loadMoreRetry {
@@ -248,14 +274,7 @@ img[smileid], img[smilieid] {
     display:inline-block;
     margin-top: 0px;
     margin-bottom: 0px;
-}
-
-blockquote font {
-    color: ${block-quote-text-color} !important;
-}
-
-blockquote a font {
-    color: ${block-quote-text-color} !important;
+    height:1em;
 }
 
 input {
@@ -268,8 +287,8 @@ progress.poll {
     width:60%;
 }
 
-span.xg1 > a {
-    color: #2f9299;
+span.xg1 {
+    color: ${text-color};
 }
 
 .expandArrow {
@@ -288,9 +307,9 @@ span.xg1 > a {
 }
 
 .activityIndicator {
-    height: 30px;
-    width: 30px;
-    background-size: 30px 30px;
+    height: 20px;
+    width: 20px;
+    background-size: 20px 20px;
     margin: 0px auto;
     background-image: url("loading.gif");
     filter: invert(${icon-invert-percent});

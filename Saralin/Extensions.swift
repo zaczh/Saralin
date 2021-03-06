@@ -89,12 +89,15 @@ extension UIViewController: SAViewControllerTheming {
         if !needsUpdateTheme {
             return
         }
-        // do the actually updating themes
-        if isViewLoaded {
-            updatingTheme(for: view, theme: newTheme)
+        
+        if !isViewLoaded {
+            return
         }
         
+        // do the actually updating themes
+        updatingTheme(for: view, theme: newTheme)
         needsUpdateTheme = false
+        
         for vc in children {
             vc.needsUpdateTheme = true
             vc.viewThemeDidChange(newTheme)
@@ -122,16 +125,20 @@ extension UIViewController: SAViewControllerTheming {
             return
         }
         
-        // do the actually updating font
-        if isViewLoaded {
-            updatingFont(for: view, theme: newTheme)
+        if !isViewLoaded {
+            return
         }
         
+        // do the actually updating font
+        updatingFont(for: view, theme: newTheme)
         needsUpdateFont = false
+        
         for vc in children {
             vc.needsUpdateFont = true
-            vc.viewFontDidChange(newTheme)
-            vc.needsUpdateFont = false
+            if vc.isViewLoaded {
+                vc.viewFontDidChange(newTheme)
+                vc.needsUpdateFont = false
+            }
         }
     }
     
@@ -236,4 +243,118 @@ extension UIViewController: SAViewControllerLoading {
         }
     }
     var loadingView: UIView {return loadingController.view}
+}
+
+
+extension UIImageView {
+    static var saImageViewLoadingTasks: [URLSessionDataTask] = []
+    static let saImageViewLoadingTasksLock = NSLock()
+    static var kSAImageURLKey = ""
+    private var saImageURLKey: URL? {
+        get {
+            return objc_getAssociatedObject(self, &UIImageView.kSAImageURLKey) as? URL
+        }
+        set {
+            objc_setAssociatedObject(self, &UIImageView.kSAImageURLKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+    
+    private func sa_set(image: UIImage, for url: URL) {
+        if self.saImageURLKey == url {
+            self.image = image
+        } else {
+            os_log("image changed", log:.network)
+        }
+    }
+    
+    func sa_setImage(with url: URL?) {
+        guard let url = url else {
+            self.image = nil
+            saImageURLKey = nil
+            return
+        }
+        
+        saImageURLKey = url
+        
+        let request = URLRequest(url: url)
+        if let cached = URLCache.shared.cachedResponse(for: request) {
+            let data = cached.data
+            let response = cached.response as! HTTPURLResponse
+            if let image = UIImage(data: data) {
+                dispatch_async_main { [weak self] in
+                    self?.sa_set(image: image, for: url)
+                }
+                return
+            }
+            
+            if response.statusCode == 301,
+                let location = response.allHeaderFields["Location"] as? String,
+                let locationURL = URL(string: location) {
+                let request = URLRequest(url: locationURL)
+                if let cached = URLCache.shared.cachedResponse(for: request) {
+                    let data = cached.data
+                    if let image = UIImage(data: data) {
+                        dispatch_async_main { [weak self] in
+                            self?.sa_set(image: image, for: url)
+                        }
+                        return
+                    }
+                }
+            }
+            
+            URLCache.shared.removeCachedResponse(for: request)
+            os_log("cached response corrupted, remove it. task: %@.", log:.network, url.absoluteString)
+        }
+        
+        UIImageView.saImageViewLoadingTasksLock.lock()
+        for task in UIImageView.saImageViewLoadingTasks {
+            guard let taskUrl = task.originalRequest?.url else {
+                continue
+            }
+            if taskUrl == url {
+                UIImageView.saImageViewLoadingTasksLock.unlock()
+                return
+            }
+        }
+        UIImageView.saImageViewLoadingTasksLock.unlock()
+        os_log("new task: %@", log:.network, url.absoluteString)
+        let session = URLSession(configuration: URLSessionConfiguration.default)
+        let task = session.dataTask(with: url) { [weak self] (data, response, error) in
+            UIImageView.saImageViewLoadingTasksLock.lock()
+            UIImageView.saImageViewLoadingTasks.removeAll { (task) -> Bool in
+                guard let taskUrl = task.originalRequest?.url else {
+                    return false
+                }
+                return taskUrl == url
+            }
+            UIImageView.saImageViewLoadingTasksLock.unlock()
+
+            guard error == nil else {
+                os_log("task failed: %@", log:.network, error!.localizedDescription)
+                return
+            }
+            
+            guard let data = data, let response = response, let responseURL = response.url else {
+                os_log("task no data or response: %@", log:.network, url.absoluteString)
+                return
+            }
+            
+            guard let image = UIImage(data: data) else {
+                os_log("task no image: %@", log:.network, url.absoluteString)
+                return
+            }
+            
+            let request = URLRequest(url: responseURL)
+            let cached = CachedURLResponse.init(response: response, data: data, userInfo: nil, storagePolicy: .allowedInMemoryOnly)
+            URLCache.shared.storeCachedResponse(cached, for: request)
+            
+            dispatch_async_main {
+                self?.sa_set(image: image, for: url)
+            }
+        }
+        task.resume()
+        UIImageView.saImageViewLoadingTasksLock.lock()
+        UIImageView.saImageViewLoadingTasks.append(task)
+        UIImageView.saImageViewLoadingTasksLock.unlock()
+    }
 }

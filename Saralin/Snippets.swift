@@ -21,3 +21,13 @@ func imageFrom(color: UIColor, size: CGSize) -> UIImage {
     UIGraphicsEndImageContext()
     return newImage
 }
+
+
+#if targetEnvironment(macCatalyst)
+func getToolBarItemRightOffset(_ toolbarItem: NSToolbarItem) -> CGFloat {
+    let visibleItems = toolbarItem.toolbar!.visibleItems!
+    let index = visibleItems.firstIndex(where: {$0 == toolbarItem})!
+    let offset = index.distance(to: visibleItems.count)
+    return CGFloat(offset) * (SAToolbarItemWidth + SAToolbarItemSpacing)
+}
+#endif

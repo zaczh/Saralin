@@ -60,10 +60,10 @@ class SAContentViewController: SABaseViewController, WKNavigationDelegate, SFSaf
         webView.navigationDelegate = self
         view.insertSubview(webView, at: 0)
         webView.translatesAutoresizingMaskIntoConstraints = false
-        webView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
-        webView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
-        webView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
-        webView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        webView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
+        webView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
+        webView.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor).isActive = true
+        webView.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor).isActive = true
         
         let globalConfig = SAGlobalConfig()
         if shouldSetDesktopBrowserUserAgent {
@@ -82,7 +82,8 @@ class SAContentViewController: SABaseViewController, WKNavigationDelegate, SFSaf
         loadingProgressView.rightAnchor.constraint(equalTo: webView.rightAnchor).isActive = true
         loadingProgressView.topAnchor.constraint(equalTo: webView.topAnchor).isActive = true
         loadingProgressView.heightAnchor.constraint(equalToConstant: 1).isActive = true
-        
+        loadingProgressView.isHidden = true
+
         guard let url = url, automaticallyLoadsURL else {
             return
         }
@@ -153,7 +154,7 @@ class SAContentViewController: SABaseViewController, WKNavigationDelegate, SFSaf
             }
             
             guard error == nil else {
-                sa_log_v2("wrong data from url: %@", module: .ui, type: .debug, strongSelf.url!.absoluteString)
+                os_log("wrong data from url: %@", log: .ui, type: .debug, strongSelf.url!.absoluteString)
                 return
             }
             
@@ -168,7 +169,7 @@ class SAContentViewController: SABaseViewController, WKNavigationDelegate, SFSaf
     // MARK: - KVO
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         guard (object as? WKWebView) == webView else {
-            sa_log_v2("I am not observing this keyPath!", module: .ui, type: .debug)
+            os_log("I am not observing this keyPath!", log: .ui, type: .debug)
             super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
             return
         }
@@ -223,7 +224,7 @@ class SAContentViewController: SABaseViewController, WKNavigationDelegate, SFSaf
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         
         if let url = navigationAction.request.url {
-            sa_log_v2("decidePolicyForNavigationAction: %@", module: .ui, type: .debug, url.absoluteString)
+            os_log("decidePolicyForNavigationAction: %@", log: .ui, type: .debug, url.absoluteString)
         }
         
         guard navigationAction.request.url != nil else {
@@ -234,7 +235,7 @@ class SAContentViewController: SABaseViewController, WKNavigationDelegate, SFSaf
         if navigationAction.navigationType != .linkActivated {
             if let frame = navigationAction.targetFrame, !frame.isMainFrame, let url = navigationAction.request.url, url.sa_isExternal() {
                 decisionHandler(.cancel)
-                sa_log_v2("cancel external requests: %@", module: .ui, type: .debug, url.absoluteString)
+                os_log("cancel external requests: %@", log: .ui, type: .debug, url.absoluteString)
                 return
             }
             
@@ -261,7 +262,7 @@ class SAContentViewController: SABaseViewController, WKNavigationDelegate, SFSaf
 
         if navigationAction.request.url!.sa_isExternal() {
             guard presentedViewController == nil else {
-                sa_log_v2("Cannot present two view controllers at same time!")
+                os_log("Cannot present two view controllers at same time!")
                 return
             }
             
@@ -312,7 +313,7 @@ class SAContentViewController: SABaseViewController, WKNavigationDelegate, SFSaf
     }
     
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        sa_log_v2("didFailNavigation")
+        os_log("didFailNavigation")
         //do nothing
     }
     
@@ -324,14 +325,14 @@ class SAContentViewController: SABaseViewController, WKNavigationDelegate, SFSaf
     
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         //do nothing
-        sa_log_v2("webView did finish load", module: .webView, type: .info)
+        os_log("webView did finish load", log: .webView, type: .info)
     }
     
     // Sometimes when app awake from background, webview display a blank page.
     // This is because the web process has been terminated by system.
     // We need to refresh page if this happends
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
-        sa_log_v2("web process has been terminated")
+        os_log("web process has been terminated")
         let error = NSError.init(domain: SAGeneralErrorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey:"Web进程已终止。"])
         loadingController.setFailed(with: error)
     }
@@ -342,10 +343,10 @@ class SAContentViewController: SABaseViewController, WKNavigationDelegate, SFSaf
     }
     
     func openUsingSharedApplication(_ url: Foundation.URL) {
-        sa_log_v2("open url with shared application", module: .ui, type: .info)
+        os_log("open url with shared application", log: .ui, type: .info)
         if #available(iOS 10.0, *) {
             UIApplication.shared.open(url, options: [:], completionHandler: { (success: Bool) in
-                sa_log_v2("open result: %d", module: .ui, type: .info, success as CVarArg)
+                os_log("open result: %d", log: .ui, type: .info, success as CVarArg)
             })
         } else {
             // Fallback on earlier versions
@@ -416,7 +417,11 @@ class SAContentViewController: SABaseViewController, WKNavigationDelegate, SFSaf
         } else if mode == "redirect" {
             if let goto = url.sa_queryString("goto") {
                 if goto == "findpost" {
-                    return SAThreadContentViewController(url: url)
+                    guard let ptid = url.sa_queryString("ptid") else {
+                        return nil
+                    }
+                    let newUrl = url.sa_urlByReplacingQuery("tid", value: ptid)
+                    return SAThreadContentViewController(url: newUrl)
                 }
             }
         }

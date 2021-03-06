@@ -63,7 +63,7 @@ int main(int argc, const char * argv[]) {
         }];
         
         NSDictionary *dict = @{@"version":@"1.0",@"items":plist};
-        [dict writeToFile:[NSString stringWithFormat:@"%@/emoji.plist", rootPath] atomically:YES];
+        [dict writeToFile:[NSString stringWithFormat:@"%@/Mahjong/emoji.plist", rootPath] atomically:YES];
     }
     return 0;
 }

@@ -34,7 +34,7 @@ class BottomRefreshView: UIView {
         NSLayoutConstraint(item: stackView!, attribute: .centerX, relatedBy: .equal, toItem: self, attribute: .centerX, multiplier: 1.0, constant: 0).isActive = true
         NSLayoutConstraint(item: stackView!, attribute: .centerY, relatedBy: .equal, toItem: self, attribute: .centerY, multiplier: 1.0, constant: 0).isActive = true
         
-        loadingView = UIActivityIndicatorView(style: UIActivityIndicatorView.Style.white)
+        loadingView = UIActivityIndicatorView(style: UIActivityIndicatorView.Style.medium)
         loadingView.startAnimating()
         stackView.addArrangedSubview(loadingView)
         

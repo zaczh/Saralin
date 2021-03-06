@@ -9,13 +9,7 @@
 import UIKit
 import os.log
 
-enum SALogType : Int {
-    case `default` = 0
-    case debug = 1
-    case info = 2
-    case error = 3
-    case fault = 4
-    
+extension OSLogType {
     func toString() -> String {
         switch self {
         case .`default`:
@@ -28,62 +22,62 @@ enum SALogType : Int {
             return "Error"
         case .fault:
             return "Fault"
+        default:
+            return "Default"
         }
     }
     
-    @available(iOS 10.0, *)
-    func toOSLogType() -> OSLogType {
+    static let allTypes: [OSLogType] = [.default, .debug, .info, .error, .fault]
+}
+
+extension OSLog {
+    static let ui = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "UI")
+    static let debugging = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Debugging")
+    static let utility = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Utility")
+    static let network = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Network")
+    static let database = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Database")
+    static let webView = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "WebView")
+    static let account = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Account")
+    static let cookie = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Cookie")
+    static let keychain = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Keychain")
+    static let search = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Search")
+    static let config = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Config")
+    static let cloudkit = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Cloudkit")
+    
+    func getCategory() -> String {
         switch self {
-        case .`default`:
-            return OSLogType.default
-        case .debug:
-            return OSLogType.debug
-        case .info:
-            return OSLogType.info
-        case .error:
-            return OSLogType.error
-        case .fault:
-            return OSLogType.fault
+        case .ui:
+            return "UI"
+        case .utility:
+            return "Utility"
+        case .network:
+            return "Network"
+        case .database:
+            return "Database"
+        case .webView:
+            return "WebView"
+        case .account:
+            return "Account"
+        case .cookie:
+            return "Cookie"
+        case .keychain:
+            return "Keychain"
+        case .search:
+            return "Search"
+        case .config:
+            return "Config"
+        case .cloudkit:
+            return "Cloudkit"
+        default:
+            return "Default"
         }
     }
-    
-    static var allTypes: [SALogType] {
-        return [.default, .debug, .info, .error, .fault]
-    }
 }
 
-enum SALogModule : String {
-    case `default`  = "Default"
-    case ui         = "UI"
-    case utility    = "Utility"
-    case network    = "Network"
-    case database   = "Database"
-    case webView    = "WebView"
-    case account    = "Account"
-    case cookie     = "Cookie"
-    case keychain   = "keychain"
-    case search     = "Search"
-    case config     = "Config"
-    case cloudkit   = "Cloudkit"
-}
-
-@available(iOS 10.0, *)
-private var _logs: [String:OSLog] = [:]
-@available(iOS 10.0, *)
-private func getOSLog(for module: String) -> OSLog {
-    if let log = _logs[module] {
-        return log
-    }
-    
-    let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: module)
-    _logs[module] = log
-    return log
-}
-
-private var _savingLogTypes: [SALogType] = [.info, .error, .fault]
+private var _savingLogTypes: [OSLogType] = [.info, .error, .fault]
 /// Set log types to be saved in file.
 /// - Parameter types: The types of log to be saved in file.
-func setSavingLogTypes(_ types: [SALogType]) {
+func setSavingLogTypes(_ types: [OSLogType]) {
     _logQueue.async {
         _savingLogTypes = types
     }
@@ -113,10 +107,10 @@ private let _pid = ProcessInfo.processInfo.processIdentifier
 ///   - line: line of source code
 ///   - column: column of source code
 ///   - function: calling function of source code
-///   - module: the log module
+///   - log: the os log object
 ///   - type: the log type
 ///   - args: the args
-func sa_log_v2(_ message: StaticString, file: String = #file, line: Int = #line, column: Int = #column, function: String = #function, module: SALogModule = .default, type: SALogType = .debug, _ args: CVarArg...) {
+func sa_save_log(_ message: StaticString, file: String = #file, line: Int = #line, column: Int = #column, function: String = #function, log: OSLog = .default, type: OSLogType = .debug, _ args: CVarArg...) {
     let date = Date()
     var tid: __uint64_t = 0
     pthread_threadid_np(pthread_self(), &tid)
@@ -135,19 +129,11 @@ func sa_log_v2(_ message: StaticString, file: String = #file, line: Int = #line,
         let logFilePath = sa_log_file_directoy + "\(year)\(month)\(day).log"
         let dateStr = "\(year)-\(month)-\(day) \(hour):\(minute):\(second)\(timeZone)"
         let printLog = String.init(format: "|[%@]|%@:%d|%@:%d|%@\n", type.toString(), (file as NSString).lastPathComponent, line, function, column, logContent)
-        if #available(iOS 10.0, *) {
-            let log = getOSLog(for: module.rawValue)
-            os_log("%@", log: log, type: type.toOSLogType(), printLog)
-        } else {
-            // Fallback on earlier versions
-            NSLog("%@", printLog)
-        }
-        
         if !_savingLogTypes.contains(type) {
             return
         }
         
-        let logSaveInfo = String.init(format: "%@|[%d:%d]|[%@]%@", dateStr, _pid, tid, module.rawValue, printLog)
+        let logSaveInfo = String.init(format: "%@|[%d:%d]|[%@]%@", dateStr, _pid, tid, log.getCategory(), printLog)
         guard let logSaveInfoData = logSaveInfo.data(using: .utf8) else {
             os_log("log content illegal")
             return

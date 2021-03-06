@@ -21,6 +21,6 @@
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2020 zaczh. All rights reserved.</string>
 	<key>NSPrincipalClass</key>
-	<string>CatalystExtensionLoader</string>
+	<string>$(PRODUCT_MODULE_NAME).CatalystExtensionLoader</string>
 </dict>
 </plist>

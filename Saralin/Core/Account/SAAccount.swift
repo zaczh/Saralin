@@ -8,7 +8,7 @@
 
 import UIKit
 
-class SAAccount: NSObject, NSCoding {
+class SAAccount: NSObject, NSSecureCoding {
     // keys
     enum Preference : String {
         case useGoogleSearch = "k_user_preferences_useGoogleSearch"
@@ -28,9 +28,11 @@ class SAAccount: NSObject, NSCoding {
         case uses_system_dynamic_type_font = "k_uses_system_dynamic_type_font"
         case automatically_change_theme_to_match_system_appearance = "k_automatically_change_theme_to_match_system_appearance"
         case enable_multi_windows = "k_enable_multi_windows"
-        
+        case enable_pasteboard_monitoring = "k_enable_pasteboard_monitoring"
+        case hot_tab_board_fid = "k_hot_tab_board_fid"
+
         static let changedPreferenceNameKey = "key"
-        static let allPreferences: [Preference] = [.useGoogleSearch, .normalFontSize, .smallFontSize, .language, .save_traffic, .new_threads_order, .theme_id, .theme_id_before_night_switch, .shown_boards_ids, .bodyFontSizeOffset, .thread_view_shows_avatar, .remove_signature_and_last_editing_notice, .forum_tab_default_sub_board_id, .insert_client_signature, .uses_system_dynamic_type_font, .automatically_change_theme_to_match_system_appearance, .enable_multi_windows]
+        static let allPreferences: [Preference] = [.useGoogleSearch, .normalFontSize, .smallFontSize, .language, .save_traffic, .new_threads_order, .theme_id, .theme_id_before_night_switch, .shown_boards_ids, .bodyFontSizeOffset, .thread_view_shows_avatar, .remove_signature_and_last_editing_notice, .forum_tab_default_sub_board_id, .insert_client_signature, .uses_system_dynamic_type_font, .automatically_change_theme_to_match_system_appearance, .enable_multi_windows, .enable_pasteboard_monitoring, .hot_tab_board_fid]
     }
     
     
@@ -73,6 +75,8 @@ class SAAccount: NSObject, NSCoding {
     }
     
     // MARK: - Coding
+    static var supportsSecureCoding: Bool { return true }
+    
     func encode(with aCoder: NSCoder) {
         aCoder.encode(uid, forKey: "uid")
         aCoder.encode(name, forKey: "name")
@@ -108,8 +112,7 @@ class SAAccount: NSObject, NSCoding {
     
     func saveToFile(_ filePath: String) {
         let fileUrl = URL.init(fileURLWithPath: filePath)
-        
-        let data = NSKeyedArchiver.archivedData(withRootObject: self)
+        let data = try! NSKeyedArchiver.archivedData(withRootObject: self, requiringSecureCoding: true)
         try! data.write(to: fileUrl)
     }
     

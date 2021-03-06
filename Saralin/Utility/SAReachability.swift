@@ -16,7 +16,7 @@ func SAReachabilityCallback(_ reachability: SCNetworkReachability, _ flags: SCNe
     
     let m = Unmanaged<SAReachability>.fromOpaque(info).takeUnretainedValue()
     m.updateStatus()
-    sa_log_v2("reachability status changed. isWWAN? %@ isReachable: %@", module: .network, type: .info, m.isWWAN ? "1":"0", m.isReachable ? "1" : "0")
+    os_log("reachability status changed. isWWAN? %@ isReachable: %@", log: .network, type: .info, m.isWWAN ? "1":"0", m.isReachable ? "1" : "0")
 }
 
 /// This class IS thread-safe.

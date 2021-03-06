@@ -9,20 +9,10 @@
 import UIKit
 import WebKit
 
-#if !targetEnvironment(macCatalyst)
-class SAWebLoginViewController: SABaseViewController, UIWebViewDelegate {
-    // use WKWebview with custom cookie handling is such a pain.
-    // in fact, it has never worked.
-    private let webView = UIWebView(frame: .zero)
-    private let loginUrl = URL(string: SAGlobalConfig().login_url)!
-    private let fetchAccountInfoUrl = URL(string: "api/mobile/index.php?module=login", relativeTo: URL(string: SAGlobalConfig().forum_base_url)!)!
-    private let redirectUrls = [URL(string: "forum.php", relativeTo: URL(string: SAGlobalConfig().forum_base_url)!)!,
-                                URL(string: SAGlobalConfig().forum_base_url)!]
-
+class SAWebLoginViewController: SABaseViewController {
+    private var webView: WKWebView!
     private var savedFormRecords: CredentialInfo?
-    
-    private let form_beautify_js = "document.querySelector(\"input[name=cookietime]\").checked=1;document.querySelector(\"input[name=cookietime]\").style.display=\"none\";"
-    
+    private var webViewKvoContext: String?
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -33,7 +23,34 @@ class SAWebLoginViewController: SABaseViewController, UIWebViewDelegate {
             // Fallback on earlier versions
         }
         
-        webView.delegate = self
+        let config = WKWebViewConfiguration()
+        config.processPool = WKProcessPool()
+        config.userContentController.add(SALoginWebviewScriptMessageHandler(viewController: self), name: "login")
+        config.userContentController.addUserScript(WKUserScript.init(source: "" +
+            "var form = document.forms[0];" +
+            "var originalOnsubmit = form.onsubmit;" +
+            "form.querySelector(\"input[name='cookietime']\").checked = true;" +
+            "form.onsubmit = function(e) {" +
+            "var username = form.querySelector(\"input[name='username']\").value;" +
+            "var password = form.querySelector(\"input[name='password']\").value;" +
+            "if (username == null || username.length == 0) {" +
+            "    alert('用户名不能为空');" +
+            "    return false;" +
+            "}" +
+            "if (password == null || password.length == 0) {" +
+            "    alert('密码不能为空');" +
+            "    return false;" +
+            "}" +
+            "var questionid = form.querySelector(\"select[name='questionid']\").value;" +
+            "var answer = form.querySelector(\"input[name='answer']\").value;" +
+            "" +
+            "window.webkit.messageHandlers.login.postMessage({'action':'submit','data':{'username':username,'password':password,'questionid':questionid,'answer':answer}});" +
+            "return originalOnsubmit(e);" +
+            "};", injectionTime: .atDocumentEnd, forMainFrameOnly: true))
+        webView = WKWebView(frame: .zero, configuration: config)
+        webView.customUserAgent = SAGlobalConfig().mobile_useragent_string
+        webView.navigationDelegate = self
+        webView.uiDelegate = self
         webView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(webView)
         if #available(iOS 11.0, *) {
@@ -47,15 +64,42 @@ class SAWebLoginViewController: SABaseViewController, UIWebViewDelegate {
             webView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
             webView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
         }
-        
-        let leftItem = UIBarButtonItem(title: NSLocalizedString("CLOSE", comment: "关闭"), style: .plain, target: self, action: #selector(SAWebLoginViewController.handleCloseButtonItemClick(_:)))
-        navigationItem.leftBarButtonItems = [leftItem]
+
         let rightItem = UIBarButtonItem(title: NSLocalizedString("REGISTER", comment: "注册"), style: .plain, target: self, action: #selector(SAWebLoginViewController.handleRegisterButtonItemClicked(_:)))
         navigationItem.rightBarButtonItems = [rightItem]
         title = NSLocalizedString("LOGIN", comment: "Login")
         
-        let request = URLRequest(url: loginUrl)
-        webView.loadRequest(request)
+        os_log("delete account cookie before doing login", log: .account, type: .info)
+        AppController.current.getService(of: SAAccountManager.self)!.logoutCurrentActiveAccount {
+            self.reloadWebPage()
+        }
+    }
+    
+    private var doCheckingWhenLoadingFinished = false
+    private func reloadWebPage() {
+        doCheckingWhenLoadingFinished = false
+        title = NSLocalizedString("LOGIN", comment: "Login")
+        navigationItem.leftBarButtonItems = nil
+        let loginUrl = URL(string: SAGlobalConfig().login_url)!
+        webView.load(URLRequest.init(url: loginUrl))
+    }
+    
+    override func didMove(toParent parent: UIViewController?) {
+        super.didMove(toParent: parent)
+        if parent != nil {
+            if webViewKvoContext == nil {
+                webViewKvoContext = ""
+                webView.addObserver(self, forKeyPath: #keyPath(WKWebView.isLoading), options: [.new], context: &webViewKvoContext)
+            }
+        } else {
+            if webViewKvoContext != nil {
+                webView.removeObserver(self, forKeyPath: #keyPath(WKWebView.isLoading), context: &webViewKvoContext)
+            }
+        }
+    }
+    
+    deinit {
+        os_log("[Login Web] deinit", log: .ui, type: .info)
     }
 
     override func didReceiveMemoryWarning() {
@@ -63,118 +107,110 @@ class SAWebLoginViewController: SABaseViewController, UIWebViewDelegate {
         // Dispose of any resources that can be recreated.
     }
     
-    private func getUserInfoFailed() {
-        
+    private func loginFailed() {
+        let alert = UIAlertController(title: "", message: "登录失败，请重试", preferredStyle: .alert)
+        alert.popoverPresentationController?.sourceView = webView
+        alert.popoverPresentationController?.sourceRect = webView.bounds
+        alert.popoverPresentationController?.permittedArrowDirections = [.up]
+        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "OK"), style: .cancel, handler: { (action) in
+            self.reloadWebPage()
+        }))
+        navigationController?.present(alert, animated: true, completion: nil)
     }
     
-    fileprivate func loginFinished() {
+    fileprivate func loginSucceeded() {
         let viewController = navigationController?.presentingViewController
         viewController?.dismiss(animated: true, completion: nil)
     }
     
-    private func recordFormInfo() -> Bool {
-        guard let username = webView.stringByEvaluatingJavaScript(from: "document.querySelector('input[name=\"username\"]').value"), !username.isEmpty,
-            let password = webView.stringByEvaluatingJavaScript(from: "document.querySelector('input[name=\"password\"]').value"), !password.isEmpty else {
-                return false
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        guard context == &webViewKvoContext else {
+            super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
+            return
         }
         
-        // these fields are optional
-        let _ = webView.stringByEvaluatingJavaScript(from: "document.querySelector('select[name=\"questionid\"]').value")
-        let _ = webView.stringByEvaluatingJavaScript(from: "document.querySelector('input[name=\"answer\"]').value")
+        guard let change = change, let isLoading = change[.newKey] as? Bool else {
+            return
+        }
         
-        savedFormRecords = CredentialInfo(username: username, password: password)
-        return true
+        guard !isLoading else {
+            os_log("[Login Web] still loading", log: .ui, type: .info)
+            return
+        }
+        
+        if !doCheckingWhenLoadingFinished {
+            os_log("[Login Web] ignore finish loading", log: .ui, type: .info)
+            return
+        }
+        // login succeeded
+        os_log("[Login Web] login succeeded", log: .ui, type: .info)
+        let fetchAccountInfoUrl = URL(string: "api/mobile/index.php?module=login", relativeTo: URL(string: SAGlobalConfig().forum_base_url)!)!
+        webView!.evaluateJavaScript("var url = '\(fetchAccountInfoUrl.absoluteString)';" +
+            "var oReq = new XMLHttpRequest();" +
+            "oReq.onload = function(e) {" +
+            "    if (oReq.responseText != null) {" +
+            "        window.webkit.messageHandlers.login.postMessage({'action':'fetchAccountInfo','data':{'info':oReq.responseText}});" +
+            "    } else {" +
+            "        window.webkit.messageHandlers.login.postMessage({'action':'fetchAccountInfo','data':{'info':''}});" +
+            "    }" +
+            "};" +
+            "oReq.open('GET', url);" +
+            "oReq.send();" +
+            "", completionHandler: {(result, error) in
+                guard error == nil else {
+                    os_log("[Login Web] js execute error: %@", log: .ui, type: .error, error!.localizedDescription)
+                    return
+                }
+
+                os_log("[Login Web] form submitted: %@", log: .ui, type: .info, result.debugDescription)
+        })
     }
     
-    // MARK: - UIWebViewDelegate
-    func webView(_ webView: UIWebView, shouldStartLoadWith request: URLRequest, navigationType: UIWebView.NavigationType) -> Bool {
-        if navigationType == UIWebView.NavigationType.formSubmitted {
-            if !recordFormInfo() {
-                showFormIncompleteAlert()
-                return false
-            }
-            willSubmitForm()
-            return true
-        }
-        
-        guard let url = request.url else {
-            return false
-        }
-        
-        if url.sa_isExternal() {
-            sa_log_v2("web login cancel external request: %@", module: .webView, type: .debug, url as CVarArg)
-            return false
-        }
-        sa_log_v2("[Login Web] loading url: %@", module: .ui, type: .debug, url.absoluteString)
-        
-        if redirectUrls.contains(url) {
-            fetchAccountInfo()
-            return true
-        }
-        
-        return true
-    }
-    
-    func showFormIncompleteAlert() {
-        let alert = UIAlertController(title: "", message: "用户名和密码不能为空", preferredStyle: .alert)
-        alert.popoverPresentationController?.sourceView = webView
-        alert.popoverPresentationController?.sourceRect = webView.bounds
-        alert.popoverPresentationController?.permittedArrowDirections = [.up]
-        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "OK"), style: .cancel, handler: nil))
-        navigationController?.present(alert, animated: true, completion: nil)
-    }
-    
-    func willSubmitForm() {
+    func willSubmitForm(_ data: [String:AnyObject]) {
         // redirect
-        sa_log_v2("[Login Web] form submitted", module: .ui, type: .debug)
+        os_log("[Login Web] form submitted", log: .ui, type: .info)
+        guard let username = data["username"] as? String,
+              let password = data["password"] as? String,
+              let questionid = data["questionid"] as? String,
+              let answer = data["answer"] as? String else {
+            os_log("[Login Web] form not enough info", log: .ui, type: .error)
+            return
+        }
+        
+        savedFormRecords = CredentialInfo(username: username, password: password, questionid: questionid, answer: answer)
         
         // update UI
         title = NSLocalizedString("LOGIN_IN_PROGRESS", comment: "login in progress")
-        let activity = UIActivityIndicatorView(style: .gray)
+        let activity = UIActivityIndicatorView(style: .medium)
         let loadingItem = UIBarButtonItem(customView: activity)
         activity.startAnimating()
         navigationItem.leftBarButtonItems = [loadingItem]
     }
     
-    func webViewDidFinishLoad(_ webView: UIWebView) {
-        if webView.request!.url == loginUrl {
-            webView.stringByEvaluatingJavaScript(from: form_beautify_js)
-        }
-    }
-    
-    private func fetchAccountInfo() {
-        UIApplication.shared.showNetworkIndicator()
-        URLSession.saCustomized.dataTask(with: fetchAccountInfoUrl, completionHandler: { (data, response, error) in
-            UIApplication.shared.hideNetworkIndicator()
-            guard error == nil && data != nil else {return}
-            DispatchQueue.main.async {
-                self.parseAccountInfoResult(data: data!)
-            }
-        }).resume()
-    }
-    
-    private func parseAccountInfoResult(data: Data) {
+    func parseAccountInfoResult(data: Data) {
         guard let obj = try? JSONSerialization.jsonObject(with: data, options: []) as AnyObject else {
-            sa_log_v2("[Login Web] parse account info failed: not json", module: .ui, type: .error)
-            self.getUserInfoFailed()
+            os_log("[Login Web] parse account info failed: not json", log: .ui, type: .error)
+            self.loginFailed()
             return
         }
         
         guard let info = savedFormRecords else {
-            sa_log_v2("login finished but no form info", module: .ui, type: .error)
-            self.getUserInfoFailed()
+            os_log("login finished but no form info", log: .ui, type: .error)
+            self.loginFailed()
             return
         }
         
         let error = AppController.current.getService(of: SAAccountManager.self)!.parseAccountInfoResponse(obj, credential: info)
         if error != nil {
-            sa_log_v2("[Login Web] parse account info failed error: %@", module: .ui, type: .error, error! as CVarArg)
-            self.getUserInfoFailed()
+            os_log("[Login Web] parse account info failed error: %@", log: .ui, type: .error, error! as CVarArg)
+            self.loginFailed()
             return
         }
         
-        loginFinished()
-        sa_log_v2("[Login Web] xhr result OK", module: .ui, type: .info)
+        AppController.current.getService(of: SACookieManager.self)!.syncWKCookiesToNSCookieStorage {
+            self.loginSucceeded()
+            os_log("[Login Web] xhr result OK", log: .ui, type: .info)
+        }
     }
 
     /*
@@ -186,21 +222,34 @@ class SAWebLoginViewController: SABaseViewController, UIWebViewDelegate {
         // Pass the selected object to the new view controller.
     }
     */
-    @objc func handleCloseButtonItemClick(_ sender: AnyObject) {
-        if let presenting = navigationController?.presentingViewController {
-            presenting.dismiss(animated: true, completion: nil)
-        } else if let presenting = presentingViewController {
-            presenting.dismiss(animated: true, completion: nil)
-        } else {
-            _ = navigationController?.popViewController(animated: true)
-        }
-    }
     
     @objc func handleRegisterButtonItemClicked(_ sender: AnyObject) {
         let url = Foundation.URL(string: SAGlobalConfig().register_url)!
-        let page = SAContentViewController(url: url)
-        page.title = NSLocalizedString("REGISTER", comment: "Register")
-        navigationController?.pushViewController(page, animated: true)
+        UIApplication.shared.open(url, options: [:]) { (succeeded) in
+            os_log("[Login] register open", log: .ui, type: .info)
+        }
     }
 }
-#endif
+
+
+extension SAWebLoginViewController: WKNavigationDelegate {
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        if let method = navigationAction.request.httpMethod, method == "POST"  {
+            doCheckingWhenLoadingFinished = true
+        }
+        decisionHandler(.allow)
+    }
+}
+
+
+extension SAWebLoginViewController: WKUIDelegate {
+    func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
+        let alert = UIAlertController(title: "", message: message, preferredStyle: .alert)
+        alert.popoverPresentationController?.sourceView = webView
+        alert.popoverPresentationController?.sourceRect = webView.bounds
+        alert.popoverPresentationController?.permittedArrowDirections = [.up]
+        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "OK"), style: .cancel, handler: nil))
+        navigationController?.present(alert, animated: true, completion: nil)
+        completionHandler()
+    }
+}

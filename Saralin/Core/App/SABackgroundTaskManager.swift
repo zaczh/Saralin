@@ -52,7 +52,7 @@ class SABackgroundTaskManager {
             return
         }
         
-        sa_log_v2("app bg fetch timer fires", module: .ui, type: .info)
+        os_log("app bg fetch timer fires", log: .ui, type: .info)
         startBackgroundTask { (result) in
             
         }
@@ -60,7 +60,7 @@ class SABackgroundTaskManager {
     
     func startBackgroundTask(with completionHandler: @escaping ((UIBackgroundFetchResult) -> Void)) {
         if backgroundTaskIdentifier != UIBackgroundTaskIdentifier.invalid {
-            sa_log_v2("app bg fetch: a job is already running", module: .ui, type: .info)
+            os_log("app bg fetch: a job is already running", log: .ui, type: .info)
             completionHandler(.noData)
             return
         }
@@ -109,7 +109,7 @@ class SABackgroundTaskManager {
         self.backgroundTaskCompletion?(self.currentBackgroundFetchResult)
         self.backgroundTaskCompletion = nil
         self.currentBackgroundFetchResult = .noData
-        sa_log_v2("app bg fetch finished", module: .network, type: .info)
+        os_log("app bg fetch finished", log: .network, type: .info)
     }
     
     func clearDiskCache(completion: (() -> Void)?) {
@@ -134,7 +134,7 @@ class SABackgroundTaskManager {
         // count pages
         urlSession.getFavoriteThreads(page: 1, completion: { (object, error) in
             guard error == nil else {
-                sa_log_v2("parsing favorite threads data error: %@", module: .network, type: .error, error!)
+                os_log("parsing favorite threads data error: %@", log: .network, type: .error, error!)
                 dispatch_async_main {
                     completionHandler(.failed)
                 }
@@ -142,7 +142,7 @@ class SABackgroundTaskManager {
             }
             
             guard let object = object as? [String:Any] else {
-                sa_log_v2("parsing favorite threads data error bad response", module: .network, type: .error)
+                os_log("parsing favorite threads data error bad response", log: .network, type: .error)
                 dispatch_async_main {
                     completionHandler(.failed)
                 }
@@ -150,7 +150,7 @@ class SABackgroundTaskManager {
             }
             
             guard let variables = object["Variables"] as? [String:Any] else {
-                sa_log_v2("parsing favorite threads data error variables is nil", module: .network, type: .error)
+                os_log("parsing favorite threads data error variables is nil", log: .network, type: .error)
                 dispatch_async_main {
                     completionHandler(.failed)
                 }
@@ -158,7 +158,7 @@ class SABackgroundTaskManager {
             }
             
             guard let perpageStr = variables["perpage"] as? String, let countStr = variables["count"] as? String else {
-                sa_log_v2("parsing favorite threads data error no page info", module: .network, type: .error)
+                os_log("parsing favorite threads data error no page info", log: .network, type: .error)
                 dispatch_async_main {
                     completionHandler(.failed)
                 }
@@ -175,7 +175,7 @@ class SABackgroundTaskManager {
                 group.enter()
                 self.urlSession.getFavoriteThreads(page: i + 1, completion: { (obj, error) in
                     guard error == nil, let object = obj as? [String:Any], let variables = object["Variables"] as? [String:Any] else {
-                        sa_log_v2("parsing favorite threads data error no page info", module: .network, type: .error)
+                        os_log("parsing favorite threads data error no page info", log: .network, type: .error)
                         group.leave()
                         return
                     }
@@ -195,7 +195,7 @@ class SABackgroundTaskManager {
     private func handleFavoritesResponse(data: [String:Any], completion:(() -> Void)?) {
         let variables = data
         guard let list = variables["list"] as? [[String:Any]] else {
-            sa_log_v2("parsing favorite threads data error: not array type", module: .network, type: .error)
+            os_log("parsing favorite threads data error: not array type", log: .network, type: .error)
             completion?()
             return
         }
@@ -207,7 +207,7 @@ class SABackgroundTaskManager {
             let favid = item["favid"] as? String
             let replies = item["replies"] as? String
             guard let replyCount = Int(replies ?? "0") else {
-                sa_log_v2("replies is bad or nil", module: .network, type: .error)
+                os_log("replies is bad or nil", log: .network, type: .error)
                 group.leave()
                 continue
             }
@@ -215,7 +215,7 @@ class SABackgroundTaskManager {
             let author = item["author"] as? String
             let dateline = item["dateline"] as? String
             guard let datelineInt = Int(dateline ?? "0") else {
-                sa_log_v2("dateline is bad or nil", module: .network, type: .error)
+                os_log("dateline is bad or nil", log: .network, type: .error)
                 group.leave()
                 continue
             }
@@ -258,7 +258,7 @@ class SABackgroundTaskManager {
     // the completionHandler MUST BE executed before return
     // TODO: filter older thread in this list
     fileprivate func fetchWatchingListThreadsInBackground(_ completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        sa_log_v2("begin fetching watching list in background", module: .ui, type: .info)
+        os_log("begin fetching watching list in background", log: .ui, type: .info)
         
         if Account().isGuest {
             completionHandler(.noData)
@@ -272,7 +272,7 @@ class SABackgroundTaskManager {
             let sort = NSSortDescriptor(key: "timeadded", ascending: false)
             fetch.sortDescriptors = [sort]
             guard let objects = try? context.fetch(fetch) else {
-                sa_log_v2("fetching watching list in background failed", module: .ui, type: .error)
+                os_log("fetching watching list in background failed", log: .ui, type: .error)
                 completionHandler(.noData)
                 return
             }
@@ -297,7 +297,7 @@ class SABackgroundTaskManager {
                         UNUserNotificationCenter.current().add(notificationRequest) { (error : Error?) in
                             if let error = error {
                                 // Handle any errors
-                                sa_log_v2("error presenting local notification: %@", module: .ui, type: .error, error as NSError)
+                                os_log("error presenting local notification: %@", log: .ui, type: .error, error as NSError)
                                 return
                             }
                         }
@@ -385,11 +385,11 @@ class SABackgroundTaskManager {
         }
     }
     
-    func fetchDirectMessageInBackground(completion: (([[String:AnyObject]], Error?) -> Void)?) {
-        sa_log_v2("begin fetching direct message list in background", module: .ui, type: .info)
+    func fetchDirectMessageInBackground(completion: (([PrivateMessageSummary], Error?) -> Void)?) {
+        os_log("begin fetching direct message list in background", log: .ui, type: .info)
         // get all messages at once
         DispatchQueue.global().async {
-            var allMessages: [[String : AnyObject]] = []
+            var allMessages: [PrivateMessageSummary] = []
             var page = 1
             var finished = false
             
@@ -412,7 +412,30 @@ class SABackgroundTaskManager {
                         finished = true
                         return
                     }
-                    allMessages.append(contentsOf: list)
+                    
+                    var results: [PrivateMessageSummary] = []
+                    for item in list {
+                        guard let lastupdate = item["lastupdate"] as? String,
+                              let isnewStr = item["isnew"] as? String,
+                              let isnew = Int(isnewStr),
+                              let touid = item["touid"] as? String,
+                              let message = item["message"] as? String,
+                              let pmnumstr = item["pmnum"] as? String,
+                              let pmnum = Int(pmnumstr)
+                        else {
+                            continue
+                        }
+                        
+                        let tousername = (item["tousername"] as? String) ?? (item["msgfrom"] as? String) ?? ""
+                        results.append(PrivateMessageSummary(lastupdate: lastupdate,
+                                                             isnew: isnew,
+                                                             tousername: tousername,
+                                                             touid: touid,
+                                                             message: message,
+                                                             pmnum: pmnum))
+                    }
+                    
+                    allMessages.append(contentsOf: results)
                     
                     guard let countStr = variables["count"] as? String,
                         let count = Int(countStr),
@@ -437,15 +460,16 @@ class SABackgroundTaskManager {
     }
     
     // MARK: - Core Data
-    private func saveMessagesToDb(messages: [[String:AnyObject]]) {
+    private func saveMessagesToDb(messages: [PrivateMessageSummary]) {
         let group = DispatchGroup()
         var numberOfNewMessages = 0
         messages.forEach({ (dict) in
-            guard let touid = dict["touid"] as? String else {
+            let touid = dict.touid
+            guard !touid.isEmpty else {
                 return
             }
             
-            if dict["isnew"]?.boolValue ?? false {
+            if dict.isnew != 0 {
                 numberOfNewMessages = numberOfNewMessages + 1
             }
             
@@ -454,57 +478,28 @@ class SABackgroundTaskManager {
             coreDataManager.insertNewOrUpdateExist(fetchPredicate: predicate, sortDescriptors: nil, update: { (obj: DirectMessage) in
                 obj.createdevicename = UIDevice.current.name
                 obj.createdeviceidentifier = AppController.current.currentDeviceIdentifier
-                obj.members = NSNumber(value: Int(dict["members"] as? String ?? "0")!)
-                obj.pmnum = NSNumber(value: Int(dict["pmnum"] as? String ?? "0")!)
-                obj.lastauthor = dict["lastauthor"] as? String
-                obj.isnew = NSNumber(value: Int(dict["isnew"] as? String ?? "0")!)
-                obj.dateline = (dict["dateline"] as? String)?.sa_toDateFrom1970SecondsDate()
-                obj.authorid = NSNumber(value: Int(dict["authorid"] as? String ?? "0")!)
-                obj.pmtype = NSNumber(value: Int(dict["pmtype"] as? String ?? "0")!)
-                obj.msgfrom = dict["msgfrom"] as? String
-                obj.subject = dict["subject"] as? String
-                obj.touid = dict["touid"] as? String
-                
-                let msgFromIDStr = dict["msgfromid"] as? String ?? "0"
-                obj.msgfromid = NSNumber(value: Int(msgFromIDStr)!)
-                obj.lastupdate = (dict["lastupdate"] as? String)?.sa_toDateFrom1970SecondsDate()
-                obj.plid = NSNumber(value: Int(dict["plid"] as? String ?? "0")!)
-                obj.lastdateline = (dict["lastdateline"] as? String)?.sa_toDateFrom1970SecondsDate()
-                obj.lastauthorid = NSNumber(value: Int(dict["lastauthorid"] as? String ?? "0")!)
-                obj.message = dict["message"] as? String
-                obj.lastsummary = dict["lastsummary"] as? String
-                obj.msgtoid = NSNumber(value: Int(dict["msgtoid"] as? String ?? "0")!)
-                obj.tousername = dict["tousername"] as? String
-                sa_log_v2("update existing record DirectMessage", module: .database, type: .debug)
+                obj.pmnum = NSNumber(value: dict.pmnum)
+                obj.isnew = NSNumber(value: dict.isnew)
+                obj.touid = dict.touid
+                obj.lastupdate = dict.lastupdate.sa_toDateFrom1970SecondsDate()
+                obj.message = dict.message
+                obj.tousername = dict.tousername
+                os_log("update existing record DirectMessage", log: .database, type: .debug)
                 group.leave()
             }, create: { (obj) in
                 obj.uid = Account().uid
                 obj.createdevicename = UIDevice.current.name
                 obj.createdeviceidentifier = AppController.current.currentDeviceIdentifier
-                obj.members = NSNumber(value: Int(dict["members"] as? String ?? "0")!)
-                obj.pmnum = NSNumber(value: Int(dict["pmnum"] as? String ?? "0")!)
-                obj.lastauthor = dict["lastauthor"] as? String
-                obj.isnew = NSNumber(value: Int(dict["isnew"] as? String ?? "0")!)
-                obj.dateline = (dict["dateline"] as? String)?.sa_toDateFrom1970SecondsDate()
-                obj.authorid = NSNumber(value: Int(dict["authorid"] as? String ?? "0")!)
-                obj.pmtype = NSNumber(value: Int(dict["pmtype"] as? String ?? "0")!)
-                obj.msgfrom = dict["msgfrom"] as? String
-                obj.subject = dict["subject"] as? String
-                obj.touid = dict["touid"] as? String
                 
-                let msgFromIDStr = dict["msgfromid"] as? String ?? "0"
-                obj.msgfromid = NSNumber(value: Int(msgFromIDStr)!)
-                obj.lastupdate = (dict["lastupdate"] as? String)?.sa_toDateFrom1970SecondsDate()
-                obj.plid = NSNumber(value: Int(dict["plid"] as? String ?? "0")!)
-                obj.lastdateline = (dict["lastdateline"] as? String)?.sa_toDateFrom1970SecondsDate()
-                obj.lastauthorid = NSNumber(value: Int(dict["lastauthorid"] as? String ?? "0")!)
-                obj.message = dict["message"] as? String
-                obj.lastsummary = dict["lastsummary"] as? String
-                obj.msgtoid = NSNumber(value: Int(dict["msgtoid"] as? String ?? "0")!)
-                obj.tousername = dict["tousername"] as? String
+                obj.pmnum = NSNumber(value: dict.pmnum)
+                obj.isnew = NSNumber(value: dict.isnew)
+                obj.touid = dict.touid
+                obj.lastupdate = dict.lastupdate.sa_toDateFrom1970SecondsDate()
+                obj.message = dict.message
+                obj.tousername = dict.tousername
                 
                 group.leave()
-                sa_log_v2("insert new record DirectMessage", module: .database, type: .debug)
+                os_log("insert new record DirectMessage", log: .database, type: .debug)
             }, completion: nil)
         })
         
@@ -529,7 +524,7 @@ class SABackgroundTaskManager {
             UNUserNotificationCenter.current().add(notificationRequest) { (error : Error?) in
                 if let error = error {
                     // Handle any errors
-                    sa_log_v2("error presenting local notification: %@", module: .ui, type: .error, error as NSError)
+                    os_log("error presenting local notification: %@", log: .ui, type: .error, error as NSError)
                     return
                 }
             }
@@ -566,7 +561,7 @@ class SABackgroundTaskManager {
             }
             
             guard error == nil else {
-                sa_log_v2("dailyCheckIn error: %@", error! as CVarArg)
+                os_log("dailyCheckIn error: %@", error! as CVarArg)
                 dispatch_async_main {
                     completion?(false)
                 }
@@ -574,7 +569,7 @@ class SABackgroundTaskManager {
             }
             
             guard let data = data else {
-                sa_log_v2("dailyCheckIn empty data")
+                os_log("dailyCheckIn empty data")
                 dispatch_async_main {
                     completion?(false)
                 }
@@ -583,7 +578,7 @@ class SABackgroundTaskManager {
             
             let str = String(data: data, encoding: String.Encoding.utf8)!
             guard let parser = try? HTMLParser.init(string: str) else {
-                sa_log_v2("dailyCheckIn parser initializing failed")
+                os_log("dailyCheckIn parser initializing failed")
                 dispatch_async_main {
                     completion?(false)
                 }
@@ -602,7 +597,7 @@ class SABackgroundTaskManager {
                 let parent = el.parent()
                 if parent.nodetype() == HTMLHrefNode {
                     guard let checkInUrl = parent.getAttributeNamed("href") else {
-                        sa_log_v2("dailyCheckIn empty data")
+                        os_log("dailyCheckIn empty data")
                         dispatch_async_main {
                             completion?(false)
                         }
@@ -610,7 +605,7 @@ class SABackgroundTaskManager {
                     }
                     
                     guard let url = URL.init(string: self.globalConfig.forum_base_url + checkInUrl) else {
-                        sa_log_v2("dailyCheckIn bad url")
+                        os_log("dailyCheckIn bad url")
                         dispatch_async_main {
                             completion?(false)
                         }
@@ -621,7 +616,7 @@ class SABackgroundTaskManager {
                     
                     self.urlSession.dataTask(with: url) { (data, response, error) in
                         guard error == nil else {
-                            sa_log_v2("dailyCheckIn error: %@", error! as CVarArg)
+                            os_log("dailyCheckIn error: %@", error! as CVarArg)
                             dispatch_async_main {
                                 completion?(false)
                             }
@@ -629,7 +624,7 @@ class SABackgroundTaskManager {
                         }
                         
                         guard let data = data else {
-                            sa_log_v2("dailyCheckIn empty data")
+                            os_log("dailyCheckIn empty data")
                             dispatch_async_main {
                                 completion?(false)
                             }
@@ -638,7 +633,7 @@ class SABackgroundTaskManager {
                         
                         let str = String(data: data, encoding: String.Encoding.utf8)!
                         guard let parser = try? HTMLParser.init(string: str) else {
-                            sa_log_v2("dailyCheckIn parser initializing failed")
+                            os_log("dailyCheckIn parser initializing failed")
                             dispatch_async_main {
                                 completion?(false)
                             }
@@ -652,7 +647,7 @@ class SABackgroundTaskManager {
                                     // <p>已签到,请不要重新签到！</p>
                                     // 成功签到
                                     if content.contains("成功") || content.contains("已签到") {
-                                        sa_log_v2("dailyCheckIn succeeded")
+                                        os_log("dailyCheckIn succeeded")
                                         dispatch_async_main {
                                             Account().lastDayCheckIn = Date()
                                             completion?(true)
@@ -663,7 +658,7 @@ class SABackgroundTaskManager {
                             }
                         }
                         
-                        sa_log_v2("dailyCheckIn failed")
+                        os_log("dailyCheckIn failed")
                         dispatch_async_main {
                             completion?(false)
                         }
@@ -685,14 +680,14 @@ class SABackgroundTaskManager {
         if let date = userDefaults.value(forKey: key) as? Date, date.timeIntervalSinceNow < -5 * 24 * 60 * 60 {
             userDefaults.set(Date() as AnyObject, forKey: key)
             clearDiskCache(completion: nil)
-            sa_log_v2("cleared disk cache", module: .ui, type: .info)
+            os_log("cleared disk cache", log: .ui, type: .info)
         }
     }
     
     func removeLogFilesIfNeeded() {
         let fm = FileManager.default
         guard let dirEnu = fm.enumerator(atPath: sa_log_file_directoy) else {
-            sa_log_v2("fail to enumerate at log file dir", module: .ui, type: .info)
+            os_log("fail to enumerate at log file dir", log: .ui, type: .info)
             return
         }
         
@@ -715,7 +710,7 @@ class SABackgroundTaskManager {
         
         for dir in deletedFiles {
             try? fm.removeItem(atPath: dir as String)
-            sa_log_v2("delete log file at: %@", module: .ui, type: .info, dir)
+            os_log("delete log file at: %@", log: .ui, type: .info, dir)
         }
     }
 }

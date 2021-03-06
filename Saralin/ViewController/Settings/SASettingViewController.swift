@@ -42,6 +42,20 @@ class SASettingViewController: SABaseTableViewController {
              "description":NSLocalizedString("OPTION_THREADS_DISPLAY_ORDER_DESCRIPTION", comment: "设置帖子列表的排序规则")
             ],
             
+//            ["summary":"",
+//             "items":[
+//                ["title":NSLocalizedString("OPTION_HOT_TAB_SHOW_BOARD_FID", comment: "热门Tab显示子版块"), "detail":"", "bindKey":SAAccount.Preference.hot_tab_board_fid.rawValue,  "bottom":"", "clickable":"1", "eventId":"hot_tab_board_fid", "disclosure":"1"],
+//                ],
+//             "description":NSLocalizedString("OPTION_HOT_TAB_SHOW_BOARD_FID_DESCRIPTION", comment: "设置热门Tab显示子版块")
+//            ],
+            
+            ["summary":"",
+             "items":[
+                ["title":NSLocalizedString("OPTION_ENABLE_PASTEBOARD_MONITORING", comment: "开启剪贴板监控"), "detail":"", "bindKey":SAAccount.Preference.enable_pasteboard_monitoring.rawValue, "bottom":"", "eventId":"enable_pasteboard_monitoring", "isSwitch":"1"],
+                ],
+             "description":NSLocalizedString("OPTION_ENABLE_PASTEBOARD_MONITORING_DESCRIPTION", comment: "")
+            ],
+            
             ["summary":"",
              "items":[
                 ["title":NSLocalizedString("OPTION_THEME_SETTING", comment: "OPTION_THEME_SETTING"), "detail":"", "isSwitch":"0", "disclosure":"1", "clickable":"1","bindKey":SAAccount.Preference.theme_id.rawValue, "eventId":"3"],
@@ -274,6 +288,8 @@ class SASettingViewController: SABaseTableViewController {
             return openNotificationSettingPage(indexPath)
         case "debug_entry":
             return openDebugPage(indexPath)
+        case "hot_tab_board_fid":
+            return openHotTabBoardSelectPage(indexPath)
         default:
             break
         }
@@ -283,6 +299,12 @@ class SASettingViewController: SABaseTableViewController {
     
     private func openBoardSelectPage(_ indexPath: IndexPath?) -> IndexPath? {
         let about = SABoardArrangementViewController()
+        navigationController?.pushViewController(about, animated: true)
+        return indexPath
+    }
+    
+    private func openHotTabBoardSelectPage(_ indexPath: IndexPath?) -> IndexPath? {
+        let about = SAHotTabBoardSelectionViewController()
         navigationController?.pushViewController(about, animated: true)
         return indexPath
     }

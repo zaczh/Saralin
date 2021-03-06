@@ -283,7 +283,7 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
         let uid = Account().uid
         
         guard let fid = quoteInfo["fid"] as? String, let tid = quoteInfo["tid"] as? String else {
-            sa_log_v2("bad data, not save draft", module: .ui, type: .error)
+            os_log("bad data, not save draft", log: .ui, type: .error)
             return
         }
         let quote_id = quoteInfo["quote_id"] as? String
@@ -319,26 +319,26 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
     private func deleteDraftAfterSent() {
         let uid = Account().uid
         guard let fid = quoteInfo["fid"] as? String, let tid = quoteInfo["tid"] as? String else {
-            sa_log_v2("bad data, not delete draft", module: .ui, type: .error)
+            os_log("bad data, not delete draft", log: .ui, type: .error)
             return
         }
         let quote_id = quoteInfo["quote_id"] as? String
         let predicate = NSPredicate(format: "fid==%@ AND tid==%@ AND quote_id==%@ AND uid==%@", fid, tid, quote_id ?? NSNull(), uid)
         AppController.current.getService(of: SACoreDataManager.self)!.delete(predicate: predicate) { (entities: [ReplyDraft]) in
-            sa_log_v2("draft deleted", module: .ui, type: .info)
+            os_log("draft deleted", log: .ui, type: .info)
         }
     }
     
     private func saveDraft() {
         if textView.text.isEmpty && uploadingImages.isEmpty {
-            sa_log_v2("reply view empty, not save to draft")
+            os_log("reply view empty, not save to draft")
             return
         }
         
         let uid = Account().uid
         guard let fid = quoteInfo["fid"] as? String,
             let tid = quoteInfo["tid"] as? String else {
-                sa_log_v2("bad data, not save draft", module: .ui, type: .error)
+                os_log("bad data, not save draft", log: .ui, type: .error)
                 return
         }
         let quote_id = quoteInfo["quote_id"] as? String
@@ -633,11 +633,30 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
             toolBarBottomConstraint.constant = -view.frame.size.height + localBounds.origin.y
         }
 
-        UIView.beginAnimations("", context: nil)
-        UIView.setAnimationDuration(((notification as NSNotification).userInfo![UIResponder.keyboardAnimationDurationUserInfoKey]! as AnyObject).doubleValue)
-        UIView.setAnimationCurve(UIView.AnimationCurve(rawValue: ((notification as NSNotification).userInfo![UIResponder.keyboardAnimationCurveUserInfoKey]! as AnyObject).intValue)!)
-        view.layoutIfNeeded()
-        UIView.commitAnimations()
+        let duration = ((notification as NSNotification).userInfo![UIResponder.keyboardAnimationDurationUserInfoKey]! as AnyObject).doubleValue ?? 0
+        let curve = UIView.AnimationCurve(rawValue: ((notification as NSNotification).userInfo![UIResponder.keyboardAnimationCurveUserInfoKey]! as AnyObject).intValue)!
+        var option: UIView.AnimationOptions = .curveLinear
+        switch curve {
+        case .easeIn:
+            option = .curveEaseIn
+            break
+        case .easeInOut:
+            option = .curveEaseInOut
+            break
+        case .easeOut:
+            option = .curveEaseOut
+            break
+        case .linear:
+            option = .curveLinear
+            break
+        default:
+            break
+        }
+        
+        UIView.animate(withDuration: duration, delay: 0, options: option) {
+            self.view.layoutIfNeeded()
+        } completion: { (finished) in
+        }
     }
     
     @objc func handleKeyboardWillHide(_ notification: Notification) {
@@ -657,11 +676,31 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
 
         replyPreviewViewTopConstraint.constant = 10
         toolBarBottomConstraint.constant = 0
-        UIView.beginAnimations("", context: nil)
-        UIView.setAnimationDuration(((notification as NSNotification).userInfo![UIResponder.keyboardAnimationDurationUserInfoKey]! as AnyObject).doubleValue)
-        UIView.setAnimationCurve(UIView.AnimationCurve(rawValue: ((notification as NSNotification).userInfo![UIResponder.keyboardAnimationCurveUserInfoKey]! as AnyObject).intValue)!)
-        view.layoutIfNeeded()
-        UIView.commitAnimations()
+
+        let duration = ((notification as NSNotification).userInfo![UIResponder.keyboardAnimationDurationUserInfoKey]! as AnyObject).doubleValue ?? 0
+        let curve = UIView.AnimationCurve(rawValue: ((notification as NSNotification).userInfo![UIResponder.keyboardAnimationCurveUserInfoKey]! as AnyObject).intValue)!
+        var option: UIView.AnimationOptions = .curveLinear
+        switch curve {
+        case .easeIn:
+            option = .curveEaseIn
+            break
+        case .easeInOut:
+            option = .curveEaseInOut
+            break
+        case .easeOut:
+            option = .curveEaseOut
+            break
+        case .linear:
+            option = .curveLinear
+            break
+        default:
+            break
+        }
+        
+        UIView.animate(withDuration: duration, delay: 0, options: option) {
+            self.view.layoutIfNeeded()
+        } completion: { (finished) in
+        }
     }
     
     //bar item actions
@@ -909,7 +948,7 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
                                         let options = UIWindowSceneDestructionRequestOptions()
                                         options.windowDismissalAnimation = .commit
                                         UIApplication.shared.requestSceneSessionDestruction(sceneSession, options: options, errorHandler: { (error) in
-                                            sa_log_v2("request scene session destruction returned: %@", error.localizedDescription)
+                                            os_log("request scene session destruction returned: %@", error.localizedDescription)
                                         })
                                     }
                                 } else {
@@ -941,7 +980,7 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
                                     let options = UIWindowSceneDestructionRequestOptions()
                                     options.windowDismissalAnimation = .commit
                                     UIApplication.shared.requestSceneSessionDestruction(sceneSession, options: options, errorHandler: { (error) in
-                                        sa_log_v2("request scene session destruction returned: %@", error.localizedDescription)
+                                        os_log("request scene session destruction returned: %@", error.localizedDescription)
                                     })
                                 }
                             } else {
@@ -998,7 +1037,7 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
                     let options = UIWindowSceneDestructionRequestOptions()
                     options.windowDismissalAnimation = .decline
                     UIApplication.shared.requestSceneSessionDestruction(sceneSession, options: options, errorHandler: { (error) in
-                        sa_log_v2("request scene session destruction returned: %@", error.localizedDescription)
+                        os_log("request scene session destruction returned: %@", error.localizedDescription)
                     })
                 }
             } else {

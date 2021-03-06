@@ -221,7 +221,7 @@ class SAAccountInfoViewController: SABaseTableViewController {
             }
             
             if let date = model.createDate {
-                cell.customTimeLabel.text = NSLocalizedString("POST_ON", comment: "") + date
+                cell.customTimeLabel.text = date
             }
         }
         
@@ -480,7 +480,7 @@ class SAAccountInfoViewController: SABaseTableViewController {
                 URLSession.saCustomized.dataTask(with: url, completionHandler: { (data, response, error) in
                     UIApplication.shared.hideNetworkIndicator()
                     guard error == nil && data != nil else {
-                        sa_log_v2("image download failed", type: .error)
+                        os_log("image download failed", type: .error)
                         return
                     }
                     

@@ -45,7 +45,7 @@ class SAModalActivityViewController: UIViewController, UIViewControllerTransitio
         view.layer.cornerRadius = 4.0
         view.tintColor = Theme().globalTintColor.sa_toColor()
         
-        activity = UIActivityIndicatorView(style: .whiteLarge)
+        activity = UIActivityIndicatorView(style: .large)
         activity.startAnimating()
         activity.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(activity)
@@ -115,7 +115,7 @@ class SAModalActivityViewController: UIViewController, UIViewControllerTransitio
     }
 
     func show(completion: (() -> Void)?) {
-        if let vc = UIApplication.shared.keyWindow?.rootViewController {
+        if let vc = AppController.current.currentActiveWindow?.rootViewController {
             vc.present(self, animated: true, completion: completion)
         } else {
             completion?()

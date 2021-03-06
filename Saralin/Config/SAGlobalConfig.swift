@@ -21,7 +21,7 @@ enum SAUserDefaultsKey: String {
 // MARK: - Some string constants
 struct SAGlobalConfig {
     
-    let pc_useragent_string = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/603.2.4 (KHTML, like Gecko) Version/10.1.1 Safari/603.2.4"
+    let pc_useragent_string = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15"
     
     let mobile_useragent_string = "Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1"
     
@@ -56,9 +56,11 @@ struct SAGlobalConfig {
     
     var forum_url: String { return forum_base_url + "forum.php" }
     
-    var login_url: String { return forum_base_url + "member.php?mod=logging&action=login&mobile=no" }
+    var login_url: String { return forum_base_url + "member.php?mod=logging&action=login&mobile=1" }
     
     var register_url: String { return forum_base_url + "member.php?mod=register&mobile=1" }
+    
+    let forum_logo_image_url = "https://static.saraba1st.com/image/s1/logo.png"
     
     // Signature
     var signature: String { return "\n\n发自我的\(UIDevice.current.localizedModel) via [url=\(app_store_link)]Saralin \(app_version_string)[/url]\n" }
@@ -82,4 +84,6 @@ struct SAGlobalConfig {
     let developer_imessage_address = "jhzhangdev@gmail.com"
     
     let developer_email_address = "jhzhangdev@gmail.com"
+    
+    let hot_tab_default_board_fid = "6" // 动漫论坛
 }

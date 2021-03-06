@@ -268,7 +268,7 @@ class SAAboutViewController: SABaseTableViewController, MFMailComposeViewControl
         
         alert.addAction(UIAlertAction(title: "iMessage(推荐)", style: .default){ (action) in
             if !MFMessageComposeViewController.canSendText() {
-                sa_log_v2("message services are not available", module: .ui, type: .info)
+                os_log("message services are not available", log: .ui, type: .info)
                 return
             }
             
@@ -285,7 +285,7 @@ class SAAboutViewController: SABaseTableViewController, MFMailComposeViewControl
             if let _ = try? FileManager.default.copyItem(atPath: sa_current_log_file_path(), toPath: tempFileName) {
                 composeVC.addAttachmentURL(tempFileURL, withAlternateFilename: tempFileURL.lastPathComponent)
             } else {
-                sa_log_v2("can not copy log file", type: .error)
+                os_log("can not copy log file", type: .error)
             }
             // Present the view controller modally.
             self.present(composeVC, animated: true, completion: nil)
@@ -293,7 +293,7 @@ class SAAboutViewController: SABaseTableViewController, MFMailComposeViewControl
         
         alert.addAction(UIAlertAction(title: "电子邮件", style: .default){ (action) in
             if !MFMailComposeViewController.canSendMail() {
-                sa_log_v2("Mail services are not available", module: .ui, type: .info)
+                os_log("Mail services are not available", log: .ui, type: .info)
                 return
             }
             

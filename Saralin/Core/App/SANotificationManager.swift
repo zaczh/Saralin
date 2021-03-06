@@ -98,7 +98,7 @@ class SANotificationManager: NSObject, UNUserNotificationCenterDelegate {
             if let additionalInfo = customInfo["a"] as? [AnyHashable:Any] {
                 /* handle push commands here */
                 if let _ = additionalInfo["sa_fetch"] {
-                    sa_log_v2("receive background fetch notification", module: .ui, type: .info)
+                    os_log("receive background fetch notification", log: .ui, type: .info)
                     AppController.current.getService(of: SABackgroundTaskManager.self)!.startBackgroundTask(with: completionHandler)
                     return
                 } else  if let _ = additionalInfo["sa_clear"] {
@@ -113,27 +113,22 @@ class SANotificationManager: NSObject, UNUserNotificationCenterDelegate {
     // MARK: - delegate
     @available(iOS 10.0, *)
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Swift.Void) {
-        completionHandler([.alert, .sound])
+        completionHandler([.list, .banner, .sound])
     }
     
     @available(iOS 10.0, *)
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        sa_log_v2("user clicked notification %@", module: .ui, type: .info, response)
+        os_log("user clicked notification %@", log: .ui, type: .info, response)
         defer {
             completionHandler()
         }
         
         var rootViewController: UIViewController?
         
-        if #available(iOS 13.0, *) {
-            UIApplication.shared.connectedScenes.forEach { (s) in
-                if s.activationState == .foregroundActive && rootViewController == nil {
-                    rootViewController = (s.delegate as? UIWindowSceneDelegate)?.window??.rootViewController
-                }
+        UIApplication.shared.connectedScenes.forEach { (s) in
+            if s.activationState == .foregroundActive && rootViewController == nil {
+                rootViewController = (s.delegate as? UIWindowSceneDelegate)?.window??.rootViewController
             }
-        } else {
-            // Fallback on earlier versions
-            rootViewController = UIApplication.shared.keyWindow?.rootViewController
         }
         
         guard rootViewController != nil else {
@@ -141,7 +136,7 @@ class SANotificationManager: NSObject, UNUserNotificationCenterDelegate {
         }
         
         guard let navigationController = AppController.current.findDeailNavigationController(rootViewController: rootViewController!) else {
-           sa_log_v2("found no tab bar controller", module: .ui, type: .info)
+           os_log("found no tab bar controller", log: .ui, type: .info)
             return
         }
         

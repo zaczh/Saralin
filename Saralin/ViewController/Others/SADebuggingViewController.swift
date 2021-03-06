@@ -24,7 +24,7 @@ class SADebuggingViewController: SABaseTableViewController {
         viewUserDefaultsCell.textLabel?.text = "查看用户配置"
         
         let crashCell = SAThemedTableViewCell.init(style: .default, reuseIdentifier: nil)
-        crashCell.textLabel?.text = "Crash日志"
+        crashCell.textLabel?.text = "分析日志"
         cells = [
             viewLogCell, viewFileCell, viewUserDefaultsCell, crashCell
         ]
@@ -32,7 +32,7 @@ class SADebuggingViewController: SABaseTableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        sa_log_v2("open debug entry", module: .ui, type: .info)
+        os_log("open debug entry", log: .ui, type: .info)
 
         title = NSLocalizedString("DEBUG_ENTRY", comment: "DEBUG ENTRY")
         if #available(iOS 11.0, *) {
@@ -71,7 +71,7 @@ class SADebuggingViewController: SABaseTableViewController {
     
     @objc private func handleLogShareButtonClick(_ sender: UIBarButtonItem) {
         let url = URL.init(fileURLWithPath: sa_current_log_file_path())
-        sa_log_v2("clicked share button", module: .ui, type: .info)
+        os_log("clicked share button", log: .ui, type: .info)
         let activityController = UIActivityViewController(activityItems: [url], applicationActivities: nil)
         activityController.modalPresentationStyle = .popover
         activityController.completionWithItemsHandler = { (activityType, completed, returnedItems, activityError) in
@@ -110,10 +110,10 @@ class SADebuggingViewController: SABaseTableViewController {
     }
     
     private func showCrashFiles() {
-        let directoryURL = AppController.current.crashFilesDirectory
+        let directoryURL = AppController.current.diagnosticsReportFilesDirectory
         let localFileManager = FileManager()
          
-        let resourceKeys = Set<URLResourceKey>([.nameKey, .isDirectoryKey])
+        let resourceKeys = Set<URLResourceKey>([.nameKey, .isDirectoryKey, .fileSizeKey])
         let directoryEnumerator = localFileManager.enumerator(at: directoryURL, includingPropertiesForKeys: Array(resourceKeys), options: .skipsHiddenFiles)!
         var fileURLs: [URL] = []
         for case let fileURL as URL in directoryEnumerator {
@@ -124,7 +124,7 @@ class SADebuggingViewController: SABaseTableViewController {
             fileURLs.append(fileURL)
         }
         guard !fileURLs.isEmpty else {
-            let alert = UIAlertController(title: nil, message: "Wow! There are no crash files yet.", preferredStyle: .alert)
+            let alert = UIAlertController(title: nil, message: "Wow! There are no diagnostics files yet.", preferredStyle: .alert)
             let cancelAction = UIAlertAction(title: NSLocalizedString("CANCEL", comment: "Cancel"), style: .cancel) { (action) in
             }
             alert.addAction(cancelAction)
@@ -132,7 +132,7 @@ class SADebuggingViewController: SABaseTableViewController {
             return
         }
         
-        let alert = UIAlertController(title: "View Crash Log", message: "Choose a crash log file to view.", preferredStyle: .actionSheet)
+        let alert = UIAlertController(title: "View Crash Log", message: "Choose a diagnostics report file to view.", preferredStyle: .actionSheet)
         alert.popoverPresentationController?.sourceView = view
         alert.popoverPresentationController?.sourceRect = view.bounds
         

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" >
+<meta name="viewport" content="width=device-width, user-scalable=no, maximum-scale=1" >
+<title>Login</title>
+<script type="text/javascript">
+'use strict';
+
+function submitForm() {
+    var username = document.getElementById('ls_username').value;
+    var password = document.getElementById('ls_password').value;
+    if (username == null || username.length == 0) {
+        //window.webkit.messageHandlers.login.postMessage({'action':'validate','data':{'field':'username'}});
+        alert("用户名不能为空");
+        return false;
+    }
+    if (password == null || password.length == 0) {
+        //window.webkit.messageHandlers.login.postMessage({'action':'validate','data':{'field':'password'}});
+        alert("密码不能为空");
+        return false;
+    }
+    
+    window.webkit.messageHandlers.login.postMessage({'action':'submit','data':{'username':username,'password':password}});
+    return true;
+}
+</script>
+</head>
+<body>
+<form id="loginform" method="post" action="member.php?mod=logging&amp;action=login&amp;loginsubmit=yes&amp;loginhash=LVYMD" onsubmit="">
+    <input type="hidden" name="formhash" id="formhash" value='e0baa07a'/>
+    <input type="hidden" name="referer" id="referer" value="https://bbs.saraba1st.com/2b/./"/>
+    <input type="hidden" name="fastloginfield" value="username">
+    <input type="hidden" name="cookietime" value="2592000">
+    <div class="login_from">
+        <ul>
+            <li>
+                <input type="text" value="" tabindex="1" class="px p_fre" size="30" autocomplete="off" value="" name="username" placeholder="请输入用户名" fwin="login">
+            </li>
+            <li>
+                <input type="password" tabindex="2" class="px p_fre" size="30" value="" name="password" placeholder="密码" fwin="login">
+            </li>
+            <li class="questionli">
+                <div class="login_select">
+                    <span class="login-btn-inner">
+                        <span class="login-btn-text">
+                            <span class="span_question">安全提问(未设置请忽略)</span>
+                        </span>
+                        <span class="icon-arrow">&nbsp;</span>
+                    </span>
+                    <select id="questionid_LyQ3i" name="questionid" class="sel_list">
+                        <option value="0" selected="selected">安全提问(未设置请忽略)</option>
+                        <option value="1">母亲的名字</option>
+                        <option value="2">爷爷的名字</option>
+                        <option value="3">父亲出生的城市</option>
+                        <option value="4">您其中一位老师的名字</option>
+                        <option value="5">您个人计算机的型号</option>
+                        <option value="6">您最喜欢的餐馆名称</option>
+                        <option value="7">驾驶执照最后四位数字</option>
+                    </select>
+                </div>
+            </li>
+            <li class="bl_none answerli" style="display:none;">
+                <input type="text" name="answer" id="answer_LyQ3i" class="px p_fre" size="30" placeholder="答案">
+            </li>
+        </ul>
+    </div>
+    <div class="btn_login">
+        <button tabindex="3" value="true" name="submit" type="submit" class="formdialog pn pnc">
+            <span>登录</span>
+        </button>
+    </div>
+</form>
+</body>
+</html>

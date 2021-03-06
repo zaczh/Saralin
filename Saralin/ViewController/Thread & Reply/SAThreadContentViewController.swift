@@ -11,54 +11,23 @@ import WebKit
 import CoreData
 
 class SAThreadContentViewController: SAContentViewController, SAReplyViewControllerDelegate {
-    /// for paging
-    private var currentPageUpper: Int = 1
-    private var currentPageLower: Int = 1
-    private var totalPage: Int = 1
-    
-    
-    struct PollData {
-        var polloptionid: Int
-        var tid: Int
-        var votes: Int
-        var displayorder: Int
-        var polloption: String
-        var voterids: String
-    }
-    
-    struct ThreadData {
-        var author: String?
-        var authorid: String?
-        var dbdateline: String?
-        var subject: String?
-        var formhash: String!
-        var tid: String!
-        var fid: String!
-        var typeid: String?
-        var replies: Int = 0
-        var pollData: [PollData] = []
-    }
     
     // used in font configuration VC
     private var isDummy: Bool = false
     private var dummyHTMLFileURL: URL?
     class func createDummyInstanceWithHTMLFileAt(url: URL) -> SAThreadContentViewController {
-        let dummyURL = URL.init(string: "http://dummy?tid=0&fid=0&page=0")!
+        let dummyURL = URL.init(string: "http://dummy?tid=0&fid=0&tid=0&page=0")!
         let viewController = SAThreadContentViewController.init(url: dummyURL)
         viewController.isDummy = true
         viewController.dummyHTMLFileURL = url
         return viewController
     }
-    
-    private var pageComposer: SAThreadHTMLComposer?
-    private var pageLoadingFinishHandler: (((() -> Void)?) -> ())?
-    
+        
     private var fileURL: URL!
     private var fileDirectoryURL: URL!
     private let imageSavingSubDirName = "images"
-
-    // thread json data
-    private var threadData = ThreadData()
+    private let bottomRefreshDraggingTriggerDistance = CGFloat(40)
+    var enableBottomRefreshing = false
 
     // wkwebview javascript interaction
     var webData: [String:AnyObject]?
@@ -87,23 +56,11 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
     private func commonInit() {
         showsLoadingProgressView = false
         
-        let url = self.url!
-        threadData.tid = url.sa_queryString("tid")
-        
-        // my notice view controller cell click goes here
-        if threadData.tid == nil {
-            threadData.tid = url.sa_queryString("ptid")
-        }
-        
-        if let totalpage = url.sa_queryString("totalpage") {
-            totalPage = Int(totalpage)!
-        }
-        
-        guard threadData.tid != nil else {
-            fatalError("wrong url parameter!")
-        }
-        
         automaticallyLoadsURL = false
+        
+        guard let _ = url?.sa_queryString("tid") else {
+            fatalError("tid must be set.")
+        }
         
         // this should be done early
         prepareDirectory()
@@ -113,8 +70,39 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
         }
     }
     
+    
+    // the bridging js methods
+    private func getThreadInfo(completion: @escaping((ThreadSummary?) -> Void)) {
+        webView.evaluateJavaScript("threadInfo;") { (object, error) in
+            guard error == nil else {
+                os_log("webview javascript error: %@", type: .error, error!.localizedDescription)
+                completion(nil)
+                return
+            }
+            
+            guard let thread = object as? [String:AnyObject] else {
+                os_log("webview thread info bad", type: .error)
+                completion(nil)
+                return
+            }
+            
+            var threadData = ThreadSummary(tid: thread["tid"] as? String ?? "",
+                                           fid: thread["fid"] as? String ?? "",
+                                           subject: thread["subject"] as? String ?? "",
+                                           author: thread["author"] as? String ?? "",
+                                           authorid: thread["authorid"] as? String ?? "",
+                                           dbdateline: thread["dbdateline"] as? String ?? "",
+                                           dblastpost: thread["dblastpost"] as? String ?? "",
+                                           replies: Int((thread["replies"] as? String) ?? "0") ?? 0,
+                                           views: Int(thread["views"] as! String)!, readperm: 0)
+            threadData.formhash = thread["formhash"] as? String
+            threadData.floor = thread["floor"] as? Int ?? 1
+            completion(threadData)
+        }
+    }
+    
     deinit {
-        sa_log_v2("SAThreadContentViewController deinit", module: .ui, type: .debug)
+        os_log("SAThreadContentViewController deinit", log: .ui, type: .debug)
         removeHTMLFiles()
         if let session = urlSession {
             session.invalidateAndCancel()
@@ -140,7 +128,7 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
         super.decodeRestorableState(with: coder)
         url = coder.decodeObject(forKey: "url") as? URL
         commonInit()
-        loadPagePreserveHistory()
+        loadHTMLFile()
     }
     
     private var bottomRefreshStack = UIStackView()
@@ -164,14 +152,22 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
         bottomRefreshContainerView.addSubview(bottomRefreshStack)
         bottomRefreshStack.centerXAnchor.constraint(equalTo: bottomRefreshContainerView.centerXAnchor).isActive = true
         bottomRefreshStack.centerYAnchor.constraint(equalTo: bottomRefreshContainerView.centerYAnchor).isActive = true
-        let loading = UIActivityIndicatorView(style: .gray)
-        bottomRefreshStack.addArrangedSubview(loading)
+        if #available(iOS 13.0, *) {
+            let loading = UIActivityIndicatorView(style: .medium)
+            bottomRefreshStack.addArrangedSubview(loading)
+        } else {
+            // Fallback on earlier versions
+            let loading = UIActivityIndicatorView(style: .gray)
+            bottomRefreshStack.addArrangedSubview(loading)
+        }
         let label = UILabel()
         bottomRefreshStack.addArrangedSubview(label)
         kvoContext = ""
         webView.scrollView.addObserver(self, forKeyPath: #keyPath(UIScrollView.contentSize), options: [.new], context: &kvoContext)
+        #if !targetEnvironment(macCatalyst)
         bottomRefresherDidRefresh() // reset state
-
+        #endif
+        
         if isDummy {
             restorationIdentifier = nil
         } else {
@@ -188,16 +184,14 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
             } else {
                 loadDB { [weak self] in
                     if self?.favoriteRecordInDB != nil {
-                        sa_log_v2("this thread also exist in online favorite list", module: .ui, type: .info)
+                        os_log("this thread also exist in online favorite list", log: .ui, type: .info)
                     }
-                    self?.loadPagePreserveHistory()
+                    self?.loadHTMLFile()
                 }
             }
         }
         
-        #if targetEnvironment(macCatalyst)
-            setupContextMenuAction()
-        #endif
+        setupContextMenuAction()
                
         if !isDummy {
             let moreItem: UIBarButtonItem = { () in
@@ -359,119 +353,26 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
     
     private func reloadPage() {
         guard let _ = webView.url else {
-            sa_log_v2("no url was loaded", module: .ui, type: .info)
+            os_log("no url was loaded", log: .ui, type: .info)
             return
         }
         
         updateCSSFile()
         
         if webView.isLoading {
-            sa_log_v2("is loading, run later", module: .ui, type: .info)
+            os_log("is loading, run later", log: .ui, type: .info)
             let handler: ValueChangeHandler = ("loading", { (webView) in
                 webView.evaluateJavaScript("reloadCSS();") { (obj, error) in
-                    sa_log_v2("reloadPage", module: .ui, type: .info)
+                    os_log("reloadPage", log: .ui, type: .info)
                 }
             })
             webviewKeyValueChangeRunOnceHandlers.append(handler)
         } else {
-            sa_log_v2("not loading, run immediately", module: .ui, type: .info)
+            os_log("not loading, run immediately", log: .ui, type: .info)
             webView.evaluateJavaScript("reloadCSS();") { (obj, error) in
-                sa_log_v2("reloadPage", module: .ui, type: .info)
+                os_log("reloadPage", log: .ui, type: .info)
             }
         }
-    }
-    
-    func refreshPage() {
-        getWebPageCurrentFloor { [weak self] (floor) in
-            guard let self = self else { return }
-            
-            guard floor > 0 else {
-                self.loadDataForCurrentPage()
-                return
-            }
-            
-            self.refreshPageAndGoTo(floor: floor)
-        }
-    }
-    
-    func refreshWebPollForm() {
-        var pollInfo: [String:AnyObject]?
-        var pollOptions: [String:AnyObject]?
-
-        let group = DispatchGroup()
-        group.enter()
-        urlSession.getPollInfo(of: threadData.tid) { [weak self] (obj, error) in
-            defer {
-                group.leave()
-            }
-            
-            guard error == nil else {
-                sa_log_v2("get poll error: %@", module: .ui, type: .error, error!)
-                return
-            }
-                        
-            guard let result = obj as? [String:AnyObject] else {
-                let error = NSError(domain: NSPOSIXErrorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey:"Bad response from server."])
-                sa_log_v2("%@", module: .ui, type: .error, error.localizedDescription)
-                return
-            }
-            
-            guard let success = result["success"] as? Int, success == 1 else {
-                sa_log_v2("%@", module: .ui, type: .info, "no poll in this thread")
-                return
-            }
-            
-            guard let self = self else {
-                let error = NSError(domain: NSPOSIXErrorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey:"Canceled."])
-                sa_log_v2("%@", module: .ui, type: .error, error.localizedDescription)
-                return
-            }
-            pollInfo = result
-            
-            group.enter()
-            self.urlSession.getPollOptions(of: self.threadData.tid) { (obj, error) in
-                defer {
-                    group.leave()
-                }
-                
-                guard error == nil else {
-                    sa_log_v2("get poll error: %@", module: .ui, type: .error, error!)
-                    return
-                }
-                
-                sa_log_v2("get poll result: %@", module: .ui, type: .debug, obj?.description ?? "")
-                
-                guard let result = obj as? [String:AnyObject] else {
-                    let error = NSError(domain: NSPOSIXErrorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey:"Bad response from server.[GetPoolOption]"])
-                    sa_log_v2("%@", module: .ui, type: .error, error.localizedDescription)
-                    return
-                }
-                
-                pollOptions = result
-            }
-        }
-        
-        group.notify(queue: .main) {
-            self.pageComposer?.reloadPollForm(pollInfo: pollInfo, pollOptions: pollOptions)
-        }
-    }
-    
-    private func refreshPageAndGoTo(floor: Int) {
-        let page = pageOfFloor(floor)
-        currentPageUpper = page
-        currentPageLower = page
-        pageLoadingFinishHandler = { [weak self] (completion) in
-            guard let self = self else { return }
-            self.scrollWebPageTo(floor: floor, completion:{() in
-                completion?()
-            })
-        }
-        loadDataForCurrentPage()
-    }
-    
-    private func pageOfFloor(_ floor: Int) -> Int {
-        let ppp = SAGlobalConfig().number_of_replies_per_page
-        return floor/ppp + 1
     }
     
     override func getWebViewConfiguration() -> WKWebViewConfiguration {
@@ -484,9 +385,9 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
         config.userContentController.add(SAScriptReportAbuseUserHandler(viewController: self), name: "reportabuseuser")
         config.userContentController.add(SAScriptUnblockAbuseUserHandler(viewController: self), name: "unblockabuseuser")
         config.userContentController.add(SAScriptThreadDeleteHandler(viewController: self), name: "threaddelete")
-        config.userContentController.add(SAScriptThreadLoadMoreDataHandler(viewController: self), name: "threadloadmore")
+        config.userContentController.addScriptMessageHandler(SAScriptThreadLoadMoreDataHandler(viewController: self), contentWorld: WKContentWorld.page, name: "threadloadmore")
+        config.userContentController.addScriptMessageHandler(SAScriptThreadPollHandler(viewController: self), contentWorld: WKContentWorld.page, name: "threadpoll")
         config.userContentController.add(SAScriptThreadActionHandler(viewController: self), name: "threadaction")
-        config.userContentController.add(SAScriptWebDataHandler(viewController: self), name: "webdata")
         config.userContentController.add(SAScriptWebPageHandler(viewController: self), name: "page")
 
         if #available(iOS 11.0, *) {
@@ -506,9 +407,8 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
     private var favoriteRecordInDB: OnlineFavoriteThread?
 
     private func loadDB(completion:(() -> Void)?) {
-        
-        guard let tid = threadData.tid else {
-            sa_log_v2("save viewedthread tid is nil, not saved", module: .ui, type: .debug)
+        guard let tid = self.url?.sa_queryString("tid") else {
+            os_log("save viewedthread tid is nil, not saved", log: .ui, type: .debug)
             completion?()
             return
         }
@@ -574,58 +474,35 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
         }
     }
     
-    private func loadPagePreserveHistory() {
-        guard let obj = historyRecordInDB, let floor = obj.lastviewfloor?.intValue, floor > 1 else {
-            sa_log_v2("load ThreadViewHistory floor number is zero", module: .ui, type: .debug)
-             DispatchQueue.main.async {
-                 self.loadDataForCurrentPage()
-             }
-            return
-        }
-        
-        sa_log_v2("load ThreadViewHistory floor: %@", module: .ui, type: .info, NSNumber(value: floor))
-        
-        DispatchQueue.main.async { [weak self] in
-            guard let strongSelf = self else { return }
-            let page = strongSelf.pageOfFloor(floor)
-            strongSelf.currentPageUpper = page
-            strongSelf.currentPageLower = page
-            strongSelf.pageLoadingFinishHandler = { [weak self] (completion) in
-                guard let self = self else { return }
-                self.scrollWebPageTo(floor: floor, completion: {
-                    completion?()
-                })
-            }
-            strongSelf.loadDataForCurrentPage()
-        }
-    }
-    
     // MARK: record history
     fileprivate func recordThreadViewHistory() {
-        guard threadData.fid != nil && threadData.tid != nil else {
-            sa_log_v2("save viewedthread fid is nil or tid is nil, not saved", module: .ui, type: .debug)
-            return
-        }
+        getThreadInfo { (threadData) in
+            guard let threadData = threadData else { return }
         
-        let uid = Account().uid
-        guard !uid.isEmpty else {
-            return
-        }
-        
-        getWebPageCurrentFloor { (floor) in
+            guard !threadData.fid.isEmpty && !threadData.tid.isEmpty else {
+                os_log("save viewedthread fid is nil or tid is nil, not saved", log: .ui, type: .debug)
+                return
+            }
+            
+            let uid = Account().uid
+            guard !uid.isEmpty else {
+                return
+            }
+            
+            let floor = threadData.floor
             guard floor > 0 else {return}
             
-            sa_log_v2("record ThreadViewHistory floor: %@", module: .ui, type: .debug, NSNumber(value: floor))
+            os_log("record ThreadViewHistory floor: %@", log: .ui, type: .debug, NSNumber(value: floor))
             
             // because coredata saving could be in background thread
             let webviewYOffset = Float(self.webView!.scrollView.contentOffset.y)
-            let lower = self.currentPageLower
-            let replies = self.threadData.replies
-            let subject = self.threadData.subject
-            let author = self.threadData.author
-            let authorID = self.threadData.authorid
-            let tid = self.threadData.tid
-            let fid = self.threadData.fid
+            let lower = threadData.floor // TODO: get floor
+            let replies = threadData.replies
+            let subject = threadData.subject
+            let author = threadData.author
+            let authorID = threadData.authorid
+            let tid = threadData.tid
+            let fid = threadData.fid
             
             if let obj = self.historyRecordInDB {
                 obj.managedObjectContext?.perform {
@@ -657,266 +534,24 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
                     viewedThread.lastviewreplycount = NSNumber(value: replies)
                     self?.historyRecordInDB = viewedThread
                 }, completion: nil)
-                sa_log_v2("save viewedthread", module: .ui, type: .debug)
+                os_log("save viewedthread", log: .ui, type: .debug)
                 
-                if let _ = tid {
-                    AppController.current.getService(of: SACoreDataManager.self)!.cache?.viewedThreadIDs.append(tid!)
+                if !tid.isEmpty {
+                    AppController.current.getService(of: SACoreDataManager.self)!.cache?.viewedThreadIDs.append(tid)
                 }
             }
-        }
-    }
-    
-    // this function is called from webpage
-    func loadMoreDataAndInsertHTML(downward: Bool, callbackIndex: Int) {
-        let noMoreDataScript = "runCallbackFuncAtIndex(\(callbackIndex),false,true,null);"
-        let failedScript = "runCallbackFuncAtIndex(\(callbackIndex),true,false,null);"
-        
-        let allLoadedJob = { () in
-            self.webView?.evaluateJavaScript(noMoreDataScript, completionHandler: nil)
-            sa_log_v2("loadMoreDataAndInsertHTML: all loaded downward", module: .ui, type: .debug)
-        }
-        
-        let allLoadedJobUpward = { () in
-            self.webView?.evaluateJavaScript(noMoreDataScript, completionHandler: nil)
-            sa_log_v2("loadMoreDataAndInsertHTML: all loaded upward", module: .ui, type: .debug)
-        }
-        
-        let failedJob = { [weak self] () in
-            guard let self = self else { return }
-            
-            // restore page
-            if downward {
-                self.currentPageLower = self.currentPageLower - 1
-            } else {
-                self.currentPageUpper = self.currentPageUpper + 1
-            }
-            self.webView?.evaluateJavaScript(failedScript, completionHandler: nil)
-            sa_log_v2("loadMoreDataAndInsertHTML failed", module: .ui, type: .debug)
-        }
-        
-        if downward {
-            guard currentPageLower < totalPage else {
-                allLoadedJob()
-                return
-            }
-            currentPageLower = currentPageLower + 1
-        } else {
-            guard currentPageUpper > 1 else {
-                allLoadedJobUpward()
-                return
-            }
-            currentPageUpper = currentPageUpper - 1
-        }
-        
-        urlSession.getTopicContent(of: threadData.tid, page: downward ? currentPageLower : currentPageUpper) { [weak self] (result, error) in
-            guard let self = self else {
-                return
-            }
-            
-            guard error == nil,
-                let resultDict = result as? [String:AnyObject],
-                let variables = resultDict["Variables"] as? [String:Any],
-                let thread = variables["thread"] as? [String:AnyObject],
-                let replyCount = thread["replies"] as? String,
-                let postlist = variables["postlist"] as? [[String:AnyObject]] else {
-                    failedJob();
-                    return
-            }
-            
-            self.threadData.replies = Int(replyCount)!
-            self.threadData.formhash = variables["formhash"] as? String
-            self.threadData.fid = thread["fid"] as? String
-            self.threadData.tid = thread["tid"] as? String
-            self.threadData.subject = thread["subject"] as? String
-            self.threadData.author = thread["author"] as? String
-            self.threadData.authorid = thread["authorid"] as? String
-            self.threadData.dbdateline = postlist.first?["dbdateline"] as? String
-            
-            guard self.threadData.tid != nil else {
-                failedJob();
-                return
-            }
-            
-            let noMoreData = postlist.count < SAGlobalConfig().number_of_replies_per_page
-            self.pageComposer?.append(threadInfo: thread, postList: postlist, completion: { (composer, content, parseError) in
-                guard !content.isEmpty else {
-                    failedJob();
-                    return
-                }
-                
-                let script = "runCallbackFuncAtIndex(\(callbackIndex),false,false,\"\(content.sa_escapedStringForJavaScriptInput())\");"
-                self.webView?.evaluateJavaScript(script, completionHandler: { (result, error) in
-                    if error == nil {
-                        sa_log_v2("append html ok", module: .ui, type: .debug)
-                    } else  {
-                        sa_log_v2("append html error", module: .ui, type: .debug)
-                    }
-                })
-                
-                if noMoreData {
-                    if downward {
-                        allLoadedJob()
-                    } else  {
-                        allLoadedJobUpward()
-                    }
-                }
-            })
-        }
-    }
-    
-    private func loadDataForCurrentPage() {
-        guard threadData.tid != nil else {
-            sa_log_v2("error: tid is nil!", module: .ui, type: .debug)
-            return
-        }
-        
-        //clear flags
-        let script = "clearBeforeReloading();"
-        webView?.evaluateJavaScript(script, completionHandler: nil)
-        
-        loadingController.setLoading()
-        
-        var threadResult: [String:AnyObject]?
-        var pollInfo: [String:AnyObject]?
-        var pollOptions: [String:AnyObject]?
-
-        let group = DispatchGroup()
-        group.enter()
-        urlSession.getTopicContent(of: threadData.tid, page: currentPageLower) { [weak self] (result, error) in
-            defer {
-                group.leave()
-            }
-            guard let strongSelf = self else {
-                return
-            }
-            
-            guard error == nil,
-            let resultDict = result as? [String:AnyObject] else {
-                strongSelf.loadingController.setFailed(with: error)
-                return
-            }
-
-            threadResult = resultDict
-        }
-        
-        group.enter()
-        urlSession.getPollInfo(of: threadData.tid) { [weak self] (obj, error) in
-            defer {
-                group.leave()
-            }
-            
-            guard error == nil else {
-                sa_log_v2("get poll error: %@", module: .ui, type: .error, error!)
-                return
-            }
-                        
-            guard let result = obj as? [String:AnyObject] else {
-                let error = NSError(domain: NSPOSIXErrorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey:"Bad response from server."])
-                sa_log_v2("%@", module: .ui, type: .error, error.localizedDescription)
-                return
-            }
-            
-            guard let success = result["success"] as? Int, success == 1 else {
-                sa_log_v2("%@", module: .ui, type: .info, "no poll in this thread")
-                return
-            }
-            
-            guard let self = self else {
-                let error = NSError(domain: NSPOSIXErrorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey:"Canceled."])
-                sa_log_v2("%@", module: .ui, type: .error, error.localizedDescription)
-                return
-            }
-            pollInfo = result
-            
-            group.enter()
-            self.urlSession.getPollOptions(of: self.threadData.tid) { (obj, error) in
-                defer {
-                    group.leave()
-                }
-                
-                guard error == nil else {
-                    sa_log_v2("get poll error: %@", module: .ui, type: .error, error!)
-                    return
-                }
-                
-                sa_log_v2("get poll result: %@", module: .ui, type: .debug, obj?.description ?? "")
-                
-                guard let result = obj as? [String:AnyObject] else {
-                    let error = NSError(domain: NSPOSIXErrorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey:"Bad response from server.[GetPoolOption]"])
-                    sa_log_v2("%@", module: .ui, type: .error, error.localizedDescription)
-                    return
-                }
-                
-                pollOptions = result
-            }
-        }
-        
-        group.notify(queue: DispatchQueue.main) { [weak self] in
-            guard let strongSelf = self else {
-                return
-            }
-            guard let resultDict = threadResult, let variables = resultDict["Variables"] as? [String:AnyObject] else {
-                return
-            }
-                        
-            if let message = resultDict["Message"] as? [String:AnyObject],
-                let messagestr = message["messagestr"] as? String, !messagestr.isEmpty {
-                strongSelf.loadingController.emptyLabelTitle = messagestr
-            }
-            
-            guard let thread = variables["thread"] as? [String:Any],
-            let postlist = variables["postlist"] as? [[String:Any]],
-                !postlist.isEmpty else {
-                strongSelf.loadingController.setEmpty()
-                return
-            }
-            
-            guard let replyCount = thread["replies"] as? String else {
-                strongSelf.loadingController.setEmpty()
-                return
-            }
-            
-            strongSelf.threadData.replies = Int(replyCount)!
-            strongSelf.threadData.formhash = variables["formhash"] as? String
-            strongSelf.threadData.fid = thread["fid"] as? String
-            strongSelf.threadData.tid = thread["tid"] as? String
-            strongSelf.threadData.subject = thread["subject"] as? String
-            strongSelf.threadData.author = thread["author"] as? String
-            strongSelf.threadData.authorid = thread["authorid"] as? String
-            strongSelf.threadData.dbdateline = postlist.first?["dbdateline"] as? String
-            
-            let allowperm = variables["allowperm"] as? [String:Any]
-            if let uploadhash = allowperm?["uploadhash"] as? String {
-               Account().uploadhash = uploadhash
-            }
-            guard strongSelf.threadData.fid != nil, strongSelf.threadData.tid != nil else {
-               strongSelf.loadingController.setEmpty()
-               return
-            }
-
-            #if targetEnvironment(macCatalyst)
-            strongSelf.title = strongSelf.threadData.subject
-            strongSelf.updateToolBar(true)
-            #endif
-
-            // NOTE: `loadDataForCurrentPage` may reset the composer
-            strongSelf.pageComposer = SAThreadHTMLComposer(fid: strongSelf.threadData.fid, tid: strongSelf.threadData.tid, threadData: resultDict, pollInfo: pollInfo, pollOptions: pollOptions)
-            strongSelf.pageComposer?.webView = strongSelf.webView
-            strongSelf.pageComposer!.parse(isFirstPage: strongSelf.currentPageLower == 1, completion: { (composer, content, error) in
-               if let ppp = variables["ppp"] as? String {
-                   let postPerPage = Int(ppp)!
-                   let replies = composer.replyCount + 1 // 主贴不算回复，所以加一
-                   strongSelf.totalPage = Int(ceil(CGFloat(replies)/CGFloat(postPerPage)))
-               }
-               strongSelf.loadHTMLFile()
-            })
         }
     }
     
     private func prepareDirectory() {
         let fm = FileManager.default
         let timeinterval = CFAbsoluteTimeGetCurrent()
-        let htmlFileDirectory = AppController.current.threadHtmlFileDirectory.appendingPathComponent("\(timeinterval)_" + self.threadData.tid, isDirectory: true).path
+        guard let tid = self.url?.sa_queryString("tid") else {
+            os_log("prepareDirectory tid is nil", log: .ui, type: .debug)
+            return
+        }
+        
+        let htmlFileDirectory = AppController.current.threadHtmlFileDirectory.appendingPathComponent("\(timeinterval)_" + tid, isDirectory: true).path
         if !fm.fileExists(atPath: htmlFileDirectory) {
             try! fm.createDirectory(atPath: htmlFileDirectory, withIntermediateDirectories: true, attributes: nil)
         }
@@ -930,6 +565,7 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
             htmlFileDirectory + "/loading.gif" : Bundle.main.path(forResource: "loading", ofType: "gif")!,
             htmlFileDirectory + "/placeholder.png" : Bundle.main.path(forResource: "placeholder", ofType: "png")!,
             htmlFileDirectory + "/placeholderfail.png" : Bundle.main.path(forResource: "placeholderfail", ofType: "png")!,
+            htmlFileDirectory + "/mahjong_placeholder.png" : Bundle.main.path(forResource: "mahjong_placeholder", ofType: "png")!,
         ]
         for (k, v) in resourceMap {
             if !fm.fileExists(atPath: k) {
@@ -944,6 +580,13 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
         }
         
         let htmlFilePath = String.init(format: "%@/1.html", htmlFileDirectory)
+        
+        var htmlTemplateContent = try! String(contentsOfFile: Bundle.main.path(forResource: "thread_view_template", ofType: "html")!)
+        htmlTemplateContent = htmlTemplateContent.replacingOccurrences(of: "${AVATAR_PLACEHOLDER_BASE64}", with: "noavatar_middle.png")
+        htmlTemplateContent = htmlTemplateContent.replacingOccurrences(of: "${CSS_FILE_TIMESTAMP}", with: "\(Int(Date().timeIntervalSince1970 * 1000))")
+        htmlTemplateContent = htmlTemplateContent.replacingOccurrences(of: "${REPLIES_PER_PAGE}", with: "\(SAGlobalConfig().number_of_replies_per_page)")
+        try? htmlTemplateContent.write(toFile: htmlFilePath, atomically: false, encoding: .utf8)
+
         self.fileURL = Foundation.URL.init(fileURLWithPath: htmlFilePath)
         self.fileDirectoryURL = Foundation.URL.init(fileURLWithPath: htmlFileDirectory)
     }
@@ -964,7 +607,6 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
         css = css.replacingOccurrences(of: "${foreground-color}", with: (activeTheme.foregroundColor))
         css = css.replacingOccurrences(of: "${normal-font-size}", with: String(describing: floor(UIFont.sa_preferredFont(forTextStyle: UIFont.TextStyle.body).pointSize/96 * 72)) + "pt")
         css = css.replacingOccurrences(of: "${small-font-size}", with: String(describing: floor(UIFont.sa_preferredFont(forTextStyle: UIFont.TextStyle.subheadline).pointSize/96 * 72)) + "pt")
-        css = css.replacingOccurrences(of: "${reply-header-height}", with: String(describing: floor(UIFont.sa_preferredFont(forTextStyle: UIFont.TextStyle.body).pointSize/96 * 72 * 2.5)) + "pt")
 
         // adapt icon color
         if activeTheme.colorScheme == 0 {
@@ -976,13 +618,16 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
         css = css.replacingOccurrences(of: "${thread-title-color}", with: (activeTheme.tableHeaderTextColor))
         css = css.replacingOccurrences(of: "${thread-title-font-size}", with: String(describing: floor(UIFont.sa_preferredFont(forTextStyle: UIFont.TextStyle.headline).pointSize/96 * 72)) + "pt")
         css = css.replacingOccurrences(of: "${text-color}", with: (activeTheme.textColor))
-        css = css.replacingOccurrences(of: "${body-padding}", with: "15px")
         css = css.replacingOccurrences(of: "${link-color}", with: (activeTheme.htmlLinkColor))
         css = css.replacingOccurrences(of: "${header-background-color}", with: (activeTheme.tableCellHighlightColor))
-        css = css.replacingOccurrences(of: "${block-quote-text-color}", with: (activeTheme.htmlBlockQuoteTextColor))
+        css = css.replacingOccurrences(of: "${block-quote-text-color}", with: (activeTheme.tableCellGrayedTextColor))
         css = css.replacingOccurrences(of: "${block-quote-background-color}", with: (activeTheme.htmlBlockQuoteBackgroundColor))
         
-        css = css.replacingOccurrences(of: "${table-cell-seperator-color}", with: activeTheme.tableCellSeperatorColor.sa_toColor().sa_toHtmlCssColorFunction())
+        if #available(iOS 13.0, *) {
+            css = css.replacingOccurrences(of: "${table-cell-seperator-color}", with: UIColor.separator.sa_toHtmlCssColorFunction())
+        } else {
+            css = css.replacingOccurrences(of: "${table-cell-seperator-color}", with: activeTheme.tableCellSeperatorColor.sa_toColor().sa_toHtmlCssColorFunction())
+        }
         css = css.replacingOccurrences(of: "${table-cell-grayed-text-color}", with: (activeTheme.tableCellGrayedTextColor))
         
         #if targetEnvironment(macCatalyst)
@@ -990,7 +635,11 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
             css = css.replacingOccurrences(of: "${img-max-width}", with: "\(SAContentViewControllerReadableAreaMaxWidth * 2/3)px")
         #else
             css = css.replacingOccurrences(of: "${ipad-body-style}", with: "")
-            css = css.replacingOccurrences(of: "${img-max-width}", with: "100%")
+            if UIDevice.current.userInterfaceIdiom == .pad {
+                css = css.replacingOccurrences(of: "${img-max-width}", with: "300px")
+            } else {
+                css = css.replacingOccurrences(of: "${img-max-width}", with: "100%")
+            }
         #endif
         
         try? FileManager.default.removeItem(at: fileDirectoryURL.appendingPathComponent("base.css"))
@@ -1003,31 +652,28 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
         do {
             try content.write(to: fileURL, atomically: true, encoding: String.Encoding.utf8)
         } catch {
-            sa_log_v2("write html to file failed error: %@", module: .ui, type: .error, error as CVarArg)
+            os_log("write html to file failed error: %@", log: .ui, type: .error, error as CVarArg)
             return
         }
         _ = self.webView?.loadFileURL(fileURL, allowingReadAccessTo: fileDirectoryURL)
     }
     
     private func loadHTMLFile() {
-        guard let content = pageComposer?.content else {
-            sa_log_v2("load failed because content is nil", module: .ui, type: .error)
-            return
-        }
         updateCSSFile()
-        do {
-            try content.write(to: fileURL, atomically: true, encoding: String.Encoding.utf8)
-        } catch {
-            sa_log_v2("write html to file failed error: %@", module: .ui, type: .error, error as CVarArg)
-            return
-        }
-        _ = self.webView?.loadFileURL(fileURL, allowingReadAccessTo: fileDirectoryURL)
+        let url = fileURL!.sa_urlByReplacingQuery("floor", value: "\(historyRecordInDB?.lastviewfloor?.intValue ?? 1)").sa_urlByReplacingQuery("tid", value: self.url!.sa_queryString("tid")!)
+        _ = self.webView?.loadFileURL(url, allowingReadAccessTo: fileDirectoryURL)
+    }
+    
+    private func loadHTMLFilesAt(floor: Int) {
+        updateCSSFile()
+        let url = fileURL!.sa_urlByReplacingQuery("floor", value: "\(floor)").sa_urlByReplacingQuery("tid", value: self.url!.sa_queryString("tid")!)
+        _ = self.webView?.loadFileURL(url, allowingReadAccessTo: fileDirectoryURL)
     }
     
     private func scrollWebPageTo(floor: Int, completion: (() -> Void)?) {
         self.webView?.evaluateJavaScript("scrollToFloor('\(floor)')", completionHandler: { (result, error) in
             if error != nil {
-                sa_log_v2("error when scroll to last postition: %@", module: .ui, type: .debug, error! as NSError)
+                os_log("error when scroll to last postition: %@", log: .ui, type: .debug, error! as NSError)
             }
             completion?()
         })
@@ -1039,23 +685,10 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
     
     override func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
         if isDummy { return }
-        
-        let finishing = {
-            self.loadingController.setFinished()
-            self.navigationItem.rightBarButtonItems?.forEach({ (item) in
-                item.isEnabled = true
-            })
-            
-        }
-        
-        if pageLoadingFinishHandler != nil {
-            pageLoadingFinishHandler!{
-                finishing()
-            }
-            pageLoadingFinishHandler = nil
-        } else {
-            finishing()
-        }
+        self.loadingController.setFinished()
+        self.navigationItem.rightBarButtonItems?.forEach({ (item) in
+            item.isEnabled = true
+        })
     }
     
     override func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
@@ -1069,7 +702,12 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
             return
         }
         
-        if let pid = url.sa_queryString("pid"), let ptid = url.sa_queryString("ptid"), ptid == threadData.tid {
+        guard let tid = self.url?.sa_queryString("tid") else {
+            os_log("save viewedthread tid is nil, not saved", log: .ui, type: .debug)
+            return
+        }
+        
+        if let pid = url.sa_queryString("pid"), let ptid = url.sa_queryString("ptid"), ptid == tid {
             // jump to floor of this thread
             let jumpJs = "(function(){var oldFloor = getCurrentFloorTid();var jumpDiv = document.querySelector('div#pid\(pid)');if (jumpDiv != null) {return oldFloor;} else {return null;}})();"
             webView.evaluateJavaScript(jumpJs) { [weak self] (obj, error) in
@@ -1101,8 +739,9 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
         webView.reload()
     }
     
-    func openDesktopPage() {
-        let link = SAGlobalConfig().forum_base_url + "thread-\(self.threadData.tid!)-1-1.html"
+    func openDesktopPage(_ sender: AnyObject) {
+        let tid = self.url!.sa_queryString("tid")!
+        let link = SAGlobalConfig().forum_base_url + "thread-\(tid)-1-1.html"
         let desktopPage = SAContentViewController(url: Foundation.URL(string: link)!)
         desktopPage.shouldSetDesktopBrowserUserAgent = true
         desktopPage.shouldLoadAllRequestsWithin = true
@@ -1118,10 +757,11 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
     }
     
     // MARK: UIScrollViewDelegate
+    #if !targetEnvironment(macCatalyst)
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         quoteFloorJumpView.isHidden = true
     }
-        
+    
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
         if !decelerate {
             // prompt immediately after scrolls conclues is not appropriate
@@ -1130,13 +770,14 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
         }
         quoteFloorJumpView.updateVisibility()
         
-        if currentPageLower == totalPage {
-            bottomRefreshContainerView.isHidden = false
-            let offset =  webView.scrollView.contentOffset.y + webView.scrollView.frame.size.height - webView.scrollView.contentSize.height - webView.scrollView.adjustedContentInset.bottom
-            if offset > bottomRefreshContainerView.frame.size.height {
-                bottomRefresherIsRefreshing()
-                doBottomRefreshing()
-            }
+        if !enableBottomRefreshing {
+            return
+        }
+        bottomRefreshContainerView.isHidden = false
+        let offset =  webView.scrollView.contentOffset.y + webView.scrollView.frame.size.height - webView.scrollView.contentSize.height - webView.scrollView.adjustedContentInset.bottom
+        if offset > bottomRefreshContainerView.frame.size.height + bottomRefreshDraggingTriggerDistance {
+            bottomRefresherIsRefreshing()
+            doBottomRefreshing()
         }
     }
     
@@ -1145,13 +786,13 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
             return
         }
         
-        guard currentPageLower == totalPage else {
+        if !enableBottomRefreshing {
             return
         }
         
         bottomRefreshContainerView.isHidden = false
         let offset =  webView.scrollView.contentOffset.y + webView.scrollView.frame.size.height - webView.scrollView.contentSize.height - webView.scrollView.adjustedContentInset.bottom
-        if offset > bottomRefreshContainerView.frame.size.height {
+        if offset > bottomRefreshContainerView.frame.size.height + bottomRefreshDraggingTriggerDistance {
             bottomRefresherWillRefresh()
         } else {
             bottomRefresherDidRefresh()
@@ -1177,87 +818,66 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
     }
     
     private func doBottomRefreshing() {
-        urlSession.getTopicContent(of: threadData.tid, page: currentPageLower) { [weak self] (result, error) in
-            guard let self = self else {
-                return
-            }
+        
+        getThreadInfo { (threadInfo) in
+            guard let threadInfo = threadInfo else { return }
+            let tid = threadInfo.tid
+            let page = threadInfo.floor / SAGlobalConfig().number_of_replies_per_page + 1
             
-            guard error == nil,
-                let resultDict = result as? [String:AnyObject],
-                let variables = resultDict["Variables"] as? [String:Any],
-                let ppp = variables["ppp"] as? String,
-                let thread = variables["thread"] as? [String:AnyObject],
-                let replyCount = thread["replies"] as? String,
-                let postlist = variables["postlist"] as? [[String:AnyObject]] else {
-                    self.bottomRefresherDidRefresh()
-                    return
-            }
-            
-            guard let composer = self.pageComposer else {
-                self.bottomRefresherDidRefresh()
-                return
-            }
-            
-            var newPostList: [[String:AnyObject]] = []
-            postlist.forEach { (reply) in
-                guard let floorNumber = Int(reply["number"] as! String) else {
-                    return
-                }
-                if floorNumber > composer.maxFloor {
-                    newPostList.append(reply)
-                }
-            }
-            
-            guard !newPostList.isEmpty else {
-                let newReplyCount = Int(replyCount)!
-                if newReplyCount > self.threadData.replies {
-                    // new page
-                    let postPerPage = Int(ppp)!
-                    self.totalPage = Int(ceil(CGFloat(newReplyCount)/CGFloat(postPerPage)))
-                    guard self.totalPage > self.currentPageLower else {
-                        sa_log_v2("reloading on page boundary", module: .ui, type: .info)
-                        self.bottomRefresherDidRefresh()
-                        return
-                    }
-                    self.currentPageLower = self.totalPage
-                    self.doBottomRefreshing() // recursive
-                    sa_log_v2("recursive bottom refreshing", module: .ui, type: .info)
+            self.urlSession.getTopicContent(of: tid, page: page) { [weak self] (result, error) in
+                guard let self = self else {
                     return
                 }
                 
-                self.bottomRefresherDidRefresh()
-                return
-            }
-            
-            self.threadData.replies = Int(replyCount)!
-            self.threadData.formhash = variables["formhash"] as? String
-            self.threadData.fid = thread["fid"] as? String
-            self.threadData.tid = thread["tid"] as? String
-            self.threadData.subject = thread["subject"] as? String
-            self.threadData.author = thread["author"] as? String
-            self.threadData.authorid = thread["authorid"] as? String
-            self.threadData.dbdateline = postlist.first?["dbdateline"] as? String
-            
-            guard self.threadData.tid != nil else {
-                self.bottomRefresherDidRefresh()
-                return
-            }
-            
-            composer.append(threadInfo: thread, postList: newPostList, completion: { (composer, content, parseError) in
-                guard !content.isEmpty else {
+                guard error == nil,
+                    let resultDict = result as? [String:AnyObject],
+                    let variables = resultDict["Variables"] as? [String:Any],
+                    let _ = variables["ppp"] as? String,
+                    let thread = variables["thread"] as? [String:AnyObject],
+                    let replyCount = thread["replies"] as? String,
+                    let postlist = variables["postlist"] as? [[String:AnyObject]] else {
+                        self.bottomRefresherDidRefresh()
+                        return
+                }
+                
+                var newPostList: [[String:AnyObject]] = []
+                postlist.forEach { (reply) in
+                    guard let floorNumber = Int(reply["number"] as! String) else {
+                        return
+                    }
+                    if floorNumber > threadInfo.floor {
+                        newPostList.append(reply)
+                    }
+                }
+                
+                guard !newPostList.isEmpty else {
+                    let newReplyCount = Int(replyCount)!
+                    if newReplyCount > threadInfo.replies {
+                        self.doBottomRefreshing() // recursive
+                        os_log("recursive bottom refreshing", log: .ui, type: .info)
+                        return
+                    }
+                    
                     self.bottomRefresherDidRefresh()
                     return
                 }
-                let script = "appendPostListContent(\"\(content.sa_escapedStringForJavaScriptInput())\");"
-                self.webView?.evaluateJavaScript(script, completionHandler: { [weak self] (result, error) in
-                    if error == nil {
-                        sa_log_v2("append postlist ok", module: .ui, type: .info)
-                    } else  {
-                        sa_log_v2("append postlist error", module: .ui, type: .info)
+                
+                SAThreadHTMLComposer.appendTail(threadInfo: thread, postList: newPostList, completion: { (content, parseError) in
+                    guard !content.isEmpty else {
+                        self.bottomRefresherDidRefresh()
+                        return
                     }
-                    self?.bottomRefresherDidRefresh()
+                    let script = "appendPostListContent(\"\(content.sa_escapedStringForJavaScriptInput())\");"
+                    self.webView?.evaluateJavaScript(script, completionHandler: { [weak self] (result, error) in
+                        if error == nil {
+                            os_log("append postlist ok", log: .ui, type: .info)
+                        } else  {
+                            os_log("append postlist error", log: .ui, type: .info)
+                        }
+                        self?.bottomRefresherDidRefresh()
+                    })
                 })
-            })
+            }
         }
     }
     
@@ -1275,19 +895,11 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
         inset.bottom = 0
         webView.scrollView.contentInset = inset
     }
-    
-    private func getWebPageCurrentFloor(completion: ((Int) -> Void)?) {
-        if let s = webData?["floor"] as? String, let d = Int(s) {
-            completion?(d)
-            return
-        }
-        
-        completion?(-1)
-    }
+    #endif
     
     override func loadingControllerDidRetry(_ controller: SALoadingViewController) {
         super.loadingControllerDidRetry(controller)
-        loadPagePreserveHistory()
+        loadHTMLFile()
     }
     
     override func didReceiveMemoryWarning() {
@@ -1295,34 +907,43 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
         // Dispose of any resources that can be recreated.
     }
     
-    func showShareActivity() {
-        sa_log_v2("clicked share button", module: .ui, type: .debug)
-        guard threadData.tid != nil else {
-            sa_log_v2("error: tid is nil!")
-            return
-        }
-        
-        let url = Foundation.URL(string: SAGlobalConfig().forum_base_url + "thread-\(self.threadData.tid!)-\(self.currentPageLower)-1.html")!
+    private func showShareActivity(_ sender: AnyObject) {
+        os_log("clicked share button", log: .ui, type: .debug)
+        getThreadInfo { (threadData) in
+            guard let threadData = threadData else { return }
+            let tid = threadData.tid
+            let floor = threadData.floor/SAGlobalConfig().number_of_replies_per_page + 1
+            
+            let url = Foundation.URL(string: SAGlobalConfig().forum_base_url + "thread-\(tid)-\(floor)-1.html")!
 
-        let sharePageItem = SAActivityItem()
-        sharePageItem.url = url
-        sharePageItem.viewController = self
-        
-        var items: [AnyObject] = [sharePageItem]
-        items.append(url as AnyObject)
-        
-        // insert an app icon
-        let appIcon = #imageLiteral(resourceName: "logo")
-        items.append(appIcon as AnyObject)
+            let sharePageItem = SAActivityItem()
+            sharePageItem.url = url
+            sharePageItem.viewController = self
+            
+            var items: [AnyObject] = [sharePageItem]
+            items.append(url as AnyObject)
+            
+            // insert an app icon
+            let appIcon = #imageLiteral(resourceName: "logo")
+            items.append(appIcon as AnyObject)
 
-        let applications: [UIActivity] = [SAOpenInSafariActivity() /* , SASnapshotWebPageActivity() */]
-        let activityController = UIActivityViewController(activityItems: items, applicationActivities: applications)
-        activityController.excludedActivityTypes = [.saveToCameraRoll, .addToReadingList,.assignToContact, .print]
-        activityController.completionWithItemsHandler = { (activityType, completed, returnedItems, activityError) in
-            sa_log_v2("share completed returned: %@", returnedItems ?? "")
+            let applications: [UIActivity] = [SAOpenInSafariActivity() /* , SASnapshotWebPageActivity() */]
+            let activityController = UIActivityViewController(activityItems: items, applicationActivities: applications)
+            activityController.excludedActivityTypes = [.saveToCameraRoll, .addToReadingList,.assignToContact, .print]
+            activityController.completionWithItemsHandler = { (activityType, completed, returnedItems, activityError) in
+                os_log("share completed returned: %@", returnedItems ?? "")
+            }
+            
+            #if targetEnvironment(macCatalyst)
+            let toolbarItem = sender as! NSToolbarItem
+            let offset = getToolBarItemRightOffset(toolbarItem)
+            activityController.popoverPresentationController?.sourceView = self.view
+            activityController.popoverPresentationController?.sourceRect = CGRect(x: self.view.frame.size.width - CGFloat(offset), y: 20, width: 40, height: 40)
+            #else
+            activityController.popoverPresentationController?.barButtonItem = sender as? UIBarButtonItem
+            #endif
+            self.present(activityController, animated: true, completion: nil)
         }
-        activityController.popoverPresentationController?.barButtonItem = navigationItem.rightBarButtonItem
-        present(activityController, animated: true, completion: nil)
     }
     
     func replyToMainThread() {
@@ -1330,24 +951,36 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
             return
         }
         
-        var info = [String : AnyObject]()
-        info["fid"] = self.threadData.fid as AnyObject?
-        info["tid"] = self.threadData.tid as AnyObject?
-        info["formhash"] = self.threadData.formhash as AnyObject?
-        info["subject"] = self.threadData.subject as AnyObject?
-        info["quote_textcontent"] = self.threadData.subject as AnyObject?
-        info["author"] = self.threadData.author as AnyObject?
+        getThreadInfo { (threadData) in
+            guard let threadData = threadData else { return }
         
-        if #available(iOS 13.0, *) {
-            if UIApplication.shared.supportsMultipleScenes && ((Account().preferenceForkey(.enable_multi_windows) as? Bool) ?? false) {
-                let userActivity = NSUserActivity(activityType: SAActivityType.replyThread.rawValue)
-                userActivity.isEligibleForHandoff = true
-                userActivity.title = SAActivityType.replyThread.title()
-                userActivity.userInfo = ["quoteInfo":info]
-                let options = UIScene.ActivationRequestOptions()
-                options.requestingScene = view.window?.windowScene
-                UIApplication.shared.requestSceneSessionActivation(AppController.current.findSceneSession(), userActivity: userActivity, options: options) { (error) in
-                    sa_log_v2("request new scene returned: %@", error.localizedDescription)
+            var info = [String : AnyObject]()
+            info["fid"] = threadData.fid as AnyObject?
+            info["tid"] =  threadData.tid as AnyObject?
+            info["formhash"] = threadData.formhash as AnyObject?
+            info["subject"] = threadData.subject as AnyObject?
+            info["quote_textcontent"] = threadData.subject as AnyObject?
+            info["author"] = threadData.author as AnyObject?
+            
+            if #available(iOS 13.0, *) {
+                if UIApplication.shared.supportsMultipleScenes && ((Account().preferenceForkey(.enable_multi_windows) as? Bool) ?? false) {
+                    let userActivity = NSUserActivity(activityType: SAActivityType.replyThread.rawValue)
+                    userActivity.isEligibleForHandoff = true
+                    userActivity.title = SAActivityType.replyThread.title()
+                    userActivity.userInfo = ["quoteInfo":info]
+                    let options = UIScene.ActivationRequestOptions()
+                    options.requestingScene = self.view.window?.windowScene
+                    UIApplication.shared.requestSceneSessionActivation(AppController.current.findSceneSession(), userActivity: userActivity, options: options) { (error) in
+                        os_log("request new scene returned: %@", error.localizedDescription)
+                    }
+                } else {
+                    // Fallback on earlier versions
+                    let navi = UIStoryboard(name: "ReplyThread", bundle: nil).instantiateInitialViewController() as! UINavigationController
+                    let reply = navi.topViewController! as! SAReplyViewController
+                    reply.config(quoteInfo: info)
+                    reply.delegate = self
+                    navi.modalPresentationStyle = .pageSheet
+                    self.present(navi, animated: true, completion: nil)
                 }
             } else {
                 // Fallback on earlier versions
@@ -1358,14 +991,6 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
                 navi.modalPresentationStyle = .pageSheet
                 self.present(navi, animated: true, completion: nil)
             }
-        } else {
-            // Fallback on earlier versions
-            let navi = UIStoryboard(name: "ReplyThread", bundle: nil).instantiateInitialViewController() as! UINavigationController
-            let reply = navi.topViewController! as! SAReplyViewController
-            reply.config(quoteInfo: info)
-            reply.delegate = self
-            navi.modalPresentationStyle = .pageSheet
-            self.present(navi, animated: true, completion: nil)
         }
     }
     
@@ -1388,36 +1013,37 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
         return true
     }
     
-    private func favoriteThread() {
+    private func favoriteThread(_ sender: AnyObject) {
         if !checkLoginWithHint("登录以后才能收藏帖子") {
             return
         }
         
-        guard threadData.tid != nil && !threadData.tid.isEmpty else {
-            return
-        }
-        
-        let activity = SAModalActivityViewController()
-        present(activity, animated: true, completion: nil)
-        
-        urlSession.favorite(thread: threadData.tid!, formhash: threadData.formhash!) { (object, error) in
-            activity.hideAndShowResult(of: true, info: "已收藏") { () in
-                let viewController = self.navigationController!.presentingViewController
-                viewController?.dismiss(animated: true, completion: nil)
+        getThreadInfo { (threadData) in
+            guard let threadData = threadData else { return }
+            
+            let tid = threadData.tid
+            guard !tid.isEmpty, let formhash = threadData.formhash else {
+                return
+            }
+            
+            let activity = SAModalActivityViewController()
+            self.present(activity, animated: true, completion: nil)
+            
+            self.urlSession.favorite(thread: tid, formhash: formhash) { (object, error) in
+                activity.hideAndShowResult(of: true, info: "已收藏") { () in
+                    let viewController = self.navigationController!.presentingViewController
+                    viewController?.dismiss(animated: true, completion: nil)
+                }
             }
         }
     }
     
-    private func addToWatchList() {
+    private func addToWatchList(_ sender: AnyObject) {
         if !checkLoginWithHint("登录以后才能将帖子加入观察列表") {
             return
         }
         
         let addWatchingListAction = { () in
-            guard self.threadData.tid != nil && !self.threadData.tid.isEmpty else {
-                return
-            }
-            
             let activity = SAModalActivityViewController(style: .resultSuccess, caption: "已加入")
             self.present(activity, animated: true, completion: nil)
             self.updateWatchingListDB(createIfNotExist: true)
@@ -1457,51 +1083,51 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
     }
     
     func updateWatchingListDB(createIfNotExist: Bool) {
-        guard let tid = self.threadData.tid else {
-            sa_log_v2("addToWatchingList fid is nil or tid is nil, not add", module: .ui, type: .debug)
-            return
-        }
+        getThreadInfo { (threadData) in
+            guard let threadData = threadData else { return }
         
-        let uid = Account().uid
-        let fid = self.threadData.fid
-        let replyCount = self.threadData.replies
-        let subject = self.threadData.subject
-        let author = self.threadData.author
-        let authorid = self.threadData.authorid
-        let currentPageLower = self.currentPageLower
-        
-        if let obj = watchlingListRecordInDB {
-            obj.managedObjectContext?.perform {
-                obj.lastviewtime = Date()
-                obj.subject = subject
-                obj.page = NSNumber(value: currentPageLower)
-                obj.lastviewreplycount = NSNumber(value: replyCount)
-                obj.newreplycount = NSNumber(value: 0)
-                obj.createdevicename = UIDevice.current.name
-                obj.createdeviceidentifier = AppController.current.currentDeviceIdentifier
+            let uid = Account().uid
+            let fid = threadData.fid
+            let tid = threadData.tid
+            let replyCount = threadData.replies
+            let subject = threadData.subject
+            let author = threadData.author
+            let authorid = threadData.authorid
+            let currentPageLower = threadData.floor // TODO: floor
+            
+            if let obj = self.watchlingListRecordInDB {
+                obj.managedObjectContext?.perform {
+                    obj.lastviewtime = Date()
+                    obj.subject = subject
+                    obj.page = NSNumber(value: currentPageLower)
+                    obj.lastviewreplycount = NSNumber(value: replyCount)
+                    obj.newreplycount = NSNumber(value: 0)
+                    obj.createdevicename = UIDevice.current.name
+                    obj.createdeviceidentifier = AppController.current.currentDeviceIdentifier
+                }
+            } else if createIfNotExist {
+                AppController.current.getService(of: SACoreDataManager.self)!.insertNew(using: { [weak self] (watchingThread: WatchingThread) in
+                    watchingThread.createdevicename = UIDevice.current.name
+                    watchingThread.createdeviceidentifier = AppController.current.currentDeviceIdentifier
+                    watchingThread.uid = uid
+                    watchingThread.lastviewtime = Date()
+                    watchingThread.author = author
+                    watchingThread.authorid = authorid
+                    watchingThread.subject = subject
+                    watchingThread.tid = tid
+                    watchingThread.fid = fid
+                    watchingThread.page = NSNumber(value: currentPageLower)
+                    watchingThread.lastviewreplycount = NSNumber(value: replyCount)
+                    watchingThread.timeadded = Date()
+                    watchingThread.newreplycount = NSNumber(value: 0)
+                    watchingThread.lastfetchreplycount = NSNumber(value: replyCount)
+                    self?.watchlingListRecordInDB = watchingThread
+                }, completion: nil)
             }
-        } else if createIfNotExist {
-            AppController.current.getService(of: SACoreDataManager.self)!.insertNew(using: { [weak self] (watchingThread: WatchingThread) in
-                watchingThread.createdevicename = UIDevice.current.name
-                watchingThread.createdeviceidentifier = AppController.current.currentDeviceIdentifier
-                watchingThread.uid = uid
-                watchingThread.lastviewtime = Date()
-                watchingThread.author = author
-                watchingThread.authorid = authorid
-                watchingThread.subject = subject
-                watchingThread.tid = tid
-                watchingThread.fid = fid
-                watchingThread.page = NSNumber(value: currentPageLower)
-                watchingThread.lastviewreplycount = NSNumber(value: replyCount)
-                watchingThread.timeadded = Date()
-                watchingThread.newreplycount = NSNumber(value: 0)
-                watchingThread.lastfetchreplycount = NSNumber(value: replyCount)
-                self?.watchlingListRecordInDB = watchingThread
-            }, completion: nil)
         }
     }
     
-    func removeFromWatchingList() {
+    func removeFromWatchingList(_ sender: AnyObject) {
         guard let record = watchlingListRecordInDB, let context = record.managedObjectContext else { return }
         context.perform {
             context.delete(record)
@@ -1529,31 +1155,49 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
         targetViewController = root
         
         let toolbarItem = sender as! NSToolbarItem
-        let visibleItems = toolbarItem.toolbar!.visibleItems!
-        let index = visibleItems.firstIndex(where: {$0 == toolbarItem})!
-        let offset = index.distance(to: visibleItems.count)
+        let offset = getToolBarItemRightOffset(toolbarItem)
         popoverContentController.popoverPresentationController?.sourceView = targetViewController.view
-        popoverContentController.popoverPresentationController?.sourceRect = CGRect(x: targetViewController.view.frame.size.width - CGFloat(offset) * 60, y: 20, width: 40, height: 40)
+        popoverContentController.popoverPresentationController?.sourceRect = CGRect(x: targetViewController.view.frame.size.width - CGFloat(offset), y: 20, width: 40, height: 40)
         #else
         popoverContentController.popoverPresentationController?.barButtonItem = sender as? UIBarButtonItem
         #endif
         popoverContentController.addAction(UIAlertAction.init(title: "分享", style: UIAlertAction.Style.default, handler: { (action) in
-            self.showShareActivity()
+            #if targetEnvironment(macCatalyst)
+            self.showShareActivity(toolbarItem)
+            #else
+            self.showShareActivity(sender)
+            #endif
         }))
         popoverContentController.addAction(UIAlertAction.init(title: "查看桌面版页面", style: UIAlertAction.Style.default, handler: { (action) in
-            self.openDesktopPage()
+            #if targetEnvironment(macCatalyst)
+            self.openDesktopPage(toolbarItem)
+            #else
+            self.openDesktopPage(sender)
+            #endif
         }))
         popoverContentController.addAction(UIAlertAction.init(title: "加入收藏夹", style: UIAlertAction.Style.default, handler: { (action) in
-            self.favoriteThread()
+            #if targetEnvironment(macCatalyst)
+            self.favoriteThread(toolbarItem)
+            #else
+            self.favoriteThread(sender)
+            #endif
         }))
         
         if watchlingListRecordInDB == nil {
             popoverContentController.addAction(UIAlertAction.init(title: "加入观察列表", style: UIAlertAction.Style.default, handler: { (action) in
-                self.addToWatchList()
+                #if targetEnvironment(macCatalyst)
+                self.addToWatchList(toolbarItem)
+                #else
+                self.addToWatchList(sender)
+                #endif
             }))
         } else {
             popoverContentController.addAction(UIAlertAction.init(title: "移除出观察列表", style: UIAlertAction.Style.default, handler: { (action) in
-                self.removeFromWatchingList()
+                #if targetEnvironment(macCatalyst)
+                self.removeFromWatchingList(toolbarItem)
+                #else
+                self.removeFromWatchingList(sender)
+                #endif
             }))
         }
         popoverContentController.addAction(UIAlertAction(title: NSLocalizedString("CANCEL", comment: "Cancel"), style: .cancel, handler: nil))
@@ -1598,11 +1242,9 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
         targetViewController = root
         
         let toolbarItem = sender as! NSToolbarItem
-        let visibleItems = toolbarItem.toolbar!.visibleItems!
-        let index = visibleItems.firstIndex(where: {$0 == toolbarItem})!
-        let offset = index.distance(to: visibleItems.count)
+        let offset = getToolBarItemRightOffset(toolbarItem)
         popoverContentController.popoverPresentationController?.sourceView = targetViewController.view
-        popoverContentController.popoverPresentationController?.sourceRect = CGRect(x: targetViewController.view.frame.size.width - CGFloat(offset) * 60, y: 20, width: 40, height: 40)
+        popoverContentController.popoverPresentationController?.sourceRect = CGRect(x: targetViewController.view.frame.size.width - CGFloat(offset), y: 20, width: 40, height: 40)
         #else
         popoverContentController.popoverPresentationController?.barButtonItem = sender as? UIBarButtonItem
         #endif
@@ -1610,7 +1252,7 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
             self.jumpBetweenPages()
         }))
         popoverContentController.addAction(UIAlertAction.init(title: "刷新", style: UIAlertAction.Style.default, handler: { (action) in
-            self.refreshPage()
+            self.loadHTMLFile()
         }))
         popoverContentController.addAction(UIAlertAction.init(title: "回复", style: UIAlertAction.Style.default, handler: { (action) in
             self.replyToMainThread()
@@ -1622,84 +1264,57 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
     
     
     func jumpBetweenPages() {
-        let alert = UIAlertController(title: "输入页码：", message: nil, preferredStyle: .alert)
-        alert.popoverPresentationController?.barButtonItem = navigationItem.rightBarButtonItem
-        let cancelAction = UIAlertAction(title: NSLocalizedString("CANCEL", comment: "Cancel"), style: .cancel, handler: nil)
-        alert.addAction(cancelAction)
+        getThreadInfo { [weak self] (threadData) in
+            guard let threadData = threadData else { return }
+            let replies = threadData.replies
+            let nowfloor = max(1, threadData.floor - 1)
 
-        let okAction = UIAlertAction(title: NSLocalizedString("OK", comment: "OK"), style: .default){ (action) in
-            let textField = alert.textFields![0]
-            guard textField.text != nil else {
-                return
-            }
-            guard let page = Int(textField.text!) else {
-                return
-            }
-            
-            if page <= self.totalPage && page > 0 {
-                self.currentPageLower = page
-                self.currentPageUpper = self.currentPageLower
-                self.loadDataForCurrentPage()
-            }
-        }
-        alert.addAction(okAction)
+            let totalPages = Int(ceil(Double(replies)/Double(SAGlobalConfig().number_of_replies_per_page)))
+            let currentPage = Int(ceil(Double(nowfloor)/Double(SAGlobalConfig().number_of_replies_per_page)))
 
-        alert.addTextField { (textField) in
-            textField.text = String.init(format: "%d", self.currentPageLower)
-            textField.keyboardType = .numberPad
-            textField.keyboardAppearance = Theme().keyboardAppearence
+            let alert = UIAlertController(title: "输入页码：", message: nil, preferredStyle: .alert)
+            alert.popoverPresentationController?.barButtonItem = self?.navigationItem.rightBarButtonItem
+            let cancelAction = UIAlertAction(title: NSLocalizedString("CANCEL", comment: "Cancel"), style: .cancel, handler: nil)
+            alert.addAction(cancelAction)
+
+            let okAction = UIAlertAction(title: NSLocalizedString("OK", comment: "OK"), style: .default){ (action) in
+                let textField = alert.textFields![0]
+                guard textField.text != nil else {
+                    return
+                }
+                guard var page = Int(textField.text!) else {
+                    return
+                }
+                page = min(totalPages, max(0, page))
+                
+                let nowfloor = (page - 1) * SAGlobalConfig().number_of_replies_per_page + 1
+                self?.loadHTMLFilesAt(floor: nowfloor)
+            }
+            alert.addAction(okAction)
+
+            alert.addTextField { (textField) in
+                textField.text = String.init(format: "%d", currentPage)
+                textField.keyboardType = .numberPad
+                textField.keyboardAppearance = Theme().keyboardAppearence
+                
+                let pageLabel = UILabel()
+                pageLabel.font = textField.font
+                pageLabel.textColor = Theme().tableCellGrayedTextColor.sa_toColor()
+                pageLabel.text = "/共\(totalPages)页"
+                pageLabel.sizeToFit()
+                textField.rightView = pageLabel
+                textField.rightViewMode = .always
+            }
             
-            let pageLabel = UILabel()
-            pageLabel.font = textField.font
-            pageLabel.textColor = Theme().tableCellGrayedTextColor.sa_toColor()
-            pageLabel.text = "/共\(self.totalPage)页"
-            pageLabel.sizeToFit()
-            textField.rightView = pageLabel
-            textField.rightViewMode = .always
+            self?.present(alert, animated: true, completion: nil)
         }
-        
-        present(alert, animated: true, completion: nil)
-    }
-    
-    // MARK: Preview action items.
-    lazy var previewActions: [UIPreviewActionItem] = {
-        let action1 = UIPreviewAction(title: "隐藏帖子", style: .default, handler: { (action, viewController) in
-            guard let threadContent = viewController as? SAThreadContentViewController else {return}
-            
-            guard let tid = threadContent.threadData.tid,
-                let threadTitle = threadContent.threadData.subject,
-                let threadAuthorUid = threadContent.threadData.authorid,
-                let threadAuthorName = threadContent.threadData.author,
-                let interval = threadContent.threadData.dbdateline else {
-                    return
-            }
-            
-            AppController.current.getService(of: SACoreDataManager.self)!.blockThread(tid: tid, title: threadTitle, authorID: threadAuthorUid, authorName: threadAuthorName, threadCreation: Date.init(timeIntervalSince1970: TimeInterval(interval) ?? 0))
-            
-        })
-        
-        let action2 = UIPreviewAction(title: "屏蔽作者", style: .destructive, handler: { (action, viewController) in
-            guard let threadContent = viewController as? SAThreadContentViewController else {return}
-            guard let threadAuthorUid = threadContent.threadData.authorid,
-                let threadAuthorName = threadContent.threadData.author else {
-                    return
-            }
-            
-            AppController.current.getService(of: SACoreDataManager.self)!.blockUser(uid: threadAuthorUid, name: threadAuthorName, reason: nil)
-        })
-        
-        return [action1, action2]
-    }()
-    
-    override var previewActionItems : [UIPreviewActionItem] {
-        return previewActions
     }
 }
 
 // MARK: - SAReplyViewControllerDelegate
 extension SAThreadContentViewController {
     func replyDidSucceed(_ replyViewController: SAReplyViewController) {
-        refreshPageAndGoTo(floor: threadData.replies + 1)
+        loadHTMLFile()
     }
 
     func replyDidFail(_ replyViewController: SAReplyViewController) {
@@ -1777,19 +1392,22 @@ extension SAThreadContentViewController {
         let reportAction: ((_ reason: String) -> Void) = { (reason) in
             let alert = SAModalActivityViewController()
             self.present(alert, animated: true, completion: nil)
-            self.urlSession.reportAbuse(of: self.threadData.fid, tid: self.threadData.tid, rid: rid, reason: "广告/SPAM", formhash: self.threadData.formhash!, completion: { (obj, error) in
-                if error == nil {
-                    alert.hideAndShowResult(of: true, info: "已举报") { () in
-                        let viewController = self.navigationController!.presentingViewController
-                        viewController?.dismiss(animated: true, completion: nil)
+            self.getThreadInfo { (threadData) in
+                guard let threadData = threadData else { return }
+                self.urlSession.reportAbuse(of: threadData.fid, tid: threadData.tid, rid: rid, reason: "广告/SPAM", formhash: threadData.formhash!, completion: { (obj, error) in
+                    if error == nil {
+                        alert.hideAndShowResult(of: true, info: "已举报") { () in
+                            let viewController = self.navigationController!.presentingViewController
+                            viewController?.dismiss(animated: true, completion: nil)
+                        }
+                    } else  {
+                        alert.hideAndShowResult(of: true, info: "失败") { () in
+                            let viewController = self.navigationController!.presentingViewController
+                            viewController?.dismiss(animated: true, completion: nil)
+                        }
                     }
-                } else  {
-                    alert.hideAndShowResult(of: true, info: "失败") { () in
-                        let viewController = self.navigationController!.presentingViewController
-                        viewController?.dismiss(animated: true, completion: nil)
-                    }
-                }
-            })
+                })
+            }
         }
         
         let threadAction = UIAlertAction(title: NSLocalizedString("SPAM", comment: "Spam"), style: .default){ (action) in
@@ -1821,47 +1439,51 @@ extension SAThreadContentViewController {
             return
         }
         
-        var trimmedContent = replyContent as NSString
-        if trimmedContent.length > 200 {
-            trimmedContent = trimmedContent.substring(to: 200) as NSString
-        }
+        getThreadInfo { (threadData) in
+            guard let threadData = threadData else { return }
         
-        var info = [String : AnyObject]()
-        info["fid"] = self.threadData.fid as AnyObject?
-        info["formhash"] = self.threadData.formhash as AnyObject?
-        info["tid"] = self.threadData.tid as AnyObject?
-        info["subject"] = self.threadData.subject as AnyObject?
-        info["quote_id"] = replyID as AnyObject?
-        info["quote_name"] = authorName as AnyObject?
-        
-        let repliedOnLocalized = NSLocalizedString("TEXT_REPLIED_ON", comment: "Replied on")
-        
-        let quoteContent = "[quote][size=2][url=forum.php?mod=redirect&goto=findpost&pid=\(replyID)&ptid=\(self.threadData.tid!)][color=#999999] \(authorName) \(repliedOnLocalized) \(time)[/color][/url][/size] \((trimmedContent as String)) [/quote]"
-        info["quote_content_raw"] = quoteContent as AnyObject?
-
-        info["quote_textcontent"] = replyContent as AnyObject?
-        
-        if #available(iOS 13.0, *) {
-            if UIApplication.shared.supportsMultipleScenes && ((Account().preferenceForkey(.enable_multi_windows) as? Bool) ?? false) {
-                let userActivity = NSUserActivity(activityType: SAActivityType.replyThread.rawValue)
-                userActivity.isEligibleForHandoff = true
-                userActivity.title = SAActivityType.replyThread.title()
-                userActivity.userInfo = ["quoteInfo":info]
-                let options = UIScene.ActivationRequestOptions()
-                options.requestingScene = view.window?.windowScene
-                UIApplication.shared.requestSceneSessionActivation(AppController.current.findSceneSession(), userActivity: userActivity, options: options) { (error) in
-                    sa_log_v2("request new scene returned: %@", error.localizedDescription)
-                }
-                return
+            var trimmedContent = replyContent as NSString
+            if trimmedContent.length > 200 {
+                trimmedContent = trimmedContent.substring(to: 200) as NSString
             }
+            
+            var info = [String : AnyObject]()
+            info["fid"] = threadData.fid as AnyObject?
+            info["formhash"] = threadData.formhash as AnyObject?
+            info["tid"] = threadData.tid as AnyObject?
+            info["subject"] = threadData.subject as AnyObject?
+            info["quote_id"] = replyID as AnyObject?
+            info["quote_name"] = authorName as AnyObject?
+            
+            let repliedOnLocalized = NSLocalizedString("TEXT_REPLIED_ON", comment: "Replied on")
+            
+            let quoteContent = "[quote][size=2][url=forum.php?mod=redirect&goto=findpost&pid=\(replyID)&ptid=\(threadData.tid)][color=#999999] \(authorName) \(repliedOnLocalized) \(time)[/color][/url][/size] \((trimmedContent as String)) [/quote]"
+            info["quote_content_raw"] = quoteContent as AnyObject?
+
+            info["quote_textcontent"] = replyContent as AnyObject?
+            
+            if #available(iOS 13.0, *) {
+                if UIApplication.shared.supportsMultipleScenes && ((Account().preferenceForkey(.enable_multi_windows) as? Bool) ?? false) {
+                    let userActivity = NSUserActivity(activityType: SAActivityType.replyThread.rawValue)
+                    userActivity.isEligibleForHandoff = true
+                    userActivity.title = SAActivityType.replyThread.title()
+                    userActivity.userInfo = ["quoteInfo":info]
+                    let options = UIScene.ActivationRequestOptions()
+                    options.requestingScene = self.view.window?.windowScene
+                    UIApplication.shared.requestSceneSessionActivation(AppController.current.findSceneSession(), userActivity: userActivity, options: options) { (error) in
+                        os_log("request new scene returned: %@", error.localizedDescription)
+                    }
+                    return
+                }
+            }
+            
+            let navi = UIStoryboard(name: "ReplyThread", bundle: nil).instantiateInitialViewController() as! UINavigationController
+            let reply = navi.topViewController! as! SAReplyViewController
+            reply.config(quoteInfo: info)
+            reply.delegate = self
+            navi.modalPresentationStyle = .pageSheet
+            self.present(navi, animated: true, completion: nil)
         }
-        
-        let navi = UIStoryboard(name: "ReplyThread", bundle: nil).instantiateInitialViewController() as! UINavigationController
-        let reply = navi.topViewController! as! SAReplyViewController
-        reply.config(quoteInfo: info)
-        reply.delegate = self
-        navi.modalPresentationStyle = .pageSheet
-        present(navi, animated: true, completion: nil)
     }
     
     func reloadHTMLPlaceholderImageTag(fromURL: URL, toURL: URL) {
@@ -1869,7 +1491,7 @@ extension SAThreadContentViewController {
         assert(toURL.scheme == sa_wk_url_scheme)
         let str = fromURL.absoluteString.sa_escapedStringForJavaScriptInput()
         let toParam = "\"\(toURL.absoluteString.sa_escapedStringForJavaScriptInput())\""
-        sa_log_v2("from: %@ to: %@", module: .ui, type: .info, fromURL as CVarArg, toURL as CVarArg)
+        os_log("from: %@ to: %@", log: .ui, type: .info, fromURL as CVarArg, toURL as CVarArg)
         webView.evaluateJavaScript("reloadHTMLImgTags(\"\(str)\", \(toParam));", completionHandler: nil)
     }
     
@@ -1917,7 +1539,7 @@ extension SAThreadContentViewController: SAWKURLSchemeHandlerDelegate {
         let downloadedImageDir = dir.appendingPathComponent(imageSavingSubDirName)
         if !fm.fileExists(atPath: downloadedImageDir.path) {
             // maybe this page was removed
-            sa_log_v2("will not save because dir not found", module: .ui, type: .error)
+            os_log("will not save because dir not found", log: .ui, type: .error)
             return nil
         }
         
@@ -1955,7 +1577,7 @@ extension SAThreadContentViewController: SAWKURLSchemeHandlerDelegate {
         let downloadedImageDir = dir.appendingPathComponent(imageSavingSubDirName)
         if !fm.fileExists(atPath: downloadedImageDir.path) {
             // maybe this page was removed
-            sa_log_v2("will not save because dir not found", module: .ui, type: .error)
+            os_log("will not save because dir not found", log: .ui, type: .error)
             return nil
         }
         
@@ -1976,7 +1598,13 @@ extension SAThreadContentViewController: SAWKURLSchemeHandlerDelegate {
 @available(iOS 13.0, *)
 extension SAThreadContentViewController: UIContextMenuInteractionDelegate {
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
-        let actionProvider: ([UIMenuElement]) -> UIMenu? = { _ in
+        if UIDevice.current.userInterfaceIdiom != .mac {
+            return nil
+        }
+        
+        // A context menu can have a `identifier`, a `previewProvider`,
+        // and, finally, the `actionProvider that creates the menu
+        let actionProviderMac: ([UIMenuElement]) -> UIMenu? = { _ in
             let action0 = UIAction(title: "切换主题") { [weak self] _ in
                 let doSwitch = { () in
                     Account().savePreferenceValue(false as AnyObject, forKey: .automatically_change_theme_to_match_system_appearance)
@@ -2002,21 +1630,18 @@ extension SAThreadContentViewController: UIContextMenuInteractionDelegate {
             }
             
             let action2 = UIAction(title: "刷新") { [weak self] _ in
-                self?.refreshPage()
+                self?.loadHTMLFile()
             }
             
             let action3 = UIAction(title: "回复主贴") { [weak self] _ in
                 self?.replyToMainThread()
             }
     
-            return UIMenu(title: "Actions", image: nil, identifier: nil, children: [action0, action1, action2, action3])
+            return UIMenu(title: NSLocalizedString("CONTEXT_MENU_TITLE", comment: "Shortcuts"), image: nil, identifier: nil, children: [action0, action1, action2, action3])
         }
-
-        // A context menu can have a `identifier`, a `previewProvider`,
-        // and, finally, the `actionProvider that creates the menu
         return UIContextMenuConfiguration(identifier: nil,
                                          previewProvider: nil,
-                                         actionProvider: actionProvider)
+                                         actionProvider: actionProviderMac)
     }
     
     func setupContextMenuAction() {

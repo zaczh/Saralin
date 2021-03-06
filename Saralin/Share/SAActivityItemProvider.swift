@@ -23,7 +23,7 @@ class SAActivityItem: NSObject {
     var url: Foundation.URL?
     weak var viewController: UIViewController?
     func prepare() {
-        sa_log_v2("prepare", module: .ui, type: .debug)
+        os_log("prepare", log: .ui, type: .debug)
     }
 }
 
@@ -49,7 +49,7 @@ class SAOpenDesktopPageActivity: UIActivity {
     }
     
     override func canPerform(withActivityItems activityItems: [Any]) -> Bool {
-        sa_log_v2("canPerformWithActivityItems", module: .ui, type: .debug)
+        os_log("canPerformWithActivityItems", log: .ui, type: .debug)
         for obj in activityItems {
             if (obj as AnyObject).isKind(of: SAActivityItem.self) {
                 currentHandlingActivityItem = obj as? SAActivityItem
@@ -63,7 +63,7 @@ class SAOpenDesktopPageActivity: UIActivity {
     override func prepare(withActivityItems activityItems: [Any]) {
         for item in activityItems {
             if (item as AnyObject).isKind(of: SAActivityItem.self) {
-                sa_log_v2("prepareWithActivityItems", module: .ui, type: .debug)
+                os_log("prepareWithActivityItems", log: .ui, type: .debug)
             }
         }
     }
@@ -108,7 +108,7 @@ class SASnapshotWebPageActivity: UIActivity {
     }
     
     override func canPerform(withActivityItems activityItems: [Any]) -> Bool {
-        sa_log_v2("canPerformWithActivityItems", module: .ui, type: .debug)
+        os_log("canPerformWithActivityItems", log: .ui, type: .debug)
         for obj in activityItems {
             if (obj as AnyObject).isKind(of: SAActivityItem.self) {
                 currentHandlingActivityItem = obj as? SAActivityItem
@@ -122,7 +122,7 @@ class SASnapshotWebPageActivity: UIActivity {
     override func prepare(withActivityItems activityItems: [Any]) {
         for item in activityItems {
             if (item as AnyObject).isKind(of: SAActivityItem.self) {
-                sa_log_v2("prepareWithActivityItems", module: .ui, type: .debug)
+                os_log("prepareWithActivityItems", log: .ui, type: .debug)
             }
         }
     }
@@ -167,7 +167,7 @@ class SAOpenInSafariActivity: UIActivity {
     }
     
     override func canPerform(withActivityItems activityItems: [Any]) -> Bool {
-        sa_log_v2("canPerformWithActivityItems", module: .ui, type: .debug)
+        os_log("canPerformWithActivityItems", log: .ui, type: .debug)
         for obj in activityItems {
             if (obj as AnyObject).isKind(of: SAActivityItem.self) {
                 currentHandlingActivityItem = obj as? SAActivityItem
@@ -181,33 +181,33 @@ class SAOpenInSafariActivity: UIActivity {
     override func prepare(withActivityItems activityItems: [Any]) {
         for item in activityItems {
             if (item as AnyObject).isKind(of: SAActivityItem.self) {
-                sa_log_v2("prepareWithActivityItems", module: .ui, type: .debug)
+                os_log("prepareWithActivityItems", log: .ui, type: .debug)
             }
         }
     }
     
     override func perform() {
         guard let activity = currentHandlingActivityItem else {
-            sa_log_v2("no activity", module: .ui, type: .debug)
+            os_log("no activity", log: .ui, type: .debug)
             activityDidFinish(false)
             return
         }
         
         guard let sender = activity.viewController as? SAContentViewController else {
-            sa_log_v2("no sender", module: .ui, type: .debug)
+            os_log("no sender", log: .ui, type: .debug)
             activityDidFinish(false)
             return
         }
         
         guard let url = sender.url else {
-            sa_log_v2("no url", module: .ui, type: .debug)
+            os_log("no url", log: .ui, type: .debug)
             activityDidFinish(false)
             return
         }
         
         if #available(iOS 10.0, *) {
             UIApplication.shared.open(url, options: [:]) { (succeeded) in
-                sa_log_v2("open in safari return: %@", module: .ui, type: .debug, succeeded ? "true" : "false")
+                os_log("open in safari return: %@", log: .ui, type: .debug, succeeded ? "true" : "false")
             }
         } else {
             // Fallback on earlier versions

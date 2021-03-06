@@ -106,9 +106,9 @@ extension String {
     
     func sa_toColor() -> UIColor {
         let ahex = trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var i = UInt32()
-        Scanner(string: ahex).scanHexInt32(&i)
-        let a, r, g, b: UInt32
+        var i = UInt64()
+        Scanner(string: ahex).scanHexInt64(&i)
+        let a, r, g, b: UInt64
         switch ahex.count {
         case 3: // RGB (12-bit)
             (a, r, g, b) = (255, (i >> 8) * 17, (i >> 4 & 0xF) * 17, (i & 0xF) * 17)
@@ -236,7 +236,7 @@ extension URL {
         if let aURL = component.url {
             return aURL
         } else {
-            sa_log_v2("urlByReplacingQuery failed", module: .utility, type: .debug)
+            os_log("urlByReplacingQuery failed", log: .utility, type: .debug)
             return self
         }
     }
@@ -270,7 +270,7 @@ extension URL {
         
         if (components.last!.hasPrefix("thread-")) {
             guard components.last!.components(separatedBy: "-").count >= 3 else {
-                sa_log_v2("failed", module: .utility, type: .debug)
+                os_log("failed", log: .utility, type: .debug)
                 return self
             }
             
@@ -285,12 +285,12 @@ extension URL {
             if let aURL = URL(string: mobileUrl) {
                 return aURL
             } else {
-                sa_log_v2("failed", module: .utility, type: .debug)
+                os_log("failed", log: .utility, type: .debug)
                 return self
             }
         } else if (components.last!.hasPrefix("space-")) {
             guard components.last!.components(separatedBy: "-").count >= 3 else {
-                sa_log_v2("failed", module: .utility, type: .debug)
+                os_log("failed", log: .utility, type: .debug)
                 return self
             }
             
@@ -302,12 +302,12 @@ extension URL {
             if let aURL = URL(string: mobileUrl) {
                 return aURL
             } else {
-                sa_log_v2("failed", module: .utility, type: .debug)
+                os_log("failed", log: .utility, type: .debug)
                 return self
             }
         } else if (components.last!.hasPrefix("forum-")) {
             guard components.last!.components(separatedBy: "-").count >= 3 else {
-                sa_log_v2("failed", module: .utility, type: .debug)
+                os_log("failed", log: .utility, type: .debug)
                 return self
             }
             
@@ -320,7 +320,7 @@ extension URL {
             if let aURL = URL(string: mobileUrl) {
                 return aURL
             } else {
-                sa_log_v2("failed", module: .utility, type: .debug)
+                os_log("failed", log: .utility, type: .debug)
                 return self
             }
         }
@@ -457,9 +457,9 @@ extension UIImage {
 extension UIColor {
     class func sa_colorFromHexString(_ hex: String) -> UIColor {
         let ahex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var i = UInt32()
-        Scanner(string: ahex).scanHexInt32(&i)
-        let a, r, g, b: UInt32
+        var i = UInt64()
+        Scanner(string: ahex).scanHexInt64(&i)
+        let a, r, g, b: UInt64
         switch ahex.count {
         case 3: // RGB (12-bit)
             (a, r, g, b) = (255, (i >> 8) * 17, (i >> 4 & 0xF) * 17, (i & 0xF) * 17)
@@ -495,14 +495,22 @@ extension UIColor {
 
 extension UIApplication {
     func showNetworkIndicator() {
-        DispatchQueue.main.async {
-            self.isNetworkActivityIndicatorVisible = true
-        }
+        // TODO: create new network indicator view
     }
     
     func hideNetworkIndicator() {
-        DispatchQueue.main.async {
-            self.isNetworkActivityIndicatorVisible = false
+        // TODO: create new network indicator view
+    }
+}
+
+extension FileManager {
+    func sa_removeAllFilesIn(dir: URL, fileNameMatching: ((String) -> Bool)?) {
+        let resourceKeys = Set<URLResourceKey>([.nameKey, .isDirectoryKey])
+        let directoryEnumerator = enumerator(at: dir, includingPropertiesForKeys: Array(resourceKeys), options: .skipsHiddenFiles)!
+        for case let fileURL as URL in directoryEnumerator {
+            if fileNameMatching?(fileURL.lastPathComponent) ?? true {
+                try? removeItem(at: fileURL)
+            }
         }
     }
 }

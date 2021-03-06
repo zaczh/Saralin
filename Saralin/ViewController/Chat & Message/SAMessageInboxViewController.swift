@@ -24,7 +24,7 @@ private class SAImageFetchingOperation: Operation {
             return
         }
         
-        sa_log_v2("image download start", module: .ui, type: .debug)
+        os_log("image download start", log: .ui, type: .debug)
         
         var downloadedData: Data?
         
@@ -34,7 +34,7 @@ private class SAImageFetchingOperation: Operation {
         let task = URLSession.saCustomized.dataTask(with: imageURL) { (data, response, error) in
             UIApplication.shared.hideNetworkIndicator()
             if error != nil {
-                sa_log_v2("image download failed error: %@", module: .ui, type: .error, error! as CVarArg)
+                os_log("image download failed error: %@", log: .ui, type: .error, error! as CVarArg)
             }
             downloadedData = data
             group.leave()
@@ -43,19 +43,19 @@ private class SAImageFetchingOperation: Operation {
         group.wait()
         if downloadedData != nil {
             guard let image = UIImage.init(data: downloadedData!) else {
-                sa_log_v2("image download failed: not an image", module: .ui, type: .error)
+                os_log("image download failed: not an image", log: .ui, type: .error)
                 return
             }
             self.resultImage = image
-            sa_log_v2("image download succeeded", module: .ui, type: .debug)
+            os_log("image download succeeded", log: .ui, type: .debug)
         } else {
-            sa_log_v2("image download failed: no data", module: .ui, type: .error)
+            os_log("image download failed: no data", log: .ui, type: .error)
         }
     }
 }
 
 class SAMessageInboxViewController: SABaseTableViewController {
-    var messages: [[String:AnyObject]] = []
+    var messages: [PrivateMessageSummary] = []
     private let loadingOperationQueue = OperationQueue.init()
     private var loadingImageResult:[(IndexPath, UIImage?)] = []
     
@@ -120,14 +120,15 @@ class SAMessageInboxViewController: SABaseTableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! SAMessageInboxTableViewCell
         
-        let dateString = messages[indexPath.row]["lastupdate"] as! String
+        let dateString = messages[indexPath.row].lastupdate
         let dateInterval = Int(dateString)!
-        let isNew = (messages[indexPath.row]["isnew"] as? String) ?? "0"
-        cell.customNameLabel.text = messages[indexPath.row]["tousername"] as? String
-        if let title = messages[indexPath.row]["message"] as? String {
+        let isNew = messages[indexPath.row].isnew
+        cell.customNameLabel.text = messages[indexPath.row].tousername
+        let title = messages[indexPath.row].message
+        if !title.isEmpty {
             let trimmed = title.sa_stringByReplacingHTMLTags() as String
             let attributedTitle = NSMutableAttributedString(string: trimmed, attributes:[NSAttributedString.Key.font: UIFont.sa_preferredFont(forTextStyle: UIFont.TextStyle.headline),NSAttributedString.Key.foregroundColor: UIColor.sa_colorFromHexString(Theme().tableCellTextColor)])
-            if isNew != "0" {
+            if isNew != 0 {
                 attributedTitle.insert(NSAttributedString(string: "[新]", attributes: [
                     NSAttributedString.Key.font: UIFont.sa_preferredFont(forTextStyle: UIFont.TextStyle.headline),
                     NSAttributedString.Key.foregroundColor: UIColor.green]), at: 0)
@@ -140,7 +141,7 @@ class SAMessageInboxViewController: SABaseTableViewController {
         
         cell.avatarImageView.image = UIImage(named: "noavatar_middle")!
 
-        guard let touid = messages[indexPath.row]["touid"] as? String else {return cell}
+        let touid = messages[indexPath.row].touid
         let avatarImageURL = URL(string: SAGlobalConfig().avatar_base_url + "avatar.php?uid=\(touid)&size=middle")!
         if let operation = loadingOperationQueue.operations.filter({ (operation) -> Bool in
             let operation = operation as! SAImageFetchingOperation
@@ -172,23 +173,23 @@ class SAMessageInboxViewController: SABaseTableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
-        var dict = messages[indexPath.row]
-        guard let touid = dict["touid"] as? String else {
+        let dict = messages[indexPath.row]
+        let touid = dict.touid
+        guard !touid.isEmpty else {
             return
         }
         
-        guard let toUserName = dict["tousername"] as? String else {
+        let toUserName = dict.tousername
+        guard !toUserName.isEmpty else {
             return
         }
         
-        // reset new status
-        dict["isnew"] = "0" as AnyObject
         messages[indexPath.row] = dict
         DispatchQueue.main.async {
             tableView.reloadRows(at: [indexPath], with: .none)
         }
         
-        let count = Int(dict["pmnum"] as! String)!
+        let count = dict.pmnum
         let participants = Set.init(arrayLiteral: touid, Account().uid)
         let conversation = ChatViewController.Conversation(cid: touid, pmid: "", formhash:"", name: toUserName, participants: participants, numberOfMessages:count)
         let chatViewController = ChatViewController(conversation: conversation)
@@ -203,7 +204,11 @@ class SAMessageInboxViewController: SABaseTableViewController {
             })
             if contains {return}
             
-            guard let touid = messages[indexPath.row]["touid"] as? String else {return}
+            let touid = messages[indexPath.row].touid
+            guard !touid.isEmpty else {
+                return
+            }
+            
             let avatarImageURL = URL(string: SAGlobalConfig().avatar_base_url + "avatar.php?uid=\(touid)&size=middle")!
             let operation = SAImageFetchingOperation.init(imageURL: avatarImageURL, indexPath: indexPath)
             operation.completionBlock = {() in

@@ -54,7 +54,7 @@
 				<dict>
 					<key>UISceneClassName</key>
 					<string>UIWindowScene</string>
-                    <key>UISceneDelegateClassName</key>
+					<key>UISceneDelegateClassName</key>
 					<string>$(PRODUCT_MODULE_NAME).SASceneDelegate</string>
 					<key>UISceneConfigurationName</key>
 					<string>Default Configuration</string>
@@ -91,14 +91,8 @@
 	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>Launch Screen</string>
-    <key>NSMainStoryboardFile</key>
-    <string>Main_ipad</string>
-    <key>UIMainStoryboardFile</key>
-    <string>Main</string>
-    <key>UIMainStoryboardFile~ipad</key>
-    <string>Main_ipad</string>
-    <key>UIMainStoryboardFile~iphone</key>
-    <string>Main</string>
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>

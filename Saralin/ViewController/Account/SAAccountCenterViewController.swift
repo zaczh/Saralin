@@ -185,7 +185,7 @@ class SAAccountCenterViewController: SABaseTableViewController {
             URLSession.saCustomized.dataTask(with: url, completionHandler: { (data, response, error) in
                 UIApplication.shared.hideNetworkIndicator()
                 guard error == nil && data != nil else {
-                    sa_log_v2("image download failed", module: .ui, type: .error)
+                    os_log("image download failed", log: .ui, type: .error)
                     return
                 }
                 
@@ -323,7 +323,13 @@ class SAAccountCenterViewController: SABaseTableViewController {
     
     func openBlacklistConfigurePage(_ indexPath: IndexPath?) -> IndexPath? {
         let vc = SABlockedListConfigureViewController()
-        splitViewController?.showDetailViewController(vc, sender: self)
+        if splitViewController!.isCollapsed {
+            navigationController?.pushViewController(vc, animated: true)
+        } else {
+            // wrap with a navigation so that new secondary vc replacing old one.
+            let navi = SANavigationController(rootViewController: vc)
+            splitViewController?.setViewController(navi, for: .secondary)
+        }
         return indexPath
     }
     
@@ -334,25 +340,49 @@ class SAAccountCenterViewController: SABaseTableViewController {
     
     func openDMPage(_ indexPath: IndexPath?) -> IndexPath? {
         let vc = SAMessageInboxViewController()
-        splitViewController?.showDetailViewController(vc, sender: self)
+        if splitViewController!.isCollapsed {
+            navigationController?.pushViewController(vc, animated: true)
+        } else {
+            // wrap with a navigation so that new secondary vc replacing old one.
+            let navi = SANavigationController(rootViewController: vc)
+            splitViewController?.setViewController(navi, for: .secondary)
+        }
         return indexPath
     }
     
     func openMyThreadsPage(_ indexPath: IndexPath?) -> IndexPath? {
         let myThreads = AppController.current.createMyThreadsPage()
-        splitViewController?.showDetailViewController(myThreads, sender: self)
+        if splitViewController!.isCollapsed {
+            navigationController?.pushViewController(myThreads, animated: true)
+        } else {
+            // wrap with a navigation so that new secondary vc replacing old one.
+            let navi = SANavigationController(rootViewController: myThreads)
+            splitViewController?.setViewController(navi, for: .secondary)
+        }
         return indexPath
     }
     
     func openMyNoticesPage(_ indexPath: IndexPath?) -> IndexPath? {
-        let myNotices = SAUserNoticeViewController()
-        splitViewController?.showDetailViewController(myNotices, sender: self)
+        let vc = SAUserNoticeViewController()
+        if splitViewController!.isCollapsed {
+            navigationController?.pushViewController(vc, animated: true)
+        } else {
+            // wrap with a navigation so that new secondary vc replacing old one.
+            let navi = SANavigationController(rootViewController: vc)
+            splitViewController?.setViewController(navi, for: .secondary)
+        }
         return indexPath
     }
     
     func openAboutPage(_ indexPath: IndexPath?) -> IndexPath? {
         let about = SAAboutViewController()
-        splitViewController?.showDetailViewController(about, sender: self)
+        if splitViewController!.isCollapsed {
+            navigationController?.pushViewController(about, animated: true)
+        } else {
+            // wrap with a navigation so that new secondary vc replacing old one.
+            let navi = SANavigationController(rootViewController: about)
+            splitViewController?.setViewController(navi, for: .secondary)
+        }
         return indexPath
     }
     
@@ -362,9 +392,15 @@ class SAAccountCenterViewController: SABaseTableViewController {
         }
         
         let url = SAGlobalConfig().profile_url_template.replacingOccurrences(of: "%{UID}", with: Account().uid)
-        let page = SAAccountInfoViewController(url: URL(string: url)!)
-        page.isAccountManager = true
-        splitViewController?.showDetailViewController(page, sender: self)
+        let vc = SAAccountInfoViewController(url: URL(string: url)!)
+        vc.isAccountManager = true
+        if splitViewController!.isCollapsed {
+            navigationController?.pushViewController(vc, animated: true)
+        } else {
+            // wrap with a navigation so that new secondary vc replacing old one.
+            let navi = SANavigationController(rootViewController: vc)
+            splitViewController?.setViewController(navi, for: .secondary)
+        }
         return indexPath
     }
     
@@ -379,15 +415,21 @@ class SAAccountCenterViewController: SABaseTableViewController {
                 let options = UIScene.ActivationRequestOptions()
                 options.requestingScene = view.window?.windowScene
                 UIApplication.shared.requestSceneSessionActivation(AppController.current.findSceneSession(), userActivity: userActivity, options: options) { (error) in
-                    sa_log_v2("request new scene returned: %@", error.localizedDescription)
+                    os_log("request new scene returned: %@", error.localizedDescription)
                 }
                 return
             }
         }
         
         let navi = UIStoryboard(name: "Settings", bundle: nil).instantiateInitialViewController() as! UINavigationController
-        let settingViewController = navi.topViewController! as! SASettingViewController
-        splitViewController?.showDetailViewController(settingViewController, sender: self)
+        let vc = navi.topViewController! as! SASettingViewController
+        if splitViewController!.isCollapsed {
+            navigationController?.pushViewController(vc, animated: true)
+        } else {
+            // wrap with a navigation so that new secondary vc replacing old one.
+            let navi = SANavigationController(rootViewController: vc)
+            splitViewController?.setViewController(navi, for: .secondary)
+        }
     }
 
     @objc func handleUserLoggedOut(_ notification: NSNotification) {

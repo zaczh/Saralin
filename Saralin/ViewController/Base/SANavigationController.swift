@@ -41,12 +41,4 @@ class SANavigationController: UINavigationController, UIViewControllerTransition
     override var prefersStatusBarHidden: Bool {
         return topViewController?.prefersStatusBarHidden ?? super.prefersStatusBarHidden
     }
-    
-    open override var previewActionItems : [UIPreviewActionItem] {
-        if let items = self.topViewController?.previewActionItems {
-            return items
-        }
-        
-        return super.previewActionItems
-    }
 }

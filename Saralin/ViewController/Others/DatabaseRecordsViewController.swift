@@ -73,7 +73,7 @@ class DatabaseRecordsViewController: UITableViewController {
             do {
                 try controller.performFetch()
             } catch {
-                sa_log_v2("performFetch failed with error: %@", error.localizedDescription)
+                os_log("performFetch failed with error: %@", error.localizedDescription)
             }
         }
        
