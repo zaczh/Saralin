@@ -47,6 +47,16 @@
                ReferencedContainer = "container:Saralin.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "1F6104152606F7500039CB9F"
+               BuildableName = "SaralinUITests.xctest"
+               BlueprintName = "SaralinUITests"
+               ReferencedContainer = "container:Saralin.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

@@ -224,6 +224,7 @@
 		1F54952923FBC9BE00CBF6DF /* SAPlaceHolderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F54952823FBC9BE00CBF6DF /* SAPlaceHolderViewController.swift */; };
 		1F58447B2246251B00F7B41A /* QuoteFloorJumpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F58447A2246251B00F7B41A /* QuoteFloorJumpView.swift */; };
 		1F5E0E8B22477959009846B1 /* placeholderfail.png in Resources */ = {isa = PBXBuildFile; fileRef = 1F5E0E8822477959009846B1 /* placeholderfail.png */; };
+		1F6104192606F7500039CB9F /* SaralinUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F6104182606F7500039CB9F /* SaralinUITests.swift */; };
 		1F67BB5022EC546B005D727B /* Resources.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1F67BB4F22EC546B005D727B /* Resources.xcassets */; };
 		1F6A813025612C150023058E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F6A812F25612C150023058E /* main.m */; };
 		1F6E31FC23A328E30013171C /* SAUITableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F6E31FB23A328E30013171C /* SAUITableViewController.swift */; };
@@ -251,7 +252,6 @@
 		1FA21B042352F673005F6AC4 /* SACatalystSidebarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FA21B032352F673005F6AC4 /* SACatalystSidebarController.swift */; };
 		1FA5573E2255985500C46FBF /* noavatar_middle.png in Resources */ = {isa = PBXBuildFile; fileRef = 1FA5573C2255985500C46FBF /* noavatar_middle.png */; };
 		1FA5573F2255985500C46FBF /* thread_page_expand_arrow.png in Resources */ = {isa = PBXBuildFile; fileRef = 1FA5573D2255985500C46FBF /* thread_page_expand_arrow.png */; };
-		1FAADE4725D7DD1000B0183A /* SAThreadCompositionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F05AE5B1E2B1B9D0050F8E2 /* SAThreadCompositionViewController.swift */; };
 		1FAC33BE2125392F00BFF2C5 /* OCSnippets.m in Sources */ = {isa = PBXBuildFile; fileRef = 1FAC33BD2125392F00BFF2C5 /* OCSnippets.m */; };
 		1FAD0435243C49DC00467F6B /* logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 1FAD0434243C49DC00467F6B /* logo.png */; };
 		1FAF4B801FCE8AD500C39BE2 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FAF4B7F1FCE8AD500C39BE2 /* StoreKit.framework */; };
@@ -268,7 +268,6 @@
 		1FCB7294248C92F90085A28D /* login.html in Resources */ = {isa = PBXBuildFile; fileRef = 1FCB7293248C92F90085A28D /* login.html */; };
 		1FCB7296248C971A0085A28D /* SALoginWebviewScriptMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FCB7295248C971A0085A28D /* SALoginWebviewScriptMessageHandler.swift */; };
 		1FCE45812243576800862983 /* placeholder.png in Resources */ = {isa = PBXBuildFile; fileRef = 1FCE457E2243576800862983 /* placeholder.png */; };
-		1FD17E911C6E04CB00008128 /* SaralinTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FD17E901C6E04CB00008128 /* SaralinTests.swift */; };
 		1FD52CF01FC02AF600BEF645 /* SAWKURLSchemeHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FD52CEF1FC02AF600BEF645 /* SAWKURLSchemeHandler.swift */; };
 		1FD7E99121512742007E0BD3 /* SAAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FD7E99021512742007E0BD3 /* SAAccount.swift */; };
 		1FDB69611F452F20005E70F9 /* ChatItemsDecorator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FDB695A1F452F1F005E70F9 /* ChatItemsDecorator.swift */; };
@@ -284,7 +283,6 @@
 		1FF6890F25AAFF84009D6577 /* security_question_ids.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1FF6890E25AAFF84009D6577 /* security_question_ids.plist */; };
 		1FF702B022489C1D00926266 /* SADebuggingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF702AF22489C1D00926266 /* SADebuggingViewController.swift */; };
 		1FF7626D1DA5EC2E005BB03E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1FF7626F1DA5EC2E005BB03E /* InfoPlist.strings */; };
-		1FF762721DA5EC2F005BB03E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1FF762741DA5EC2F005BB03E /* InfoPlist.strings */; };
 		1FFC1A1B224B7F0F00D185AF /* Snippets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FFC1A1A224B7F0F00D185AF /* Snippets.swift */; };
 		840472CC1E349D7A0047748C /* SASearchResultViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840472CB1E349D7A0047748C /* SASearchResultViewController.swift */; };
 		8404AEDB1E7CDD010062CFF8 /* SAAccountManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8404AED81E7CDD010062CFF8 /* SAAccountManager.swift */; };
@@ -315,7 +313,7 @@
 			remoteGlobalIDString = 1F1ACBAB243AB5B80044D2D6;
 			remoteInfo = CatalystExtension;
 		};
-		1FD17E931C6E04CB00008128 /* PBXContainerItemProxy */ = {
+		1F61041B2606F7500039CB9F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1F530D3B1C0C94F100BD4E3B /* Project object */;
 			proxyType = 1;
@@ -581,6 +579,9 @@
 		1F54952823FBC9BE00CBF6DF /* SAPlaceHolderViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SAPlaceHolderViewController.swift; sourceTree = "<group>"; };
 		1F58447A2246251B00F7B41A /* QuoteFloorJumpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteFloorJumpView.swift; sourceTree = "<group>"; };
 		1F5E0E8822477959009846B1 /* placeholderfail.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = placeholderfail.png; sourceTree = "<group>"; };
+		1F6104162606F7500039CB9F /* SaralinUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SaralinUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1F6104182606F7500039CB9F /* SaralinUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaralinUITests.swift; sourceTree = "<group>"; };
+		1F61041A2606F7500039CB9F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1F67BB4F22EC546B005D727B /* Resources.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Resources.xcassets; sourceTree = "<group>"; };
 		1F6A812F25612C150023058E /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		1F6E31FB23A328E30013171C /* SAUITableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SAUITableViewController.swift; sourceTree = "<group>"; };
@@ -629,9 +630,6 @@
 		1FCB7293248C92F90085A28D /* login.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = login.html; sourceTree = "<group>"; };
 		1FCB7295248C971A0085A28D /* SALoginWebviewScriptMessageHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SALoginWebviewScriptMessageHandler.swift; sourceTree = "<group>"; };
 		1FCE457E2243576800862983 /* placeholder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = placeholder.png; sourceTree = "<group>"; };
-		1FD17E8E1C6E04CB00008128 /* SaralinTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SaralinTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		1FD17E901C6E04CB00008128 /* SaralinTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaralinTests.swift; sourceTree = "<group>"; };
-		1FD17E921C6E04CB00008128 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1FD52CEF1FC02AF600BEF645 /* SAWKURLSchemeHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SAWKURLSchemeHandler.swift; sourceTree = "<group>"; };
 		1FD633D32356F2B5000E11B1 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1FD7E99021512742007E0BD3 /* SAAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SAAccount.swift; sourceTree = "<group>"; };
@@ -661,9 +659,7 @@
 		1FF6890E25AAFF84009D6577 /* security_question_ids.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = security_question_ids.plist; sourceTree = "<group>"; };
 		1FF702AF22489C1D00926266 /* SADebuggingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SADebuggingViewController.swift; sourceTree = "<group>"; };
 		1FF7626E1DA5EC2E005BB03E /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
-		1FF762731DA5EC2F005BB03E /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		1FF762751DA5EC76005BB03E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		1FF762761DA5EC7E005BB03E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1FFC1A1A224B7F0F00D185AF /* Snippets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Snippets.swift; path = Saralin/Snippets.swift; sourceTree = SOURCE_ROOT; };
 		840472C71E348EC00047748C /* Saralin.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Saralin.entitlements; sourceTree = "<group>"; };
 		840472CB1E349D7A0047748C /* SASearchResultViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SASearchResultViewController.swift; sourceTree = "<group>"; };
@@ -697,7 +693,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		1FD17E8B1C6E04CB00008128 /* Frameworks */ = {
+		1F6104132606F7500039CB9F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -1321,8 +1317,8 @@
 				1F1ACB5E243AB2570044D2D6 /* CatalystExtension */,
 				1F530D451C0C94F100BD4E3B /* Saralin */,
 				1F377A391C13130500718928 /* Resources */,
+				1F6104172606F7500039CB9F /* SaralinUITests */,
 				1F34B09C1CCCC50D001C2382 /* Frameworks */,
-				1FD17E8F1C6E04CB00008128 /* SaralinTests */,
 				1F530D441C0C94F100BD4E3B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -1331,7 +1327,7 @@
 			isa = PBXGroup;
 			children = (
 				1F530D431C0C94F100BD4E3B /* Saralin.app */,
-				1FD17E8E1C6E04CB00008128 /* SaralinTests.xctest */,
+				1F6104162606F7500039CB9F /* SaralinUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1350,6 +1346,15 @@
 				1F13BB2522E1654100AE41CD /* Supporting Files */,
 			);
 			path = Saralin;
+			sourceTree = "<group>";
+		};
+		1F6104172606F7500039CB9F /* SaralinUITests */ = {
+			isa = PBXGroup;
+			children = (
+				1F6104182606F7500039CB9F /* SaralinUITests.swift */,
+				1F61041A2606F7500039CB9F /* Info.plist */,
+			);
+			path = SaralinUITests;
 			sourceTree = "<group>";
 		};
 		1F7211031E7ACFD600253463 /* Model */ = {
@@ -1528,16 +1533,6 @@
 			path = Debugging;
 			sourceTree = "<group>";
 		};
-		1FD17E8F1C6E04CB00008128 /* SaralinTests */ = {
-			isa = PBXGroup;
-			children = (
-				1FF762741DA5EC2F005BB03E /* InfoPlist.strings */,
-				1FD17E901C6E04CB00008128 /* SaralinTests.swift */,
-				1FD17E921C6E04CB00008128 /* Info.plist */,
-			);
-			path = SaralinTests;
-			sourceTree = "<group>";
-		};
 		1FD7E98D21512622007E0BD3 /* Account */ = {
 			isa = PBXGroup;
 			children = (
@@ -1652,23 +1647,23 @@
 			productReference = 1F530D431C0C94F100BD4E3B /* Saralin.app */;
 			productType = "com.apple.product-type.application";
 		};
-		1FD17E8D1C6E04CB00008128 /* SaralinTests */ = {
+		1F6104152606F7500039CB9F /* SaralinUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1FD17E971C6E04CB00008128 /* Build configuration list for PBXNativeTarget "SaralinTests" */;
+			buildConfigurationList = 1F61041D2606F7500039CB9F /* Build configuration list for PBXNativeTarget "SaralinUITests" */;
 			buildPhases = (
-				1FD17E8A1C6E04CB00008128 /* Sources */,
-				1FD17E8B1C6E04CB00008128 /* Frameworks */,
-				1FD17E8C1C6E04CB00008128 /* Resources */,
+				1F6104122606F7500039CB9F /* Sources */,
+				1F6104132606F7500039CB9F /* Frameworks */,
+				1F6104142606F7500039CB9F /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				1FD17E941C6E04CB00008128 /* PBXTargetDependency */,
+				1F61041C2606F7500039CB9F /* PBXTargetDependency */,
 			);
-			name = SaralinTests;
-			productName = SaralinTests;
-			productReference = 1FD17E8E1C6E04CB00008128 /* SaralinTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
+			name = SaralinUITests;
+			productName = SaralinUITests;
+			productReference = 1F6104162606F7500039CB9F /* SaralinUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
 
@@ -1678,7 +1673,7 @@
 			attributes = {
 				CLASSPREFIX = SA;
 				LastSwiftMigration = 0730;
-				LastSwiftUpdateCheck = 0730;
+				LastSwiftUpdateCheck = 1240;
 				LastUpgradeCheck = 1020;
 				ORGANIZATIONNAME = zaczh;
 				TargetAttributes = {
@@ -1700,9 +1695,8 @@
 							};
 						};
 					};
-					1FD17E8D1C6E04CB00008128 = {
-						CreatedOnToolsVersion = 7.3;
-						LastSwiftMigration = 1020;
+					1F6104152606F7500039CB9F = {
+						CreatedOnToolsVersion = 12.4;
 						TestTargetID = 1F530D421C0C94F100BD4E3B;
 					};
 				};
@@ -1746,7 +1740,7 @@
 			projectRoot = "";
 			targets = (
 				1F530D421C0C94F100BD4E3B /* Saralin */,
-				1FD17E8D1C6E04CB00008128 /* SaralinTests */,
+				1F6104152606F7500039CB9F /* SaralinUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -1815,11 +1809,10 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		1FD17E8C1C6E04CB00008128 /* Resources */ = {
+		1F6104142606F7500039CB9F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1FF762721DA5EC2F005BB03E /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2085,12 +2078,11 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		1FD17E8A1C6E04CB00008128 /* Sources */ = {
+		1F6104122606F7500039CB9F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1FD17E911C6E04CB00008128 /* SaralinTests.swift in Sources */,
-				1FAADE4725D7DD1000B0183A /* SAThreadCompositionViewController.swift in Sources */,
+				1F6104192606F7500039CB9F /* SaralinUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2103,10 +2095,10 @@
 			platformFilter = maccatalyst;
 			targetProxy = 1F1ACB6D243AB2BF0044D2D6 /* PBXContainerItemProxy */;
 		};
-		1FD17E941C6E04CB00008128 /* PBXTargetDependency */ = {
+		1F61041C2606F7500039CB9F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 1F530D421C0C94F100BD4E3B /* Saralin */;
-			targetProxy = 1FD17E931C6E04CB00008128 /* PBXContainerItemProxy */;
+			targetProxy = 1F61041B2606F7500039CB9F /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -2135,15 +2127,6 @@
 			children = (
 				1FF7626E1DA5EC2E005BB03E /* zh-Hans */,
 				1FF762751DA5EC76005BB03E /* en */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		1FF762741DA5EC2F005BB03E /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				1FF762731DA5EC2F005BB03E /* zh-Hans */,
-				1FF762761DA5EC7E005BB03E /* en */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -2335,41 +2318,65 @@
 			};
 			name = Release;
 		};
-		1FD17E951C6E04CB00008128 /* Debug */ = {
+		1F61041E2606F7500039CB9F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				INFOPLIST_FILE = SaralinTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = NBQ74QRWC2;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = SaralinUITests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = me.zaczh.SaralinTests;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = me.zaczh.saralin.SaralinUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Saralin.app/Saralin";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Saralin;
 			};
 			name = Debug;
 		};
-		1FD17E961C6E04CB00008128 /* Release */ = {
+		1F61041F2606F7500039CB9F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				INFOPLIST_FILE = SaralinTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = NBQ74QRWC2;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = SaralinUITests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = me.zaczh.SaralinTests;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = me.zaczh.saralin.SaralinUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Saralin.app/Saralin";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Saralin;
 			};
 			name = Release;
 		};
@@ -2394,11 +2401,11 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1FD17E971C6E04CB00008128 /* Build configuration list for PBXNativeTarget "SaralinTests" */ = {
+		1F61041D2606F7500039CB9F /* Build configuration list for PBXNativeTarget "SaralinUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				1FD17E951C6E04CB00008128 /* Debug */,
-				1FD17E961C6E04CB00008128 /* Release */,
+				1F61041E2606F7500039CB9F /* Debug */,
+				1F61041F2606F7500039CB9F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
