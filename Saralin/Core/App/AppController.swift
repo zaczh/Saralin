@@ -10,6 +10,7 @@
 import UIKit
 import UserNotifications
 import StoreKit
+import OSLog
 
 func Theme() -> SATheme {
     return AppController.current.getService(of: SAThemeManager.self)!.activeTheme
@@ -119,6 +120,14 @@ class AppController: NSObject {
         }
         
         os_log("findSceneSession return nil, will create new one.", log: .ui, type: .info)
+        return nil
+    }
+    
+    func instantiateInitialViewController(for activityType: SAActivityType) -> UIViewController? {
+        if activityType == .settings {
+            let split = UIStoryboard(name: "Settings", bundle: nil).instantiateInitialViewController()! as UISplitViewController
+            return split
+        }
         return nil
     }
     

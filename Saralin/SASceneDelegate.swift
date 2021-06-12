@@ -139,12 +139,13 @@ class SASceneDelegate: UIResponder, UIWindowSceneDelegate {
             return
         case .settings:
             var settings: SASettingViewController!
-            if let navi = window?.rootViewController as? UINavigationController, let vc = navi.topViewController as? SASettingViewController {
+            if let split = window?.rootViewController as? UISplitViewController, let navi = split.viewControllers.first as? UINavigationController, let vc = navi.topViewController as? SASettingViewController {
                 settings = vc
             } else {
-                let navi = UIStoryboard(name: "Settings", bundle: nil).instantiateInitialViewController()! as UINavigationController
+                let split = UIStoryboard(name: "Settings", bundle: nil).instantiateInitialViewController()! as UISplitViewController
+                let navi = split.viewControllers.first as! UINavigationController
                 settings = navi.topViewController! as? SASettingViewController
-                window?.rootViewController = navi
+                window?.rootViewController = split
             }
             
             // dismiss warning of unused variable

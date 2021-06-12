@@ -299,19 +299,34 @@ class SASettingViewController: SABaseTableViewController {
     
     private func openBoardSelectPage(_ indexPath: IndexPath?) -> IndexPath? {
         let about = SABoardArrangementViewController()
-        navigationController?.pushViewController(about, animated: true)
+        let split = splitViewController!
+        if split.isCollapsed {
+            navigationController?.pushViewController(about, animated: true)
+        } else {
+            split.setViewController(about, for: .secondary)
+        }
         return indexPath
     }
     
     private func openHotTabBoardSelectPage(_ indexPath: IndexPath?) -> IndexPath? {
-        let about = SAHotTabBoardSelectionViewController()
-        navigationController?.pushViewController(about, animated: true)
+        let vc = SAHotTabBoardSelectionViewController()
+        let split = splitViewController!
+        if split.isCollapsed {
+            navigationController?.pushViewController(vc, animated: true)
+        } else {
+            split.setViewController(vc, for: .secondary)
+        }
         return indexPath
     }
     
     private func openFontConfigurePage(_ indexPath: IndexPath?) -> IndexPath? {
-        let fontConfigureViewController = SAFontConfigureViewController()
-        navigationController?.pushViewController(fontConfigureViewController, animated: true)
+        let vc = SAFontConfigureViewController()
+        let split = splitViewController!
+        if split.isCollapsed {
+            navigationController?.pushViewController(vc, animated: true)
+        } else {
+            split.setViewController(vc, for: .secondary)
+        }
         return indexPath
     }
     
@@ -336,13 +351,23 @@ class SASettingViewController: SABaseTableViewController {
     
     private func openDebugPage(_ indexPath: IndexPath?) -> IndexPath? {
         let debug = SADebuggingViewController()
-        navigationController?.pushViewController(debug, animated: true)
+        let split = splitViewController!
+        if split.isCollapsed {
+            navigationController?.pushViewController(debug, animated: true)
+        } else {
+            split.setViewController(debug, for: .secondary)
+        }
         return indexPath
     }
     
     private func pushThemeSelectPage(_ indexPath: IndexPath?) -> IndexPath? {
         let vc = SAThemeSelectViewController()
-        navigationController?.pushViewController(vc, animated: true)
+        let split = splitViewController!
+        if split.isCollapsed {
+            navigationController?.pushViewController(vc, animated: true)
+        } else {
+            split.setViewController(vc, for: .secondary)
+        }
         return indexPath
     }
     

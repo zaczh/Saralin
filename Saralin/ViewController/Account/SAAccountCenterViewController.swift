@@ -421,7 +421,8 @@ class SAAccountCenterViewController: SABaseTableViewController {
             }
         }
         
-        let navi = UIStoryboard(name: "Settings", bundle: nil).instantiateInitialViewController() as! UINavigationController
+        let split = AppController.current.instantiateInitialViewController(for: .settings) as! UISplitViewController
+        let navi = split.viewControllers.first as! UINavigationController
         let vc = navi.topViewController! as! SASettingViewController
         if splitViewController!.isCollapsed {
             navigationController?.pushViewController(vc, animated: true)

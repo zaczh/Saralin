@@ -471,18 +471,20 @@ class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, 
                     os_log("request new scene returned: %@", error.localizedDescription)
                 }
             } else {
-                let navi = UIStoryboard(name: "Settings", bundle: nil).instantiateInitialViewController() as! UINavigationController
+                let split = AppController.current.instantiateInitialViewController(for: .settings) as! UISplitViewController
+                let navi = split.viewControllers.first as! UINavigationController
                 let settings = navi.topViewController! as! SASettingViewController
                 settings.navigationItem.rightBarButtonItem = UIBarButtonItem(title: NSLocalizedString("CLOSE", comment: "Close"), style: .plain, target: self, action: #selector(handleSettingsClose(_:)))
                 present(navi, animated: true, completion: nil)
             }
         } else {
             // Fallback on earlier versions
-            let navi = UIStoryboard(name: "Settings", bundle: nil).instantiateInitialViewController() as! UINavigationController
-            navi.modalPresentationStyle = .formSheet
+            let split = AppController.current.instantiateInitialViewController(for: .settings) as! UISplitViewController
+            let navi = split.viewControllers.first as! UINavigationController
+            split.modalPresentationStyle = .formSheet
             let settings = navi.topViewController! as! SASettingViewController
             settings.navigationItem.rightBarButtonItem = UIBarButtonItem(title: NSLocalizedString("CLOSE", comment: "Close"), style: .plain, target: self, action: #selector(handleSettingsClose(_:)))
-            present(navi, animated: true, completion: nil)
+            present(split, animated: true, completion: nil)
         }
     }
     
