@@ -79,7 +79,7 @@ struct SAGlobalConfig {
     // how many days of log files to keep
     let log_file_days_to_keep = 3
     
-    let project_source_code_url = "https://github.com/zaczh/SaralinPub"
+    let project_source_code_url = "https://github.com/zaczh/Saralin"
     
     let developer_imessage_address = "jhzhangdev@gmail.com"
     

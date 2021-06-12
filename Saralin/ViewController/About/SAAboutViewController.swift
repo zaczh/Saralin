@@ -97,15 +97,8 @@ class SAAboutViewController: SABaseTableViewController, MFMailComposeViewControl
             stack.spacing = 10
             stack.alignment = .center
             stack.distribution = .equalSpacing
-#if false
-            let openSourceTitle = NSAttributedString.init(string: NSLocalizedString("ABOUT_VC_OPEN_SOURCE_PROJECT_URL", comment: "Project Source Code"),
-                                                          attributes: [.foregroundColor:UIColor.blue,.underlineStyle:NSNumber(value:NSUnderlineStyle.single.rawValue)])
-            openSourceProjectButton.setAttributedTitle(openSourceTitle, for: .normal)
-            openSourceProjectButton.titleLabel?.font = UIFont.sa_preferredFont(forTextStyle: .body)
-            stack.addArrangedSubview(openSourceProjectButton)
-            stack.setCustomSpacing(10, after: openSourceProjectButton)
-#endif
             
+            stack.addArrangedSubview(openSourceProjectButton)
             stack.addArrangedSubview(submitFeedbackButton)
             stack.addArrangedSubview(rateInAppStoreButton)
             stack.addArrangedSubview(donateButton)
@@ -153,6 +146,7 @@ class SAAboutViewController: SABaseTableViewController, MFMailComposeViewControl
             [
                 ["title":NSLocalizedString("LEGAL_NOTICE_VC_TITLE", comment: "Legal"), "detail":"", "action":#selector(actionViewLegalLicense(_:))],
                 ["title":NSLocalizedString("ABOUT_VC_ELUA", comment: "EULA"), "detail":"", "action":#selector(actionViewEULA(_:))],
+                ["title":NSLocalizedString("ABOUT_VC_OPEN_SOURCE_PROJECT_URL", comment: "Project Source Code"), "detail":"", "action":#selector(handleOpenSourceButtonClick(_:))],
             ]
         ]
     }
