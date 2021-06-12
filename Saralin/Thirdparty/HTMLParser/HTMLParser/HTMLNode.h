@@ -89,7 +89,7 @@ typedef enum
 -(HTMLNode* _Nullable)previousSibling;
 
 //Returns the class name
--(NSString* _Nullable)className;
+-(NSString* _Nullable)elementClassName;
 
 //Returns the tag name
 -(NSString* _Nullable)tagName;

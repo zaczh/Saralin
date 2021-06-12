@@ -73,7 +73,7 @@ NSString * getAttributeNamed(xmlNode * node, const char * nameStr)
 }
 
 //Returns the class name
--(NSString*)className
+-(NSString*)elementClassName
 {
 	return [self getAttributeNamed:@"class"];
 }

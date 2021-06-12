@@ -9,6 +9,7 @@
 import UIKit
 import WebKit
 import CoreData
+import OSLog
 
 class SABackgroundTaskManager {
     private var timer: Timer!
