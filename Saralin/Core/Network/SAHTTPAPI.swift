@@ -233,7 +233,7 @@ extension URLSession {
     
     @discardableResult
     func getPollInfo(of tid: String, completion: ((AnyObject?, NSError?) -> Void)?) -> URLSessionTask? {
-        let aurl = URL(string: "https://app.saraba1st.com/2b/api/app/poll/poll")!
+        let aurl = URL(string: "https://app.saraba1st.com/api/app/poll/poll")!
         os_log("getPoll url: %@", log: .network, type: .debug, aurl as CVarArg)
         var request = URLRequest(url: aurl)
         request.setValue(globalConfig.pc_useragent_string, forHTTPHeaderField: "User-Agent")

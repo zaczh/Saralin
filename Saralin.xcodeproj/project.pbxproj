@@ -159,6 +159,7 @@
 		1F06A79F22CC6A930012A2B0 /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F06A79E22CC6A930012A2B0 /* libiconv.tbd */; };
 		1F0921F02249E79200D8E63A /* placeholder_attachment.png in Resources */ = {isa = PBXBuildFile; fileRef = 1F0921ED2249E79200D8E63A /* placeholder_attachment.png */; };
 		1F0AE21423F0DA5900041D2F /* ViewThread.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1F0AE21323F0DA5900041D2F /* ViewThread.storyboard */; };
+		1F0D418B26B7E97A0017C300 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F0D418A26B7E97A0017C300 /* CoreData.framework */; };
 		1F1267A51FECDA31007E525F /* SAIAPManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F1267A41FECDA31007E525F /* SAIAPManager.swift */; };
 		1F1A30382328DC3E0034B22C /* DirectMessage+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F1A30242328DC3C0034B22C /* DirectMessage+CoreDataProperties.swift */; };
 		1F1A30392328DC3E0034B22C /* WatchingThread+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F1A30252328DC3C0034B22C /* WatchingThread+CoreDataClass.swift */; };
@@ -520,6 +521,7 @@
 		1F06A79E22CC6A930012A2B0 /* libiconv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.tbd; path = usr/lib/libiconv.tbd; sourceTree = SDKROOT; };
 		1F0921ED2249E79200D8E63A /* placeholder_attachment.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = placeholder_attachment.png; sourceTree = "<group>"; };
 		1F0AE21323F0DA5900041D2F /* ViewThread.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = ViewThread.storyboard; sourceTree = "<group>"; };
+		1F0D418A26B7E97A0017C300 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.0.sdk/System/Library/Frameworks/CoreData.framework; sourceTree = DEVELOPER_DIR; };
 		1F1267A41FECDA31007E525F /* SAIAPManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SAIAPManager.swift; sourceTree = "<group>"; };
 		1F1A30242328DC3C0034B22C /* DirectMessage+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "DirectMessage+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		1F1A30252328DC3C0034B22C /* WatchingThread+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WatchingThread+CoreDataClass.swift"; sourceTree = "<group>"; };
@@ -681,6 +683,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1F0D418B26B7E97A0017C300 /* CoreData.framework in Frameworks */,
 				1F06A79F22CC6A930012A2B0 /* libiconv.tbd in Frameworks */,
 				84B1A4861E358F8A00428AE6 /* Security.framework in Frameworks */,
 				1F811244201847DB008742D3 /* libxml2.tbd in Frameworks */,
@@ -1238,6 +1241,7 @@
 		1F34B09C1CCCC50D001C2382 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				1F0D418A26B7E97A0017C300 /* CoreData.framework */,
 				1F06A79E22CC6A930012A2B0 /* libiconv.tbd */,
 				1F059ADF22B760EA007CFA26 /* CloudKit.framework */,
 				1F811243201847DB008742D3 /* libxml2.tbd */,
@@ -1834,7 +1838,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "";
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -2247,7 +2251,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Saralin/Saralin.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				DEBUG_ACTIVITY_MODE = default;
+				DEVELOPMENT_TEAM = NBQ74QRWC2;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Saralin/Thirdparty/PLCrashReporter",
@@ -2271,6 +2279,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SUPPORTS_MACCATALYST = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG UPLOAD_CRASH_LOG";
 				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/Saralin/Saralin-Bridging-Header.h";
@@ -2285,7 +2295,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Saralin/Saralin.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				DEBUG_ACTIVITY_MODE = default;
+				DEVELOPMENT_TEAM = NBQ74QRWC2;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Saralin/Thirdparty/PLCrashReporter",
@@ -2309,6 +2323,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SUPPORTS_MACCATALYST = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/Saralin/Saralin-Bridging-Header.h";

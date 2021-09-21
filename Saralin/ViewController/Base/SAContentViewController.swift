@@ -74,7 +74,7 @@ class SAContentViewController: SABaseViewController, WKNavigationDelegate, SFSaf
         
         webView!.addObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress), options: .new, context: nil)
         webView!.addObserver(self, forKeyPath: #keyPath(WKWebView.title), options: .new, context: nil)
-        webView!.addObserver(self, forKeyPath: #keyPath(WKWebView.loading), options: [.new, .initial], context: nil)
+        webView!.addObserver(self, forKeyPath: #keyPath(WKWebView.isLoading), options: [.new, .initial], context: nil)
         
         view.addSubview(loadingProgressView)
         loadingProgressView.translatesAutoresizingMaskIntoConstraints = false
@@ -115,7 +115,7 @@ class SAContentViewController: SABaseViewController, WKNavigationDelegate, SFSaf
             webView.navigationDelegate = nil
             webView.removeObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress))
             webView.removeObserver(self, forKeyPath: #keyPath(WKWebView.title))
-            webView.removeObserver(self, forKeyPath: #keyPath(WKWebView.loading))
+            webView.removeObserver(self, forKeyPath: #keyPath(WKWebView.isLoading))
         }
     }
     
@@ -207,7 +207,7 @@ class SAContentViewController: SABaseViewController, WKNavigationDelegate, SFSaf
                     self.title = pageTitle
                 }
             }
-        } else if keyPath == #keyPath(WKWebView.loading) {
+        } else if keyPath == #keyPath(WKWebView.isLoading) {
             let isLoading = (change![NSKeyValueChangeKey.newKey]) as! Bool
             
             if automaticallyShowsLoadingView && webView?.url != nil {

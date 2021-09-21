@@ -98,12 +98,8 @@ function preprocessPostWrapperElement(element) {
     const edit_time_formatted = "编辑于 " + dateContent.split(' 于 ')[1].split(' 编辑')[0];
     edit_time_span.innerHTML = edit_time_formatted;
     edit_element.style.display = "none";
-    for (;;) {
-        if (edit_element.parentElement.childElementCount > 1 && edit_element.parentElement.children[1].nodeName == "BR") {
-            edit_element.parentElement.removeChild(edit_element.parentElement.children[1]);
-        } else {
-            break;
-        }
+    if (edit_element.parentElement.childElementCount > 1 && edit_element.parentElement.children[1].nodeName == "BR") {
+        edit_element.parentElement.removeChild(edit_element.parentElement.children[1]);
     }
 }
 

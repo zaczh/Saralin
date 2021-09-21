@@ -102,7 +102,9 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
         loadingController.emptyLabelTitle = "你没有权限查看当前板块或者其内容为空。"
         
         if UIDevice.current.userInterfaceIdiom == .phone {
-            let changeOrderItem = UIBarButtonItem(image: UIImage.imageWithSystemName("arrow.up.arrow.down", fallbackName: "Descending-Sorting"), style: .plain, target: self, action: #selector(handleChangeOrderItemClick(_:)))
+            let changeOrderItem = UIBarButtonItem(image: UIImage.imageWithSystemName("arrow.up.arrow.down", fallbackName: "Descending-Sorting"),
+                                                  primaryAction: nil,
+                                                  menu: createChangeOrderMenu())
             if showsSubBoardBarItem {
                 let subForumBarButtonItem = UIBarButtonItem(image: UIImage.imageWithSystemName("square.grid.2x2", fallbackName:"Menu"),
                                                             style: .plain,
@@ -116,9 +118,8 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
             if showsComposeBarItem {
                 var items = navigationItem.rightBarButtonItems ?? []
                 let composeItem = UIBarButtonItem.init(image: UIImage.imageWithSystemName("plus", fallbackName: "icons8-plus-math-48"),
-                                                       style: .plain,
-                                                       target: self,
-                                                       action: #selector(handleComposeItemClick(_:)))
+                                                       primaryAction: nil,
+                                                       menu: createComposeMenu())
                 items.insert(composeItem, at: 0)
                 navigationItem.rightBarButtonItems = items
             }
@@ -158,15 +159,11 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
         }
         
         NotificationCenter.default.addObserver(self, selector: #selector(handleMacKeyCommandNewThread(_:)), name: .macKeyCommandNewThread, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(handlePadToolbarActionCompose(_:)), name: .padToolBarActionCompose, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(handlePadToolbarActionReorder(_:)), name: .padToolBarActionReorder, object: nil)
     }
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         NotificationCenter.default.removeObserver(self, name: .macKeyCommandNewThread, object: nil)
-        NotificationCenter.default.removeObserver(self, name: .padToolBarActionCompose, object: nil)
-        NotificationCenter.default.removeObserver(self, name: .padToolBarActionReorder, object: nil)
     }
     
     @objc func handleMacKeyCommandNewThread(_ notification: NSNotification) {
@@ -175,11 +172,6 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
     
     @objc func handlePadToolbarActionCompose(_ notification: NSNotification) {
         makeNewThread()
-    }
-    
-    @objc func handlePadToolbarActionReorder(_ notification: NSNotification) {
-        let barButtonItem = notification.userInfo!["barButtonItem"] as! UIBarButtonItem
-        handleChangeOrderItemClick(barButtonItem)
     }
     
     override func getTableView() -> UITableView {
@@ -201,13 +193,18 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
             }
             
             if item.itemIdentifier.rawValue == SAToolbarItemIdentifierAddButton.rawValue {
-                item.isEnabled = showsComposeBarItem && isBarButtonItemsEnabled
-                item.action = #selector(handleComposeItemClick(_:))
+                let menuItem = item as! NSMenuToolbarItem
+                menuItem.itemMenu = self.createComposeMenu()
+            }
+            
+            if item.itemIdentifier.rawValue == SAToolbarItemIdentifierReorder.rawValue {
+                let menuItem = item as! NSMenuToolbarItem
+                menuItem.itemMenu = self.createChangeOrderMenu()
+            }
+            
+            if item.itemIdentifier.rawValue == SAToolbarItemIdentifierSelectCatagory.rawValue {
                 item.target = self
-                
-                if self.forumInfo == nil || self.fid == nil {
-                    item.isEnabled = false
-                }
+                item.action = #selector(handleSubForumButtonClick(_:))
             }
         }
     }
@@ -909,34 +906,16 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
     
     // MARK: - private methods
     
-    @objc func handleComposeItemClick(_ sender: AnyObject) {
-        var targetViewController: UIViewController = self
-        
-        let popoverContentController = UIAlertController.init(title: NSLocalizedString("THREAD_ACTION_CHOOSE", comment: "Please choose an action"), message: nil, preferredStyle: .actionSheet)
-        #if targetEnvironment(macCatalyst)
-        
-        guard let root = view.window?.rootViewController else {
-            return
-        }
-        targetViewController = root
-        
-        let toolbarItem = sender as! NSToolbarItem
-        let offset = getToolBarItemRightOffset(toolbarItem)
-        popoverContentController.popoverPresentationController?.sourceView = targetViewController.view
-        popoverContentController.popoverPresentationController?.sourceRect = CGRect(x: targetViewController.view.frame.size.width - CGFloat(offset), y: 20, width: 40, height: 40)
-        #else
-        popoverContentController.popoverPresentationController?.barButtonItem = sender as? UIBarButtonItem
-        #endif
-        popoverContentController.addAction(UIAlertAction.init(title: NSLocalizedString("ALERT_VIEW_CONTROLLER_VIEW_BOARD_REGULATION_TITLE", comment: ""), style: UIAlertAction.Style.default, handler: { (action) in
-            self.showForumRulesInfo()
-        }))
-        
-        popoverContentController.addAction(UIAlertAction.init(title: NSLocalizedString("ALERT_VIEW_CONTROLLER_POST_NEW_THREAD_TITLE", comment: ""), style: UIAlertAction.Style.default, handler: { (action) in
-            self.makeNewThread()
-        }))
-        popoverContentController.addAction(UIAlertAction(title: NSLocalizedString("CANCEL", comment: "Cancel"), style: .cancel, handler: nil))
-
-        targetViewController.present(popoverContentController, animated: true, completion: nil)
+    func createComposeMenu() -> UIMenu {
+        let menu = UIMenu(title: NSLocalizedString("THREAD_ACTION_CHOOSE", comment: "Please choose an action"), identifier: UIMenu.Identifier(SAToolbarItemIdentifierAddButton.rawValue), children: [
+            UIAction.init(title: NSLocalizedString("ALERT_VIEW_CONTROLLER_VIEW_BOARD_REGULATION_TITLE", comment: ""), handler: { [weak self] (action) in
+                self?.showForumRulesInfo()
+            }),
+            UIAction.init(title: NSLocalizedString("ALERT_VIEW_CONTROLLER_POST_NEW_THREAD_TITLE", comment: ""), handler: { [weak self] (action) in
+                self?.makeNewThread()
+            }),
+        ])
+        return menu
     }
     
     private func makeNewThread() {
@@ -1022,7 +1001,7 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
         }
     }
     
-    @objc func handleChangeOrderItemClick(_ sender: UIBarButtonItem) {
+    func createChangeOrderMenu() -> UIMenu {
         let account = Account()
         let order = account.preferenceForkey(SAAccount.Preference.new_threads_order) as! String
         
@@ -1033,7 +1012,9 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
             allOrderTitles[1] = allOrderTitles[1] + NSLocalizedString("OPTION_THREADS_DISPLAY_ORDER_CURRENT_OPTION_SUFFIX", comment: "")
         }
         
-        let selectOrderAtIndex: (Int) -> () = { (index) in
+        let selectOrderAtIndex: (Int) -> () = { [weak self] (index) in
+            guard let self = self else { return }
+            
             if index == 0 {
                 account.savePreferenceValue("lastpost" as AnyObject, forKey: .new_threads_order)
             } else {
@@ -1048,17 +1029,16 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
                 activty.presentingViewController?.dismiss(animated: true, completion: nil)
             }
         }
-        
-        let alert = UIAlertController(title: NSLocalizedString("CHANGE_THREAD_LIST_ORDER_ALERT_TITLE", comment: "Change Thread List Order"), message: nil, preferredStyle: .actionSheet)
-        alert.popoverPresentationController?.barButtonItem = sender
-        alert.addAction(UIAlertAction(title: allOrderTitles[0], style: .default, handler: { (action) in
-            selectOrderAtIndex(0)
-        }))
-        alert.addAction(UIAlertAction(title: allOrderTitles[1], style: .default, handler: { (action) in
-            selectOrderAtIndex(1)
-        }))
-        alert.addAction(UIAlertAction(title: NSLocalizedString("CANCEL", comment: "Cancel"), style: .cancel, handler: nil))
-        present(alert, animated: true, completion: nil)
+
+        let menu = UIMenu(title: NSLocalizedString("THREAD_ACTION_CHOOSE", comment: "Please choose an action"), identifier: UIMenu.Identifier(SAToolbarItemIdentifierReply.rawValue), children: [
+            UIAction.init(title: allOrderTitles[0], handler: { (action) in
+                selectOrderAtIndex(0)
+            }),
+            UIAction.init(title: allOrderTitles[1], handler: { (action) in
+                selectOrderAtIndex(1)
+            }),
+        ])
+        return menu
     }
     
     @objc func handleSubForumButtonClick(_ sender: UIBarButtonItem) {
@@ -1112,8 +1092,10 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
         childBoardController.delegate = self
         childBoardController.navigationItem.leftBarButtonItem = UIBarButtonItem(title: NSLocalizedString("CANCEL", comment: "Cancel"), style: .plain, target: self, action: #selector(SABoardViewController.handleChildBoardCancel))
         let navigation = SANavigationController(rootViewController: childBoardController)
+        #if !targetEnvironment(macCatalyst)
         navigation.modalPresentationStyle = .popover
         navigation.popoverPresentationController?.barButtonItem = sender
+        #endif
         present(navigation, animated: true, completion: nil)
     }
     

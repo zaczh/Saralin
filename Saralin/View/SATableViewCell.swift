@@ -85,21 +85,13 @@ class SAMessageInboxTableViewCell: SABoardTableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
-        let leftOrigin = avatarImageViewSize.width + 24
-
-        avatarImageView.translatesAutoresizingMaskIntoConstraints = false
         avatarImageView.backgroundColor = UIColor.gray
         avatarImageView.layer.cornerRadius = 2
         avatarImageView.layer.masksToBounds = true
-        contentView.addSubview(avatarImageView)
-        
         customTitleLabel.numberOfLines = 2
-        
-        avatarImageView.leftAnchor.constraint(equalTo: contentView.layoutMarginsGuide.leftAnchor, constant: 0).isActive = true
-        NSLayoutConstraint(item: avatarImageView, attribute: .centerY, relatedBy: .equal, toItem: contentView, attribute: .centerY, multiplier: 1.0, constant: 0).isActive = true
         NSLayoutConstraint(item: avatarImageView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: avatarImageViewSize.width).isActive = true
         NSLayoutConstraint(item: avatarImageView, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: avatarImageViewSize.height).isActive = true
-        customNameLabelLeftConstraint.constant = leftOrigin
+        topStack.insertArrangedSubview(avatarImageView, at: 0)
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -108,76 +100,71 @@ class SAMessageInboxTableViewCell: SABoardTableViewCell {
 }
 
 class SABoardTableViewCell: SAThemedTableViewCell {
+    let contentStack = UIStackView()
+    let topStack = UIStackView()
+    let bottomStack = UIStackView()
     
+    let timeLabelStack = UIStackView()
+    let titleStack = UIStackView()
+    let replyAndViewStack = UIStackView()
+
     let customNameLabel = UILabel()
     let customTitleLabel = UILabel()
     let customTimeLabel = UILabel()
     let customReplyLabel = UILabel()
     let customViewLabel = UILabel()
     let icloudIndicator = UIButton()
-    
-    var customNameLabelLeftConstraint: NSLayoutConstraint!
-    var verticalLayoutConstraints: [NSLayoutConstraint]!
+
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         accessoryType = .none
         
-        customNameLabel.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(customNameLabel)
+        contentStack.axis = .vertical
+        contentStack.spacing = 8
+        contentView.addSubview(contentStack)
+        contentStack.translatesAutoresizingMaskIntoConstraints = false
+        contentStack.leftAnchor.constraint(equalTo: contentView.layoutMarginsGuide.leftAnchor, constant: 0).isActive = true
+        contentStack.rightAnchor.constraint(equalTo: contentView.layoutMarginsGuide.rightAnchor, constant: 0).isActive = true
+        contentStack.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8).isActive = true
+        contentStack.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8).isActive = true
+        
+        timeLabelStack.axis = .horizontal
+        timeLabelStack.alignment = .leading
+        timeLabelStack.addArrangedSubview(customTimeLabel)
+        timeLabelStack.addArrangedSubview(icloudIndicator)
+        
+        topStack.axis = .horizontal
+        topStack.alignment = .leading
+        topStack.spacing = 8
+        topStack.addArrangedSubview(customNameLabel)
+        topStack.addArrangedSubview(timeLabelStack)
+        contentStack.addArrangedSubview(topStack)
+        
+        titleStack.axis = .horizontal
+        titleStack.spacing = 8
+        titleStack.addArrangedSubview(customTitleLabel)
+        contentStack.addArrangedSubview(titleStack)
+        
+        bottomStack.axis = .horizontal
+        bottomStack.spacing = 8
+        
+        replyAndViewStack.axis = .horizontal
+        replyAndViewStack.spacing = 4
+        replyAndViewStack.addArrangedSubview(customReplyLabel)
+        replyAndViewStack.addArrangedSubview(customViewLabel)
+        bottomStack.addArrangedSubview(UIView())
+        bottomStack.addArrangedSubview(replyAndViewStack)
+        
+        contentStack.addArrangedSubview(bottomStack)
         
         customTitleLabel.lineBreakMode = .byWordWrapping
         customTitleLabel.numberOfLines = 0
-        customTitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(customTitleLabel)
-
-        
-        customViewLabel.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(customViewLabel)
-        
-        customReplyLabel.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(customReplyLabel)
-        
         
         customTimeLabel.lineBreakMode = .byTruncatingMiddle
-        customTimeLabel.textAlignment = .right
-        customTimeLabel.translatesAutoresizingMaskIntoConstraints = false
         
         icloudIndicator.setTitle("☁", for: .normal)
         icloudIndicator.isUserInteractionEnabled = false
         icloudIndicator.isHidden = true
-
-        let views = ["customNameLabel":customNameLabel, "customTitleLabel":customTitleLabel, "customTimeLabel":customTimeLabel, "r":customReplyLabel, "customViewLabel":customViewLabel, "customReplyLabel": customReplyLabel]
-
-        customNameLabelLeftConstraint = customNameLabel.leftAnchor.constraint(equalTo: layoutMarginsGuide.leftAnchor, constant: 0)
-        customNameLabelLeftConstraint.isActive = true
-        
-        let timeLabelStack = UIStackView.init()
-        timeLabelStack.axis = .horizontal
-        contentView.addSubview(timeLabelStack)
-        timeLabelStack.translatesAutoresizingMaskIntoConstraints = false
-        
-        timeLabelStack.addArrangedSubview(customTimeLabel)
-        timeLabelStack.addArrangedSubview(icloudIndicator)
-        
-        timeLabelStack.leftAnchor.constraint(greaterThanOrEqualTo: customNameLabel.rightAnchor, constant: 8).isActive = true
-        timeLabelStack.rightAnchor.constraint(equalTo: layoutMarginsGuide.rightAnchor, constant: 0).isActive = true
-        timeLabelStack.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8).isActive = true
-
-        // customTitleLabel
-        NSLayoutConstraint(item: customTitleLabel, attribute: .left, relatedBy: .equal, toItem: customNameLabel, attribute: .left, multiplier: 1.0, constant: 0).isActive = true
-        customTitleLabel.rightAnchor.constraint(equalTo: layoutMarginsGuide.rightAnchor, constant: 0).isActive = true
-        customTitleLabel.topAnchor.constraint(equalTo: timeLabelStack.bottomAnchor, constant: 4).isActive = true
-        
-        customNameLabel.centerYAnchor.constraint(equalTo: timeLabelStack.centerYAnchor).isActive = true
-        
-        // customReplyLabel
-        NSLayoutConstraint.activate(NSLayoutConstraint.constraints(withVisualFormat: "H:[customReplyLabel]-8-[customViewLabel]", options: [], metrics: nil, views: views))
-        NSLayoutConstraint(item: customReplyLabel, attribute: .lastBaseline, relatedBy: .equal, toItem: customViewLabel, attribute: .lastBaseline, multiplier: 1.0, constant: 0).isActive = true
-        NSLayoutConstraint(item: customViewLabel, attribute: .right, relatedBy: .equal, toItem: timeLabelStack, attribute: .right, multiplier: 1.0, constant: 0).isActive = true
-        
-        // vertical layout
-        verticalLayoutConstraints = NSLayoutConstraint.constraints(withVisualFormat: "V:[customTitleLabel]-4-[customReplyLabel]-8@999-|", options: [], metrics: nil, views: views)
-        NSLayoutConstraint.activate(verticalLayoutConstraints)
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -213,8 +200,6 @@ class SASearchTableViewCell: SABoardTableViewCell {
     let quoteTextLabel = UILabel()
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        
-        let views = ["customNameLabel":customNameLabel, "customTitleLabel":customTitleLabel, "customTimeLabel":customTimeLabel, "r":customReplyLabel, "customViewLabel":customViewLabel, "customReplyLabel": customReplyLabel,"quoteView":quoteView,"quoteTextLabel":quoteTextLabel]
 
         quoteView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(quoteView)
@@ -222,13 +207,13 @@ class SASearchTableViewCell: SABoardTableViewCell {
         quoteTextLabel.translatesAutoresizingMaskIntoConstraints = false
         quoteTextLabel.numberOfLines = 5
         quoteView.addSubview(quoteTextLabel)
-        NSLayoutConstraint.activate(NSLayoutConstraint.constraints(withVisualFormat: "H:|-8-[quoteTextLabel]-8-|", options: [], metrics: nil, views: views))
-        NSLayoutConstraint.activate(NSLayoutConstraint.constraints(withVisualFormat: "V:|-4-[quoteTextLabel]-4-|", options: [], metrics: nil, views: views))
+        quoteTextLabel.translatesAutoresizingMaskIntoConstraints = false
+        quoteTextLabel.leftAnchor.constraint(equalTo: quoteView.leftAnchor, constant: 20).isActive = true
+        quoteTextLabel.rightAnchor.constraint(equalTo: quoteView.rightAnchor, constant: -20).isActive = true
+        quoteTextLabel.topAnchor.constraint(equalTo: quoteView.topAnchor, constant: 20).isActive = true
+        quoteTextLabel.bottomAnchor.constraint(equalTo: quoteView.bottomAnchor, constant: -20).isActive = true
         
-        NSLayoutConstraint.deactivate(verticalLayoutConstraints)
-        NSLayoutConstraint.activate(NSLayoutConstraint.constraints(withVisualFormat: "H:|-20-[quoteView]-20-|", options: [], metrics: nil, views: views))
-        verticalLayoutConstraints = NSLayoutConstraint.constraints(withVisualFormat: "V:|-8-[customTimeLabel]-4-[customTitleLabel]-20-[quoteView]-20-[customReplyLabel]-8@999-|", options: [], metrics: nil, views: views)
-        NSLayoutConstraint.activate(verticalLayoutConstraints)
+        contentStack.insertArrangedSubview(quoteView, at: 2)
     }
     
     required init?(coder aDecoder: NSCoder) {

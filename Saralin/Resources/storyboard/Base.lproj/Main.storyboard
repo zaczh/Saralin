@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="DVr-aV-MUS">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="DVr-aV-MUS">
     <device id="ipad12_9" orientation="landscape" layout="fullscreen" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -188,33 +188,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="7Ch-TU-Vy2" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-2588" y="646"/>
-        </scene>
-        <!--hot_threads_vc-->
-        <scene sceneID="hVC-I1-W7Q">
-            <objects>
-                <viewControllerPlaceholder referencedIdentifier="hot_threads_vc" id="DPO-w6-UGN" sceneMemberID="viewController">
-                    <navigationItem key="navigationItem" id="mZE-Qs-48Y"/>
-                </viewControllerPlaceholder>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="YyQ-Ma-KWv" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-68" y="410"/>
-        </scene>
-        <!--Hot-->
-        <scene sceneID="VDu-qP-7Uf">
-            <objects>
-                <navigationController id="ckq-KG-sH0" customClass="SANavigationController" customModule="Saralin" customModuleProvider="target" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Hot" image="Fire_Element" id="aBq-TS-xmn"/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="Baz-Zy-bPJ">
-                        <rect key="frame" x="0.0" y="0.0" width="1366" height="50"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </navigationBar>
-                    <connections>
-                        <segue destination="DPO-w6-UGN" kind="relationship" relationship="rootViewController" id="gyf-sr-heR"/>
-                    </connections>
-                </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="NCE-KW-gY6" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-992" y="394"/>
         </scene>
         <!--Forum-->
         <scene sceneID="ewh-Eo-8wZ">

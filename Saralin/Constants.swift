@@ -46,25 +46,36 @@ enum SAActivityType: String {
 }
 
 #if targetEnvironment(macCatalyst)
+
 let SAToolbarIdentifierMain = NSToolbar.Identifier("Main")
 let SAToolbarIdentifierImageViewer = NSToolbar.Identifier("ImageViewer")
 let SAToolbarIdentifierReplyThread = NSToolbar.Identifier("ReplyThread")
 let SAToolbarIdentifierComposeThread = NSToolbar.Identifier("ComposeThread")
 let SAToolbarIdentifierSettings = NSToolbar.Identifier("Settings")
 
+#endif
 
-let SAToolbarItemIdentifierAddButton = NSToolbarItem.Identifier(rawValue: "Add")
-let SAToolbarItemIdentifierTitle = NSToolbarItem.Identifier(rawValue: "Title")
-let SAToolbarItemIdentifierShare = NSToolbarItem.Identifier(rawValue: "Share")
-let SAToolbarItemIdentifierReply = NSToolbarItem.Identifier(rawValue: "Reply")
-let SAToolbarItemIdentifierSubmit = NSToolbarItem.Identifier(rawValue: "Submit")
-let SAToolbarItemIdentifierGoBack = NSToolbarItem.Identifier(rawValue: "GoBack")
-let SAToolbarItemIdentifierSendMessage = NSToolbarItem.Identifier(rawValue: "SendMessage")
+#if !targetEnvironment(macCatalyst)
+typealias NSToolbarItem = UIMenu
+#endif
+
+let SAToolbarItemIdentifierAddButton = NSToolbarItem.Identifier(rawValue: "ToolbarItemAdd")
+let SAToolbarItemIdentifierTitle = NSToolbarItem.Identifier(rawValue: "ToolbarItemTitle")
+let SAToolbarItemIdentifierShare = NSToolbarItem.Identifier(rawValue: "ToolbarItemShare")
+let SAToolbarItemIdentifierSelectCatagory = NSToolbarItem.Identifier(rawValue: "ToolbarItemSelectCatagory")
+let SAToolbarItemIdentifierReorder = NSToolbarItem.Identifier(rawValue: "ToolbarItemReorder")
+let SAToolbarItemIdentifierReply = NSToolbarItem.Identifier(rawValue: "ToolbarItemReply")
+let SAToolbarItemIdentifierRefresh = NSToolbarItem.Identifier(rawValue: "ToolbarItemRefresh")
+let SAToolbarItemIdentifierFavorite = NSToolbarItem.Identifier(rawValue: "ToolbarItemFavorite")
+let SAToolbarItemIdentifierSubmit = NSToolbarItem.Identifier(rawValue: "ToolbarItemSubmit")
+let SAToolbarItemIdentifierGoBack = NSToolbarItem.Identifier(rawValue: "ToolbarItemGoBack")
+let SAToolbarItemIdentifierSendMessage = NSToolbarItem.Identifier(rawValue: "ToolbarItemSendMessage")
+let SAToolbarItemIdentifierAddToWatchList = NSToolbarItem.Identifier(rawValue: "ToolbarItemAddToWatchList")
+let SAToolbarItemIdentifierScrollToComment = NSToolbarItem.Identifier(rawValue: "ToolbarItemScrollToComment")
+let SAToolbarItemIdentifierViewDeskTopPage = NSToolbarItem.Identifier(rawValue: "ToolbarItemViewDeskTopPage")
 
 let SAToolbarItemWidth = CGFloat(40)
 let SAToolbarItemSpacing = CGFloat(20)
-
-#endif
 
 let SAContextActionTitleICloudInfo = UIAction.Identifier(Bundle.main.bundleIdentifier! + ".context_action.iCloud_info")
 let SAContextActionTitleDelete = UIAction.Identifier(Bundle.main.bundleIdentifier! + ".context_action.delete")

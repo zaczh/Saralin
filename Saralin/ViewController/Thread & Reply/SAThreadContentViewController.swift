@@ -195,26 +195,57 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
                
         if !isDummy {
             let moreItem: UIBarButtonItem = { () in
-                if #available(iOS 13.0, *) {
-                    return UIBarButtonItem(image: UIImage(systemName: "arrowshape.turn.up.left"), style: .plain, target: self, action: #selector(self.handleMoreButtonClick(_:)))
-                } else {
-                    // Fallback on earlier versions
-                    return UIBarButtonItem(barButtonSystemItem: UIBarButtonItem.SystemItem.reply, target: self, action: #selector(self.handleMoreButtonClick(_:)))
-                }
+                let menu = UIMenu(title: NSLocalizedString("THREAD_ACTION_CHOOSE", comment: "Please choose an action"), identifier: UIMenu.Identifier(SAToolbarItemIdentifierReply.rawValue), children: [
+                    UIAction.init(title: "跳转分页", handler: { (action) in
+                        self.jumpBetweenPages()
+                    }),
+                    UIAction.init(title: "刷新", handler: { (action) in
+                        self.loadHTMLFile()
+                    }),
+                    UIAction.init(title: "回复", handler: { (action) in
+                        self.replyToMainThread()
+                    })
+                ])
+                return UIBarButtonItem(title: nil, image: UIImage(systemName: "arrowshape.turn.up.left"), primaryAction: nil, menu: menu)
             }()
             moreItem.isEnabled = false
             
             let shareItem: UIBarButtonItem = { () in
-                if #available(iOS 13.0, *) {
-                    return UIBarButtonItem(image: UIImage(systemName: "square.and.arrow.up"), style: .plain, target: self, action: #selector(self.handleShareButtonClick(_:)))
+                var children: [UIAction] = [
+                    UIAction.init(title: "分享", handler: { (action) in
+                        self.showShareActivity(action)
+                    }),
+                    
+                    UIAction.init(title: "查看桌面版页面", handler: { (action) in
+                        self.openDesktopPage(action)
+                    }),
+                    
+                    UIAction.init(title: "加入收藏夹", handler: { (action) in
+                        self.favoriteThread(action)
+                    }),
+                ]
+                
+                if self.watchlingListRecordInDB == nil {
+                    children.append(
+                        UIAction.init(title: "加入观察列表", handler: { (action) in
+                            self.addToWatchList(action)
+                        })
+                    )
                 } else {
-                    // Fallback on earlier versions
-                    return UIBarButtonItem(barButtonSystemItem: UIBarButtonItem.SystemItem.action, target: self, action: #selector(self.handleShareButtonClick(_:)))
+                    children.append(
+                        UIAction.init(title: "移除出观察列表", handler: { (action) in
+                            self.removeFromWatchingList(action)
+                        })
+                    )
                 }
+                let menu = UIMenu(title: NSLocalizedString("THREAD_ACTION_CHOOSE", comment: "Please choose an action"), identifier: UIMenu.Identifier(SAToolbarItemIdentifierShare.rawValue), children: children)
+                return UIBarButtonItem(title: nil, image: UIImage(systemName: "square.and.arrow.up"), primaryAction: nil, menu: menu)
             }()
             shareItem.isEnabled = false
             
-            let nightModeItem = UIBarButtonItem(image: UIImage.imageWithSystemName("moon", fallbackName:"moon-56"), style: .plain, target: self, action: #selector(handleNightModeButtonClick(_:)))
+            let nightModeItem = UIBarButtonItem(title: nil, image: UIImage(systemName: "moon"), primaryAction: UIAction(handler: { action in
+                self.handleNightModeButtonClick(action)
+            }), menu: nil)
             nightModeItem.isEnabled = false
             
             var items: [UIBarButtonItem] = [shareItem, moreItem, nightModeItem]
@@ -286,27 +317,39 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
                 }
             }
             
-            if item.itemIdentifier.rawValue == SAToolbarItemIdentifierReply.rawValue {
-                if viewAppeared {
-                    item.target = self
-                    item.action = #selector(self.handleMoreButtonClick(_:))
-                    item.isEnabled = true
-                } else {
-                    item.target = nil
-                    item.action = nil
-                    item.isEnabled = false
-                }
+            if item.itemIdentifier.rawValue == SAToolbarItemIdentifierShare.rawValue {
+                item.target = self
+                item.action = #selector(share(_:))
             }
             
-            if item.itemIdentifier.rawValue == SAToolbarItemIdentifierShare.rawValue {
-                if viewAppeared {
-                    item.target = self
-                    item.action = #selector(self.handleShareButtonClick(_:))
-                } else {
-                    item.target = nil
-                    item.action = nil
-                    item.isEnabled = false
-                }
+            if item.itemIdentifier.rawValue == SAToolbarItemIdentifierViewDeskTopPage.rawValue {
+                item.target = self
+                item.action = #selector(showDesktopPage(_:))
+            }
+            
+            if item.itemIdentifier.rawValue == SAToolbarItemIdentifierScrollToComment.rawValue {
+                item.target = self
+                item.action = #selector(scrollToComment(_:))
+            }
+            
+            if item.itemIdentifier.rawValue == SAToolbarItemIdentifierReply.rawValue {
+                item.target = self
+                item.action = #selector(reply(_:))
+            }
+            
+            if item.itemIdentifier.rawValue == SAToolbarItemIdentifierRefresh.rawValue {
+                item.target = self
+                item.action = #selector(refresh(_:))
+            }
+            
+            if item.itemIdentifier.rawValue == SAToolbarItemIdentifierFavorite.rawValue {
+                item.target = self
+                item.action = #selector(toggleFavorite(_:))
+            }
+            
+            if item.itemIdentifier.rawValue == SAToolbarItemIdentifierAddToWatchList.rawValue {
+                item.target = self
+                item.action = #selector(toggleWatchList(_:))
             }
         }
     }
@@ -346,12 +389,49 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
         reloadPage()
     }
     
+    @objc func refresh(_ sender: AnyObject) {
+        loadDB { [weak self] in
+            if self?.favoriteRecordInDB != nil {
+                os_log("this thread also exist in online favorite list", log: .ui, type: .info)
+            }
+            self?.loadHTMLFile()
+        }
+    }
+    
+    @objc func toggleFavorite(_ sender: AnyObject) {
+        self.favoriteThread(sender)
+    }
+    
+    @objc func toggleWatchList(_ sender: AnyObject) {
+        if self.watchlingListRecordInDB == nil {
+            self.addToWatchList(sender)
+        } else {
+            self.removeFromWatchingList(sender)
+        }
+    }
+    
+    @objc func reply(_ sender: AnyObject) {
+        self.replyToMainThread()
+    }
+    
+    @objc func showDesktopPage(_ sender: AnyObject) {
+        self.openDesktopPage(sender)
+    }
+    
+    @objc func share(_ sender: AnyObject) {
+        self.showShareActivity(sender)
+    }
+    
+    @objc func scrollToComment(_ sender: AnyObject) {
+        self.jumpBetweenPages()
+    }
+    
     override func viewFontDidChange(_ newTheme: SATheme) {
         super.viewFontDidChange(newTheme)
         reloadPage()
     }
     
-    private func reloadPage() {
+    func reloadPage() {
         guard let _ = webView.url else {
             os_log("no url was loaded", log: .ui, type: .info)
             return
@@ -909,6 +989,7 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
     
     private func showShareActivity(_ sender: AnyObject) {
         os_log("clicked share button", log: .ui, type: .debug)
+        let shareBarItem = navigationItem.rightBarButtonItems?.first
         getThreadInfo { (threadData) in
             guard let threadData = threadData else { return }
             let tid = threadData.tid
@@ -935,12 +1016,10 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
             }
             
             #if targetEnvironment(macCatalyst)
-            let toolbarItem = sender as! NSToolbarItem
-            let offset = getToolBarItemRightOffset(toolbarItem)
             activityController.popoverPresentationController?.sourceView = self.view
-            activityController.popoverPresentationController?.sourceRect = CGRect(x: self.view.frame.size.width - CGFloat(offset), y: 20, width: 40, height: 40)
+            activityController.popoverPresentationController?.sourceRect = CGRect(x: self.view.frame.size.width - 60, y: self.view.safeAreaInsets.top, width: 1, height: 1)
             #else
-            activityController.popoverPresentationController?.barButtonItem = sender as? UIBarButtonItem
+            activityController.popoverPresentationController?.barButtonItem = shareBarItem
             #endif
             self.present(activityController, animated: true, completion: nil)
         }
@@ -1145,67 +1224,7 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
         quoteFloorJumpView.inStackFloors = quotedFloorPidStack.count
     }
     
-    @objc func handleShareButtonClick(_ sender: AnyObject) {
-        var targetViewController: UIViewController = self
-        let popoverContentController = UIAlertController.init(title: NSLocalizedString("THREAD_ACTION_CHOOSE", comment: "Please choose an action"), message: nil, preferredStyle: .actionSheet)
-        #if targetEnvironment(macCatalyst)
-        guard let root = view.window?.rootViewController else {
-            return
-        }
-        targetViewController = root
-        
-        let toolbarItem = sender as! NSToolbarItem
-        let offset = getToolBarItemRightOffset(toolbarItem)
-        popoverContentController.popoverPresentationController?.sourceView = targetViewController.view
-        popoverContentController.popoverPresentationController?.sourceRect = CGRect(x: targetViewController.view.frame.size.width - CGFloat(offset), y: 20, width: 40, height: 40)
-        #else
-        popoverContentController.popoverPresentationController?.barButtonItem = sender as? UIBarButtonItem
-        #endif
-        popoverContentController.addAction(UIAlertAction.init(title: "分享", style: UIAlertAction.Style.default, handler: { (action) in
-            #if targetEnvironment(macCatalyst)
-            self.showShareActivity(toolbarItem)
-            #else
-            self.showShareActivity(sender)
-            #endif
-        }))
-        popoverContentController.addAction(UIAlertAction.init(title: "查看桌面版页面", style: UIAlertAction.Style.default, handler: { (action) in
-            #if targetEnvironment(macCatalyst)
-            self.openDesktopPage(toolbarItem)
-            #else
-            self.openDesktopPage(sender)
-            #endif
-        }))
-        popoverContentController.addAction(UIAlertAction.init(title: "加入收藏夹", style: UIAlertAction.Style.default, handler: { (action) in
-            #if targetEnvironment(macCatalyst)
-            self.favoriteThread(toolbarItem)
-            #else
-            self.favoriteThread(sender)
-            #endif
-        }))
-        
-        if watchlingListRecordInDB == nil {
-            popoverContentController.addAction(UIAlertAction.init(title: "加入观察列表", style: UIAlertAction.Style.default, handler: { (action) in
-                #if targetEnvironment(macCatalyst)
-                self.addToWatchList(toolbarItem)
-                #else
-                self.addToWatchList(sender)
-                #endif
-            }))
-        } else {
-            popoverContentController.addAction(UIAlertAction.init(title: "移除出观察列表", style: UIAlertAction.Style.default, handler: { (action) in
-                #if targetEnvironment(macCatalyst)
-                self.removeFromWatchingList(toolbarItem)
-                #else
-                self.removeFromWatchingList(sender)
-                #endif
-            }))
-        }
-        popoverContentController.addAction(UIAlertAction(title: NSLocalizedString("CANCEL", comment: "Cancel"), style: .cancel, handler: nil))
-
-        targetViewController.present(popoverContentController, animated: true, completion: nil)
-    }
-    
-    @objc func handleNightModeButtonClick(_ sender: UIBarButtonItem) {
+    @objc func handleNightModeButtonClick(_ sender: UIAction) {
         let doSwitch = { () in
             Account().savePreferenceValue(false as AnyObject, forKey: .automatically_change_theme_to_match_system_appearance)
             let themeManager = AppController.current.getService(of: SAThemeManager.self)!
@@ -1230,38 +1249,6 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
             return
         }
     }
-    
-    @objc func handleMoreButtonClick(_ sender: AnyObject) {
-        var targetViewController: UIViewController = self
-
-        let popoverContentController = UIAlertController.init(title: NSLocalizedString("THREAD_ACTION_CHOOSE", comment: "Please choose an action"), message: nil, preferredStyle: .actionSheet)
-        #if targetEnvironment(macCatalyst)
-        guard let root = view.window?.rootViewController else {
-            return
-        }
-        targetViewController = root
-        
-        let toolbarItem = sender as! NSToolbarItem
-        let offset = getToolBarItemRightOffset(toolbarItem)
-        popoverContentController.popoverPresentationController?.sourceView = targetViewController.view
-        popoverContentController.popoverPresentationController?.sourceRect = CGRect(x: targetViewController.view.frame.size.width - CGFloat(offset), y: 20, width: 40, height: 40)
-        #else
-        popoverContentController.popoverPresentationController?.barButtonItem = sender as? UIBarButtonItem
-        #endif
-        popoverContentController.addAction(UIAlertAction.init(title: "跳转分页", style: UIAlertAction.Style.default, handler: { (action) in
-            self.jumpBetweenPages()
-        }))
-        popoverContentController.addAction(UIAlertAction.init(title: "刷新", style: UIAlertAction.Style.default, handler: { (action) in
-            self.loadHTMLFile()
-        }))
-        popoverContentController.addAction(UIAlertAction.init(title: "回复", style: UIAlertAction.Style.default, handler: { (action) in
-            self.replyToMainThread()
-        }))
-        
-        popoverContentController.addAction(UIAlertAction(title: NSLocalizedString("CANCEL", comment: "Cancel"), style: .cancel, handler: nil))
-        targetViewController.present(popoverContentController, animated: true, completion: nil)
-    }
-    
     
     func jumpBetweenPages() {
         getThreadInfo { [weak self] (threadData) in

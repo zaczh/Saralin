@@ -164,12 +164,7 @@ class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, 
         NotificationCenter.default.addObserver(self, selector: #selector(handleUserLoggedIn(_:)), name: .SAUserLoggedInNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleUserLoggedOut(_:)), name: .SAUserLoggedOutNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleUserPreferenceChange(_:)), name: .SAUserPreferenceChangedNotification, object: nil)
-        
-        navigationItem.leftBarButtonItems = [
-            UIBarButtonItem(barButtonSystemItem: .compose, target: self, action: #selector(toolbarActionCompose(sender:))),
-            UIBarButtonItem(image: UIImage.imageWithSystemName("arrow.up.arrow.down", fallbackName: "Descending-Sorting"), style: .plain, target: self, action: #selector(toolbarActionChangeOrder(sender:)))
-        ]
-        
+
         let searchBar = UISearchBar(frame: CGRect(x: 0, y: 0, width: 0, height: 44))
         searchBar.delegate = self
         if UIDevice.current.userInterfaceIdiom == .mac {
@@ -198,14 +193,6 @@ class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, 
         UIApplication.shared.requestSceneSessionActivation(AppController.current.findSceneSession(activityType: SAActivityType.settings.rawValue), userActivity: userActivity, options: options) { (error) in
             os_log("request new scene returned: %@", error.localizedDescription)
         }
-    }
-        
-    @objc func toolbarActionCompose(sender: UIBarButtonItem) {
-        NotificationCenter.default.post(name: .padToolBarActionCompose, object: self, userInfo: ["barButtonItem":sender])
-    }
-    
-    @objc func toolbarActionChangeOrder(sender: UIBarButtonItem) {
-        NotificationCenter.default.post(name: .padToolBarActionReorder, object: self, userInfo: ["barButtonItem":sender])
     }
     
     func refreshTableViewCompletion(_ completion: ((SALoadingViewController.LoadingResult, NSError?) -> Void)?) {
