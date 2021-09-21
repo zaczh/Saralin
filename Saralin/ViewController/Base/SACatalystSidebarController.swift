@@ -191,11 +191,11 @@ class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, 
     @objc func handleMacKeyCommandPreferences(_ sender: AnyObject) {
         let userActivity = NSUserActivity(activityType: SAActivityType.settings.rawValue)
         userActivity.isEligibleForHandoff = true
-        userActivity.title = SAActivityType.viewImage.title()
+        userActivity.title = SAActivityType.settings.title()
         userActivity.userInfo = nil
         let options = UIScene.ActivationRequestOptions()
         options.requestingScene = view.window?.windowScene
-        UIApplication.shared.requestSceneSessionActivation(AppController.current.findSceneSession(), userActivity: userActivity, options: options) { (error) in
+        UIApplication.shared.requestSceneSessionActivation(AppController.current.findSceneSession(activityType: SAActivityType.settings.rawValue), userActivity: userActivity, options: options) { (error) in
             os_log("request new scene returned: %@", error.localizedDescription)
         }
     }

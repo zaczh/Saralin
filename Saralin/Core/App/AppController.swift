@@ -112,11 +112,20 @@ class AppController: NSObject {
     }
     
     @available(iOS 13.0, *)
-    func findSceneSession() -> UISceneSession? {
-        for session in UIApplication.shared.openSessions {
-            if session.scene == nil {
-                return session
+    func findSceneSession(activityType: String? = nil) -> UISceneSession? {
+        if let requestedType = activityType {
+            for session in UIApplication.shared.openSessions {
+                if let type = session.stateRestorationActivity?.activityType {
+                    if type == requestedType {
+                        os_log("findSceneSession reuse activity type: %@", log: .ui, type: .info, requestedType)
+                        return session
+                    }
+                    continue
+                } else {
+                    return session
+                }
             }
+            return nil
         }
         
         os_log("findSceneSession return nil, will create new one.", log: .ui, type: .info)

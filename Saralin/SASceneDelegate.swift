@@ -65,7 +65,8 @@ class SASceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
         scene.title = userActivity.title
-        
+        scene.session.stateRestorationActivity = userActivity
+
         let saactivityType = SAActivityType(rawValue: userActivity.activityType)
         switch saactivityType {
         case .viewThread:
