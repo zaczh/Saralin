@@ -194,16 +194,16 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
         setupContextMenuAction()
                
         if !isDummy {
-            let moreItem: UIBarButtonItem = { () in
+            let moreItem: UIBarButtonItem = { [weak self] () in
                 let menu = UIMenu(title: NSLocalizedString("THREAD_ACTION_CHOOSE", comment: "Please choose an action"), identifier: UIMenu.Identifier(SAToolbarItemIdentifierReply.rawValue), children: [
                     UIAction.init(title: "跳转分页", handler: { (action) in
-                        self.jumpBetweenPages()
+                        self?.jumpBetweenPages()
                     }),
                     UIAction.init(title: "刷新", handler: { (action) in
-                        self.loadHTMLFile()
+                        self?.loadHTMLFile()
                     }),
                     UIAction.init(title: "回复", handler: { (action) in
-                        self.replyToMainThread()
+                        self?.replyToMainThread()
                     })
                 ])
                 return UIBarButtonItem(title: nil, image: UIImage(systemName: "arrowshape.turn.up.left"), primaryAction: nil, menu: menu)
@@ -212,29 +212,29 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
             
             let shareItem: UIBarButtonItem = { () in
                 var children: [UIAction] = [
-                    UIAction.init(title: "分享", handler: { (action) in
-                        self.showShareActivity(action)
+                    UIAction.init(title: "分享", handler: { [weak self] (action) in
+                        self?.showShareActivity(action)
                     }),
                     
-                    UIAction.init(title: "查看桌面版页面", handler: { (action) in
-                        self.openDesktopPage(action)
+                    UIAction.init(title: "查看桌面版页面", handler: { [weak self] (action) in
+                        self?.openDesktopPage(action)
                     }),
                     
-                    UIAction.init(title: "加入收藏夹", handler: { (action) in
-                        self.favoriteThread(action)
+                    UIAction.init(title: "加入收藏夹", handler: { [weak self] (action) in
+                        self?.favoriteThread(action)
                     }),
                 ]
                 
                 if self.watchlingListRecordInDB == nil {
                     children.append(
-                        UIAction.init(title: "加入观察列表", handler: { (action) in
-                            self.addToWatchList(action)
+                        UIAction.init(title: "加入观察列表", handler: { [weak self] (action) in
+                            self?.addToWatchList(action)
                         })
                     )
                 } else {
                     children.append(
-                        UIAction.init(title: "移除出观察列表", handler: { (action) in
-                            self.removeFromWatchingList(action)
+                        UIAction.init(title: "移除出观察列表", handler: { [weak self] (action) in
+                            self?.removeFromWatchingList(action)
                         })
                     )
                 }
