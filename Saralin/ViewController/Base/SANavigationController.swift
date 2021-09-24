@@ -36,6 +36,8 @@ class SANavigationController: UINavigationController, UIViewControllerTransition
         } else {
             // Fallback on earlier versions
         }
+        navigationBar.scrollEdgeAppearance = UINavigationBarAppearance()
+        navigationBar.scrollEdgeAppearance?.backgroundColor = activeTheme.barTintColor.sa_toColor()
     }
     
     override var prefersStatusBarHidden: Bool {

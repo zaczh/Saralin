@@ -94,6 +94,11 @@ class SABaseTableViewController: SABaseViewController, UITableViewDataSource, UI
         super.viewDidLoad()
         
         tableView = getTableView()
+        if #available(iOS 15.0, *) {
+            tableView.sectionHeaderTopPadding = 0
+        } else {
+            // Fallback on earlier versions
+        }
         tableView.cellLayoutMarginsFollowReadableWidth = true
         tableView.delegate = self
         tableView.dataSource = self
