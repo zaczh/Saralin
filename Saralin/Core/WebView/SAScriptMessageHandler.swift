@@ -131,106 +131,100 @@ class SAScriptImageViewHandler: SABaseScriptLogHandler, UIDocumentInteractionCon
         let snapshot = webView.resizableSnapshotView(from: frame, afterScreenUpdates: false, withCapInsets: .zero)!
         snapshot.frame = webView.convert(frame, to: nil)
         
-        if #available(iOS 11, *) {
-            guard originalUrl.scheme == sa_wk_url_scheme else {
-                os_log("unknown script message from sa custom url scheme url: %@", log: .webView, type: .error, originalUrl as CVarArg)
+        guard originalUrl.scheme == sa_wk_url_scheme else {
+            os_log("unknown script message from sa custom url scheme url: %@", log: .webView, type: .error, originalUrl as CVarArg)
+            return
+        }
+        
+        guard let realUrlStr = originalUrl.sa_queryString("url"), let realUrl = URL.init(string: realUrlStr) else {
+            os_log("image url bad! %@", log: .webView, type: .error, originalUrl as CVarArg)
+            return
+        }
+        
+        if originalUrl.host == SAURLSchemeHostType.attachment.rawValue {
+            guard let attachmentURL = content.getSavedFilePath(of: realUrl) else {
+                os_log("attachment not found %@", log: .webView, type: .error, realUrl as CVarArg)
                 return
             }
             
-            guard let realUrlStr = originalUrl.sa_queryString("url"), let realUrl = URL.init(string: realUrlStr) else {
-                os_log("image url bad! %@", log: .webView, type: .error, originalUrl as CVarArg)
-                return
+            let action = UIAlertController(title: NSLocalizedString("HINT", comment: "HINT"), message: NSLocalizedString("OPEN_ATTACHMENT_HINT_TEXT", comment: ""), preferredStyle: .actionSheet)
+            let fileName = attachmentURL.lastPathComponent
+            if !fileName.isEmpty {
+                action.message = action.message! + " " + NSLocalizedString("FILE_NAME", comment: "") + ": \(fileName)"
             }
-            
-            if originalUrl.host == SAURLSchemeHostType.attachment.rawValue {
-                guard let attachmentURL = content.getSavedFilePath(of: realUrl) else {
-                    os_log("attachment not found %@", log: .webView, type: .error, realUrl as CVarArg)
+            action.popoverPresentationController?.sourceView = content.webView
+            action.popoverPresentationController?.sourceRect = frame
+            action.addAction(UIAlertAction(title: NSLocalizedString("CANCEL", comment: "Cancel"), style: .cancel, handler: nil))
+            action.addAction(UIAlertAction(title: NSLocalizedString("OPEN", comment: ""), style: .default, handler: { [weak self] (action) in
+                // copy file to temp first
+                let tempFileName = NSTemporaryDirectory() + "/\(attachmentURL.lastPathComponent)"
+                let tempFileURL = URL.init(fileURLWithPath: tempFileName, isDirectory: false)
+                try? FileManager.default.removeItem(atPath: tempFileURL.path)
+                do {
+                    try FileManager.default.copyItem(atPath: attachmentURL.path, toPath: tempFileName)
+                } catch {
+                    os_log("can not copy log file", type: .error)
                     return
                 }
-                
-                let action = UIAlertController(title: NSLocalizedString("HINT", comment: "HINT"), message: NSLocalizedString("OPEN_ATTACHMENT_HINT_TEXT", comment: ""), preferredStyle: .actionSheet)
-                let fileName = attachmentURL.lastPathComponent
-                if !fileName.isEmpty {
-                    action.message = action.message! + " " + NSLocalizedString("FILE_NAME", comment: "") + ": \(fileName)"
-                }
-                action.popoverPresentationController?.sourceView = content.webView
-                action.popoverPresentationController?.sourceRect = frame
-                action.addAction(UIAlertAction(title: NSLocalizedString("CANCEL", comment: "Cancel"), style: .cancel, handler: nil))
-                action.addAction(UIAlertAction(title: NSLocalizedString("OPEN", comment: ""), style: .default, handler: { [weak self] (action) in
-                    // copy file to temp first
-                    let tempFileName = NSTemporaryDirectory() + "/\(attachmentURL.lastPathComponent)"
-                    let tempFileURL = URL.init(fileURLWithPath: tempFileName, isDirectory: false)
-                    try? FileManager.default.removeItem(atPath: tempFileURL.path)
-                    do {
-                        try FileManager.default.copyItem(atPath: attachmentURL.path, toPath: tempFileName)
-                    } catch {
-                        os_log("can not copy log file", type: .error)
-                        return
-                    }
-                    let documentViewController = UIDocumentInteractionController.init(url: tempFileURL)
-                    documentViewController.delegate = self
-                    documentViewController.presentOpenInMenu(from: frame, in: content.webView, animated: true)
-                    self?.documentViewController = documentViewController
-                }))
-                viewController?.present(action, animated: true, completion: nil)
-                return
-            } else if originalUrl.host == SAURLSchemeHostType.failure.rawValue {
-                os_log("tap an image that fails to load, image url is %@", log: .webView, type: .error, originalUrl as CVarArg)
-                // loading and failure url state only differs in their scheme.
-                var loadingUrlComponents = URLComponents.init(url: originalUrl, resolvingAgainstBaseURL: false)
-                loadingUrlComponents?.host = SAURLSchemeHostType.loading.rawValue
-                if let loadingUrl = loadingUrlComponents?.url {
-                    content.reloadHTMLPlaceholderImageTag(fromURL: originalUrl, toURL: loadingUrl)
-                } else {
-                    os_log("can not create loading url from image url: %@", log:.webView, type: .error, originalUrl as CVarArg)
-                }
-                return
-            } else if originalUrl.host == SAURLSchemeHostType.imageFormatNotSupported.rawValue {
-                os_log("tap an image that not supported, image url is %@", log: .webView, type: .error, originalUrl as CVarArg)
-                return
-            }
-            
-            var fullSize: UIImage?
-            if let data = content.getSavedImageData(fromURL: realUrl) {
-                fullSize = UIImage.init(data: data)
-            }
-            
-            if #available(iOS 13.0, *) {
-                if UIApplication.shared.supportsMultipleScenes && ((Account().preferenceForkey(.enable_multi_windows) as? Bool) ?? false) {
-                    var userInfo:[String:AnyObject] = [:]
-                    userInfo["url"] = realUrl as AnyObject
-                    userInfo["fullSizeImageData"] = data as AnyObject
-
-                    let userActivity = NSUserActivity(activityType: SAActivityType.viewImage.rawValue)
-                    userActivity.isEligibleForHandoff = true
-                    userActivity.title = SAActivityType.viewImage.title()
-                    userActivity.userInfo = userInfo
-                    let options = UIScene.ActivationRequestOptions()
-                    options.requestingScene = webView.window?.windowScene
-                    UIApplication.shared.requestSceneSessionActivation(AppController.current.findSceneSession(), userActivity: userActivity, options: options) { (error) in
-                        os_log("request new scene returned: %@", error.localizedDescription)
-                    }
-                } else {
-                    // Fallback on earlier versions
-                    let imageViewer = ImageViewController()
-                    imageViewer.config(imageURL: realUrl, thumbnailImage: nil, fullSizeImage: fullSize, transitioningView: snapshot)
-                    viewController?.present(imageViewer, animated: true, completion: nil)
-                }
+                let documentViewController = UIDocumentInteractionController.init(url: tempFileURL)
+                documentViewController.delegate = self
+                documentViewController.presentOpenInMenu(from: frame, in: content.webView, animated: true)
+                self?.documentViewController = documentViewController
+            }))
+            viewController?.present(action, animated: true, completion: nil)
+            return
+        } else if originalUrl.host == SAURLSchemeHostType.failure.rawValue {
+            os_log("tap an image that fails to load, image url is %@", log: .webView, type: .error, originalUrl as CVarArg)
+            // loading and failure url state only differs in their scheme.
+            var loadingUrlComponents = URLComponents.init(url: originalUrl, resolvingAgainstBaseURL: false)
+            loadingUrlComponents?.host = SAURLSchemeHostType.loading.rawValue
+            if let loadingUrl = loadingUrlComponents?.url {
+                content.reloadHTMLPlaceholderImageTag(fromURL: originalUrl, toURL: loadingUrl)
             } else {
-                // Fallback on earlier versions
-                let imageViewer = ImageViewController()
-                imageViewer.config(imageURL: realUrl, thumbnailImage: nil, fullSizeImage: fullSize, transitioningView: snapshot)
-                viewController?.present(imageViewer, animated: true, completion: nil)
+                os_log("can not create loading url from image url: %@", log:.webView, type: .error, originalUrl as CVarArg)
             }
-            
+            return
+        } else if originalUrl.host == SAURLSchemeHostType.imageFormatNotSupported.rawValue {
+            os_log("tap an image that not supported, image url is %@", log: .webView, type: .error, originalUrl as CVarArg)
+            return
+        }
+        
+        if UIDevice.current.userInterfaceIdiom == .mac {
+            let macCatalystExtensionBundlePath = Bundle.main.builtInPlugInsPath! + "/CatalystExtension.bundle"
+            let bundle = Bundle.init(path: macCatalystExtensionBundlePath)!
+            if let cls = bundle.principalClass as? NSObject.Type {
+                var param: [String:AnyObject] = ["url":realUrl as AnyObject]
+                if let fileUrl = content.getSavedImageFileUrl(fromURL: realUrl) {
+                    param["fileUrl"] = fileUrl as AnyObject
+                }
+                cls.perform(NSSelectorFromString("runCommand:object:"), with: "ViewImage", with: param)
+            }
+            return
+        }
+        
+        var fullSize: UIImage?
+        if let data = content.getSavedImageData(fromURL: realUrl) {
+            fullSize = UIImage.init(data: data)
+        }
+        
+        if UIApplication.shared.supportsMultipleScenes && ((Account().preferenceForkey(.enable_multi_windows) as? Bool) ?? false) {
+            var userInfo:[String:AnyObject] = [:]
+            userInfo["url"] = realUrl as AnyObject
+            userInfo["fullSizeImageData"] = data as AnyObject
+
+            let userActivity = NSUserActivity(activityType: SAActivityType.viewImage.rawValue)
+            userActivity.isEligibleForHandoff = true
+            userActivity.title = SAActivityType.viewImage.title()
+            userActivity.userInfo = userInfo
+            let options = UIScene.ActivationRequestOptions()
+            options.requestingScene = webView.window?.windowScene
+            UIApplication.shared.requestSceneSessionActivation(AppController.current.findSceneSession(), userActivity: userActivity, options: options) { (error) in
+                os_log("request new scene returned: %@", error.localizedDescription)
+            }
         } else {
-            // does not support wk url scheme
-            var fullSize: UIImage?
-            if let data = URLCache.shared.cachedResponse(for: URLRequest.init(url: originalUrl))?.data {
-                fullSize = UIImage.init(data: data)
-            }
+            // Fallback on earlier versions
             let imageViewer = ImageViewController()
-            imageViewer.config(imageURL: originalUrl, thumbnailImage: nil, fullSizeImage: fullSize, transitioningView: snapshot)
+            imageViewer.config(imageURL: realUrl, thumbnailImage: nil, fullSizeImage: fullSize, transitioningView: snapshot)
             viewController?.present(imageViewer, animated: true, completion: nil)
         }
     }

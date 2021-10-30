@@ -21,6 +21,10 @@ div {
     text-align: unset !important;
 }
 
+ol {
+    padding:1em;
+}
+
 span[style] {
     float:unset !important;
     margin-left:unset !important;

@@ -1505,6 +1505,29 @@ extension SAThreadContentViewController {
         let data = try? Data.init(contentsOf: filePath)
         return data
     }
+    
+    func getSavedImageFileUrl(fromURL: URL) -> URL? {
+        let fm = FileManager.default
+        guard let dir = fileDirectoryURL else {
+            return nil
+        }
+        
+        let downloadedImageDir = dir.appendingPathComponent(imageSavingSubDirName)
+        if !fm.fileExists(atPath: downloadedImageDir.path) {
+            return nil
+        }
+        
+        guard let base64Name = fromURL.absoluteString.data(using: .utf8)?.base64EncodedString().replacingOccurrences(of: "/", with: "") else {
+            return nil
+        }
+        
+        let filePath = downloadedImageDir.appendingPathComponent(base64Name)
+        if !fm.fileExists(atPath: filePath.path) {
+            return nil
+        }
+        
+        return filePath
+    }
 }
 
 // MARK: - Caching Images

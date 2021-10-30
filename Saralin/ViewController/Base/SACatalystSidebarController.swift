@@ -441,7 +441,7 @@ class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, 
             let macCatalystExtensionBundlePath = Bundle.main.builtInPlugInsPath! + "/CatalystExtension.bundle"
             let bundle = Bundle.init(path: macCatalystExtensionBundlePath)!
             if let cls = bundle.principalClass as? NSObject.Type {
-                cls.perform(NSSelectorFromString("runCommand:context:"), with: "ShowSettingsWindow", with: nil)
+                cls.perform(NSSelectorFromString("runCommand:object:"), with: "ShowSettingsWindow", with: nil)
             }
             return
         }
