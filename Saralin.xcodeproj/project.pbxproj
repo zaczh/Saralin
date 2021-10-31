@@ -258,6 +258,7 @@
 		1FAF4B801FCE8AD500C39BE2 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FAF4B7F1FCE8AD500C39BE2 /* StoreKit.framework */; };
 		1FB025A724F100D500FE89AF /* ViewBoard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1FB025A624F100D500FE89AF /* ViewBoard.storyboard */; };
 		1FB460FC1C4D414B002309A4 /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FB460FB1C4D414B002309A4 /* SafariServices.framework */; };
+		1FB4DE1D272D419400BDAAD5 /* SAReplyEmojiViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FB4DE1C272D419400BDAAD5 /* SAReplyEmojiViewController.swift */; };
 		1FB61E31201EC08300F4DE08 /* static in Resources */ = {isa = PBXBuildFile; fileRef = 1FB61E30201EC08300F4DE08 /* static */; };
 		1FB8DFA82473F6C400DDCA23 /* SAHTMLAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FB8DFA72473F6C400DDCA23 /* SAHTMLAPI.swift */; };
 		1FB8DFB42474D17E00DDCA23 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FB8DFB32474D17E00DDCA23 /* Models.swift */; };
@@ -619,6 +620,7 @@
 		1FAF4B7F1FCE8AD500C39BE2 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		1FB025A624F100D500FE89AF /* ViewBoard.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = ViewBoard.storyboard; sourceTree = "<group>"; };
 		1FB460FB1C4D414B002309A4 /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = System/Library/Frameworks/SafariServices.framework; sourceTree = SDKROOT; };
+		1FB4DE1C272D419400BDAAD5 /* SAReplyEmojiViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SAReplyEmojiViewController.swift; sourceTree = "<group>"; };
 		1FB61E30201EC08300F4DE08 /* static */ = {isa = PBXFileReference; lastKnownFileType = folder; path = static; sourceTree = "<group>"; };
 		1FB8DFA72473F6C400DDCA23 /* SAHTMLAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SAHTMLAPI.swift; sourceTree = "<group>"; };
 		1FB8DFB32474D17E00DDCA23 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
@@ -825,6 +827,7 @@
 				1F05AE591E2B1B9D0050F8E2 /* SAReplyViewController.swift */,
 				1F05AE5B1E2B1B9D0050F8E2 /* SAThreadCompositionViewController.swift */,
 				1F05AE5C1E2B1B9D0050F8E2 /* SAThreadContentViewController.swift */,
+				1FB4DE1C272D419400BDAAD5 /* SAReplyEmojiViewController.swift */,
 			);
 			path = "Thread & Reply";
 			sourceTree = "<group>";
@@ -2009,6 +2012,7 @@
 				1F06A79A22CC5E850012A2B0 /* mz_strm_split.c in Sources */,
 				1FB8DFA82473F6C400DDCA23 /* SAHTMLAPI.swift in Sources */,
 				1F06A70222CC5AD00012A2B0 /* TextChatInputItem.swift in Sources */,
+				1FB4DE1D272D419400BDAAD5 /* SAReplyEmojiViewController.swift in Sources */,
 				1F06A79922CC5E850012A2B0 /* mz_strm_buf.c in Sources */,
 				1F1B300E20FC278C00ABD636 /* SATabBarController.swift in Sources */,
 				1F1A304B2328DC3E0034B22C /* OnlineFavoriteThread+CoreDataProperties.swift in Sources */,

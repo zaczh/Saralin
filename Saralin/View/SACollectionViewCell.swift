@@ -8,6 +8,11 @@
 
 import UIKit
 
+
+protocol SAEmojiCollectionWrapperViewDelegate: NSObjectProtocol {
+    func insertEmojiNamed(_ name: String, replacementString: String)
+}
+
 class SAEmojiCollectionViewCell: UICollectionViewCell {
     let imageView = UIImageView(image: nil)
     let previewView = UIView()
@@ -42,7 +47,7 @@ class SAEmojiCollectionWrapperView: UICollectionViewCell, UICollectionViewDataSo
     var collectionView = UICollectionView(frame: CGRect.zero, collectionViewLayout: UICollectionViewFlowLayout())
     var emojis = NSArray()
     let emptyView = UILabel()
-    weak var delegate: SAReplyViewController?
+    weak var delegate: SAEmojiCollectionWrapperViewDelegate?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -68,7 +73,7 @@ class SAEmojiCollectionWrapperView: UICollectionViewCell, UICollectionViewDataSo
         collectionView.backgroundColor = UIColor.sa_colorFromHexString(Theme().backgroundColor)
         let collectionViewLayout = collectionView.collectionViewLayout as! UICollectionViewFlowLayout
         collectionViewLayout.scrollDirection = .vertical
-        collectionViewLayout.itemSize = CGSize(width: 40, height: 40)
+        collectionViewLayout.itemSize = CGSize(width: 30, height: 30)
         collectionViewLayout.minimumLineSpacing = 10
         collectionViewLayout.minimumInteritemSpacing = 30
         collectionViewLayout.sectionInset = UIEdgeInsets.init(top: 10, left: 20, bottom: 10, right: 20)
@@ -121,7 +126,6 @@ class SAEmojiCollectionWrapperView: UICollectionViewCell, UICollectionViewDataSo
             
             let replacementString = (emoji["text"]) as! String
             delegate?.insertEmojiNamed(name!, replacementString: replacementString)
-            delegate?.reportEmojiUsage(replacementString, imageName: name!)
         }
     }
 }

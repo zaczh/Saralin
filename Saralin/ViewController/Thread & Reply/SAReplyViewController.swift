@@ -17,7 +17,7 @@ protocol SAReplyViewControllerDelegate {
     func replyDidFail(_ replyViewController: SAReplyViewController)
 }
 
-class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollectionViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UIScrollViewDelegate, SAReplyImagePreviewCollectionViewCellDelegate {
+class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollectionViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UIScrollViewDelegate, SAReplyImagePreviewCollectionViewCellDelegate, SAEmojiCollectionWrapperViewDelegate {
     
     //ui
     @IBOutlet var imagePreviewCollectionViewHeightConstraint: NSLayoutConstraint!
@@ -27,11 +27,7 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
     @IBOutlet var replyPreviewViewLeftLine: UIView!
     @IBOutlet var replyPreviewViewBodyLabelBottomConstraint: NSLayoutConstraint!
     @IBOutlet var replyPreviewViewBodyLabelTopConstraint: NSLayoutConstraint!
-    @IBOutlet var emojiViewSwitchCollectionView: UICollectionView!
-    @IBOutlet var emojiViewSwitchDeleteButton: UIButton!
     @IBOutlet var emojiView: UIView!
-    @IBOutlet var emojiViewCollectionView: UICollectionView!
-    @IBOutlet var emojiViewBottomConstraint: NSLayoutConstraint!
     
     @IBOutlet var toolBarBottomConstraint: NSLayoutConstraint!
 
@@ -78,7 +74,6 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
             
             // We handle the inset manually in this VC
             textView.contentInsetAdjustmentBehavior = .never
-            emojiViewCollectionView.contentInsetAdjustmentBehavior = .never
         } else {
             // Fallback on earlier versions
             
@@ -107,28 +102,9 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
         imagePreviewCollectionView.register(SAReplyImageAndContentPreviewCollectionViewCell.self, forCellWithReuseIdentifier: "cell")
         replyPreviewViewTopConstraint = NSLayoutConstraint(item: replyPreviewView!, attribute: .top, relatedBy: .equal, toItem: view.safeAreaLayoutGuide, attribute: .top, multiplier: 1.0, constant: 10)
         replyPreviewViewTopConstraint.isActive = true
-
-        emojiViewCollectionView.scrollsToTop = false
-        emojiViewCollectionView.register(SAEmojiCollectionWrapperView.self, forCellWithReuseIdentifier: "cell")
-        emojiViewCollectionView.dataSource = self
-        emojiViewCollectionView.delegate = self
-        emojiViewCollectionView.isPagingEnabled = true
-        emojiViewCollectionView.backgroundColor = UIColor.sa_colorFromHexString(Theme().backgroundColor)
-        
-        emojiViewSwitchCollectionView.scrollsToTop = false
-        emojiViewSwitchCollectionView.showsHorizontalScrollIndicator = false
-        emojiViewSwitchCollectionView.register(SAEmojiCollectionSwitchCell.self, forCellWithReuseIdentifier: "cell")
-        emojiViewSwitchCollectionView.dataSource = self
-        emojiViewSwitchCollectionView.delegate = self
-        let switchViewLayout = emojiViewSwitchCollectionView.collectionViewLayout as! UICollectionViewFlowLayout
-        switchViewLayout.scrollDirection = .horizontal
-        switchViewLayout.minimumInteritemSpacing = 20
-        switchViewLayout.itemSize = CGSize(width: 50, height: 40)
                 
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: NSLocalizedString("SEND", comment: "Reply"), style: .plain, target: self, action: #selector(handleSendBarItemClick(_:)))
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: NSLocalizedString("CLOSE", comment: "Reply"), style: .plain, target: self, action: #selector(handleCloseBarItemClick(_:)))
-        
-        emojiViewSwitchCollectionView.selectItem(at: IndexPath(item: 0, section: 0), animated: false, scrollPosition: UICollectionView.ScrollPosition())
         
         loadDraftIfExist()
         
@@ -149,8 +125,6 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
         textView.backgroundColor = UIColor.sa_colorFromHexString(newTheme.foregroundColor)
         textView.keyboardAppearance = newTheme.keyboardAppearence
         textView.font = UIFont.sa_preferredFont(forTextStyle: .body)
-        emojiViewSwitchCollectionView.backgroundColor = UIColor.sa_colorFromHexString(newTheme.foregroundColor)
-        emojiViewCollectionView.backgroundColor = UIColor.sa_colorFromHexString(newTheme.tableCellHighlightColor)
         imagePreviewCollectionView.backgroundColor = UIColor.clear
     }
     
@@ -178,6 +152,16 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
         replyPreviewViewBodyLabelBottomConstraint.constant = 8
         
         self.title = NSLocalizedString("REPLY", comment: "Reply") + ": \(quoteName!)"
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        super.prepare(for: segue, sender: sender)
+        if let dest = segue.destination as? SAReplyEmojiViewController {
+            dest.modalPresentationStyle = .popover
+            dest.popoverPresentationController?.barButtonItem = sender as? UIBarButtonItem
+            dest.popoverPresentationController?.overrideTraitCollection = UITraitCollection(traitsFrom: [UITraitCollection(horizontalSizeClass: .regular), UITraitCollection(verticalSizeClass: .regular)])
+            dest.cellDelegate = self
+        }
     }
 
     override func didReceiveMemoryWarning() {
@@ -239,16 +223,6 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
         if shouldSaveDraft {
             saveDraft()
         }
-    }
-    
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        let collectionViewLayout = emojiViewCollectionView.collectionViewLayout as! UICollectionViewFlowLayout
-        if collectionViewLayout.itemSize.equalTo(emojiViewCollectionView.bounds.size) {
-            return
-        }
-        collectionViewLayout.itemSize = CGSize(width: emojiViewCollectionView.frame.width, height: emojiViewCollectionView.frame.height)
-        collectionViewLayout.invalidateLayout()
     }
     
     override func willTransition(to newCollection: UITraitCollection, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -392,29 +366,6 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
     }
     */
     
-    // MARK: - scrollview
-    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        guard scrollView == emojiViewCollectionView else {
-            return
-        }
-        
-        let page = Int(ceil(scrollView.contentOffset.x/scrollView.frame.width))
-        if page < emojiViewCollectionView.numberOfItems(inSection: 0) {
-            let targetIndexPath = IndexPath(item: page, section: 0)
-            emojiViewSwitchCollectionView.selectItem(at: targetIndexPath, animated: true, scrollPosition: .centeredHorizontally)
-        }
-    }
-    
-    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        guard scrollView == emojiViewCollectionView else {
-            return
-        }
-        
-        if !decelerate {
-            scrollViewDidEndDecelerating(scrollView)
-        }
-    }
-    
     // MARK: - TextViewDelete
     func textViewDidChange(_ textView: UITextView) {
         if textView == self.textView {
@@ -428,12 +379,7 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        
-        if collectionView == emojiViewCollectionView {
-            return mahjongInfo.count + 1
-        } else if collectionView == emojiViewSwitchCollectionView {
-            return mahjongInfo.count + 1
-        } else if collectionView == imagePreviewCollectionView {
+        if collectionView == imagePreviewCollectionView {
             return uploadingImages.count
         }
         
@@ -441,39 +387,7 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        if collectionView == emojiViewCollectionView {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as! SAEmojiCollectionWrapperView
-            cell.delegate = self
-            if indexPath.item > 0 {
-                let emojis = mahjongInfo[indexPath.item - 1]
-                cell.emojis = emojis["emojis"] as! NSArray
-                cell.collectionView.contentOffset = CGPoint.zero
-                cell.collectionView.reloadData()
-            } else {
-                cell.emojis = Account().favoriteEmojis
-                cell.collectionView.contentOffset = CGPoint.zero
-                cell.collectionView.reloadData()
-            }
-            return cell
-        } else if collectionView == emojiViewSwitchCollectionView {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as! SAEmojiCollectionSwitchCell
-            
-            if indexPath.item == 0 {
-                cell.imageView.image = UIImage.init(named: "like_filled")
-                cell.descriptionLabel.text = "常用"
-                return cell
-            }
-            
-            let emojis = mahjongInfo[indexPath.row - 1]
-            let faceInfo = emojis["emojis"] as! NSArray
-            let description = emojis["info"] as! String
-
-            let name = (faceInfo[0] as! NSDictionary)["image"] as! String
-            let imagePath = AppController.current.mahjongEmojiDirectory.path + "/" + name
-            cell.imageView.image = UIImage.init(contentsOfFile: imagePath)
-            cell.descriptionLabel.text = description
-            return cell
-        } else if collectionView == imagePreviewCollectionView {
+        if collectionView == imagePreviewCollectionView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as! SAReplyImageAndContentPreviewCollectionViewCell
             cell.delegate = self
             let image = uploadingImages[indexPath.item]
@@ -483,12 +397,6 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
         }
         
         return UICollectionViewCell()
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        if collectionView == emojiViewSwitchCollectionView {
-            emojiViewCollectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
-        }
     }
     
     @IBAction func handleEmojiViewSwitchDeleteButtonClick(_ sender: UIButton) {
@@ -523,6 +431,7 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
         if !placeholderLabel.isHidden {
             placeholderLabel.isHidden = true
         }
+        reportEmojiUsage(replacementString, imageName: name)
     }
     
     
@@ -599,17 +508,6 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
         
         if !textView.isFirstResponder {
             return
-        }
-        
-        if #available(iOS 11.0, *) {
-            if emojiViewBottomConstraint.constant == self.view.safeAreaInsets.bottom {
-                emojiViewBottomConstraint.constant = -self.emojiView.frame.height
-            }
-        } else {
-            // Fallback on earlier versions
-            if emojiViewBottomConstraint.constant == 0 {
-                emojiViewBottomConstraint.constant = -self.emojiView.frame.height
-            }
         }
         
         guard view.window != nil else {
@@ -748,36 +646,6 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
         present(alert, animated: true, completion: nil)
     }
     
-    @IBAction func handleEmojiBarItemClick(_ sender: AnyObject) {
-        if textView.isFirstResponder {
-            textView.resignFirstResponder()
-        }
-        
-        if emojiViewBottomConstraint.constant == -self.emojiView.frame.height {
-            //show it
-            for item in toolbar.items! {
-                if item.tag == 9 {
-                   item.image = UIImage(named: "Expand_Arrow_50")
-                }
-            }
-
-            if #available(iOS 11.0, *) {
-                emojiViewBottomConstraint.constant = self.view.safeAreaInsets.bottom
-            } else {
-                emojiViewBottomConstraint.constant = 0
-            }
-            toolBarBottomConstraint.constant = -self.emojiView.frame.height
-            replyPreviewViewTopConstraint.constant = -imagePreviewCollectionView.frame.height - replyPreviewView.frame.height
-            UIView.animate(withDuration: 0.3, animations: {
-                self.view.layoutIfNeeded()
-            }) { (finished) in
-            }
-        } else {
-            //hide it
-            hideInputView(animated: true)
-        }
-    }
-    
     private func hideInputView(animated: Bool) {
         for item in toolbar.items! {
             if item.tag == 9 {
@@ -785,7 +653,6 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
             }
         }
         
-        emojiViewBottomConstraint.constant = -self.emojiView.frame.height
         replyPreviewViewTopConstraint.constant = 10
         toolBarBottomConstraint.constant = 0
         UIView.animate(withDuration: animated ? 0.3 : 0, animations: {
@@ -1005,24 +872,8 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
             return
         }
         
-        if #available(iOS 11.0, *) {
-            if emojiViewBottomConstraint.constant == self.view.safeAreaInsets.bottom {
-                sender.image = UIImage(named: "Collapse_Arrow_50")
-                hideInputView(animated: true)
-            } else {
-                sender.image = UIImage(named: "Expand_Arrow_50")
-                textView.becomeFirstResponder()
-            }
-        } else {
-            // Fallback on earlier versions
-            if emojiViewBottomConstraint.constant == 0 {
-                sender.image = UIImage(named: "Collapse_Arrow_50")
-                hideInputView(animated: true)
-            } else {
-                sender.image = UIImage(named: "Expand_Arrow_50")
-                textView.becomeFirstResponder()
-            }
-        }
+        sender.image = UIImage(named: "Expand_Arrow_50")
+        textView.becomeFirstResponder()
     }
     
     @objc func handleCloseBarItemClick(_ sender: UIBarButtonItem) {
