@@ -47,6 +47,7 @@ class SAReplyEmojiViewController: UIViewController {
         emojiViewSwitchCollectionView.showsHorizontalScrollIndicator = false
         emojiViewSwitchCollectionView.dataSource = self
         emojiViewSwitchCollectionView.delegate = self
+        emojiViewSwitchCollectionView.backgroundColor = UIColor.sa_colorFromHexString(Theme().tableCellGrayedTextColor)
         let switchViewLayout = emojiViewSwitchCollectionView.collectionViewLayout as! UICollectionViewFlowLayout
         switchViewLayout.scrollDirection = .horizontal
         switchViewLayout.minimumInteritemSpacing = 20
