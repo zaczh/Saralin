@@ -158,8 +158,11 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
         super.prepare(for: segue, sender: sender)
         if let dest = segue.destination as? SAReplyEmojiViewController {
             dest.modalPresentationStyle = .popover
+            if UIDevice.current.userInterfaceIdiom == .phone || UIDevice.current.userInterfaceIdiom == .pad {
+                dest.popoverPresentationController?.delegate = self
+            }
+            dest.preferredContentSize = CGSize(width: view.frame.size.width * 0.8, height: 200)
             dest.popoverPresentationController?.barButtonItem = sender as? UIBarButtonItem
-            dest.popoverPresentationController?.overrideTraitCollection = UITraitCollection(traitsFrom: [UITraitCollection(horizontalSizeClass: .regular), UITraitCollection(verticalSizeClass: .regular)])
             dest.cellDelegate = self
         }
     }
@@ -895,5 +898,12 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
                 fatalError("This view controller must be presented if not in a new scene.")
             }
         }
+    }
+}
+
+
+extension SAReplyViewController: UIPopoverPresentationControllerDelegate {
+    func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
+        return .none
     }
 }

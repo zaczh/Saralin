@@ -25,9 +25,7 @@ class SAReplyEmojiViewController: UIViewController {
         
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        preferredContentSize = CGSize(width: 320, height: 200)
-        
+            
         emojiViewCollectionView.scrollsToTop = false
         emojiViewCollectionView.register(SAEmojiCollectionWrapperView.self, forCellWithReuseIdentifier: "cell")
         emojiViewCollectionView.showsVerticalScrollIndicator = false
@@ -35,7 +33,7 @@ class SAReplyEmojiViewController: UIViewController {
         emojiViewCollectionView.dataSource = self
         emojiViewCollectionView.delegate = self
         emojiViewCollectionView.isPagingEnabled = true
-        emojiViewCollectionView.backgroundColor = UIColor.sa_colorFromHexString(Theme().backgroundColor)
+        emojiViewCollectionView.backgroundColor = UIColor.sa_colorFromHexString(Theme().tableCellGrayedTextColor)
         emojiViewCollectionView.contentInsetAdjustmentBehavior = .never
         let collectionViewLayout = emojiViewCollectionView.collectionViewLayout as! UICollectionViewFlowLayout
         collectionViewLayout.scrollDirection = .horizontal

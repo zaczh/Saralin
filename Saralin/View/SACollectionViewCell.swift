@@ -70,7 +70,7 @@ class SAEmojiCollectionWrapperView: UICollectionViewCell, UICollectionViewDataSo
         collectionView.register(SAEmojiCollectionViewCell.self, forCellWithReuseIdentifier: "cell")
         collectionView.dataSource = self
         collectionView.delegate = self
-        collectionView.backgroundColor = UIColor.sa_colorFromHexString(Theme().backgroundColor)
+        collectionView.backgroundColor = UIColor.clear
         let collectionViewLayout = collectionView.collectionViewLayout as! UICollectionViewFlowLayout
         collectionViewLayout.scrollDirection = .vertical
         collectionViewLayout.itemSize = CGSize(width: 30, height: 30)
