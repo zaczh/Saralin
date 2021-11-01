@@ -2260,6 +2260,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEBUG_ACTIVITY_MODE = default;
 				DEVELOPMENT_TEAM = NBQ74QRWC2;
+				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Saralin/Thirdparty/PLCrashReporter",
@@ -2304,6 +2305,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEBUG_ACTIVITY_MODE = default;
 				DEVELOPMENT_TEAM = NBQ74QRWC2;
+				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Saralin/Thirdparty/PLCrashReporter",

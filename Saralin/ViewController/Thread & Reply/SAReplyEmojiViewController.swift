@@ -33,7 +33,6 @@ class SAReplyEmojiViewController: UIViewController {
         emojiViewCollectionView.dataSource = self
         emojiViewCollectionView.delegate = self
         emojiViewCollectionView.isPagingEnabled = true
-        emojiViewCollectionView.backgroundColor = UIColor.sa_colorFromHexString(Theme().tableCellGrayedTextColor)
         emojiViewCollectionView.contentInsetAdjustmentBehavior = .never
         let collectionViewLayout = emojiViewCollectionView.collectionViewLayout as! UICollectionViewFlowLayout
         collectionViewLayout.scrollDirection = .horizontal
@@ -47,7 +46,6 @@ class SAReplyEmojiViewController: UIViewController {
         emojiViewSwitchCollectionView.showsHorizontalScrollIndicator = false
         emojiViewSwitchCollectionView.dataSource = self
         emojiViewSwitchCollectionView.delegate = self
-        emojiViewSwitchCollectionView.backgroundColor = UIColor.sa_colorFromHexString(Theme().tableCellGrayedTextColor)
         let switchViewLayout = emojiViewSwitchCollectionView.collectionViewLayout as! UICollectionViewFlowLayout
         switchViewLayout.scrollDirection = .horizontal
         switchViewLayout.minimumInteritemSpacing = 20
@@ -56,6 +54,13 @@ class SAReplyEmojiViewController: UIViewController {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+        
+        if UIDevice.current.userInterfaceIdiom == .mac {
+            var frame = emojiViewCollectionView.frame
+            frame.size.width = view.frame.size.width
+            emojiViewCollectionView.frame = frame
+        }
+        
         let collectionViewLayout = emojiViewCollectionView.collectionViewLayout as! UICollectionViewFlowLayout
         if collectionViewLayout.itemSize.equalTo(emojiViewCollectionView.bounds.size) {
             return
@@ -64,7 +69,10 @@ class SAReplyEmojiViewController: UIViewController {
         collectionViewLayout.invalidateLayout()
     }
     
-    @IBAction func handleEmojiViewSwitchDeleteButtonClick(_ sender: UIButton) {
+    override func viewThemeDidChange(_ newTheme: SATheme) {
+        super.viewThemeDidChange(newTheme)
+        emojiViewCollectionView.backgroundColor = UIColor.sa_colorFromHexString(Theme().tableCellGrayedTextColor)
+        emojiViewSwitchCollectionView.backgroundColor = UIColor.sa_colorFromHexString(Theme().foregroundColor)
     }
 }
 

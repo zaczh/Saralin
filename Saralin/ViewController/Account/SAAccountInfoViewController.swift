@@ -137,6 +137,14 @@ class SAAccountInfoViewController: SABaseTableViewController {
             self.title = self.account.name
         }
     }
+    
+    override func getTableView() -> UITableView {
+        if UIDevice.current.userInterfaceIdiom == .mac {
+            return UITableView(frame: .zero, style: .insetGrouped)
+        }
+        
+        return super.getTableView()
+    }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()

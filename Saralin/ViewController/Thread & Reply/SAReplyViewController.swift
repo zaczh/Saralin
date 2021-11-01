@@ -402,16 +402,6 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
         return UICollectionViewCell()
     }
     
-    @IBAction func handleEmojiViewSwitchDeleteButtonClick(_ sender: UIButton) {
-        let selectedRange = textView.selectedRange
-        if selectedRange.location == NSNotFound || selectedRange.location == 0 {
-            return
-        }
-        let range = NSRange(location: selectedRange.location - 1, length: 1)
-        textView.textStorage.deleteCharacters(in: range)
-        textView.selectedRange.location = selectedRange.location - 1
-    }
-    
     func insertEmojiNamed(_ name: String, replacementString: String) {
         let imagePath = AppController.current.mahjongEmojiDirectory.path + "/" + name
         let image = UIImage.init(contentsOfFile: imagePath)
