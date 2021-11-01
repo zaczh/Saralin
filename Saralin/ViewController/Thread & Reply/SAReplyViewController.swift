@@ -27,7 +27,6 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
     @IBOutlet var replyPreviewViewLeftLine: UIView!
     @IBOutlet var replyPreviewViewBodyLabelBottomConstraint: NSLayoutConstraint!
     @IBOutlet var replyPreviewViewBodyLabelTopConstraint: NSLayoutConstraint!
-    @IBOutlet var emojiView: UIView!
     
     @IBOutlet var toolBarBottomConstraint: NSLayoutConstraint!
 
@@ -79,6 +78,14 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
             
             // We handle the inset manually in this VC
             automaticallyAdjustsScrollViewInsets = false
+        }
+        
+        if UIDevice.current.userInterfaceIdiom == .mac {
+            var items = toolbar.items ?? []
+            if items.count > 2 {
+                items.removeSubrange(items.count - 2 ..< items.count)
+            }
+            toolbar.items = items
         }
             
         placeholderLabel.font = UIFont.sa_preferredFont(forTextStyle: .body)
@@ -400,16 +407,6 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
         }
         
         return UICollectionViewCell()
-    }
-    
-    @IBAction func handleEmojiViewSwitchDeleteButtonClick(_ sender: UIButton) {
-        let selectedRange = textView.selectedRange
-        if selectedRange.location == NSNotFound || selectedRange.location == 0 {
-            return
-        }
-        let range = NSRange(location: selectedRange.location - 1, length: 1)
-        textView.textStorage.deleteCharacters(in: range)
-        textView.selectedRange.location = selectedRange.location - 1
     }
     
     func insertEmojiNamed(_ name: String, replacementString: String) {
