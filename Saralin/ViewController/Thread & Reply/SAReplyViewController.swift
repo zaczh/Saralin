@@ -27,7 +27,6 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
     @IBOutlet var replyPreviewViewLeftLine: UIView!
     @IBOutlet var replyPreviewViewBodyLabelBottomConstraint: NSLayoutConstraint!
     @IBOutlet var replyPreviewViewBodyLabelTopConstraint: NSLayoutConstraint!
-    @IBOutlet var emojiView: UIView!
     
     @IBOutlet var toolBarBottomConstraint: NSLayoutConstraint!
 
@@ -79,6 +78,14 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
             
             // We handle the inset manually in this VC
             automaticallyAdjustsScrollViewInsets = false
+        }
+        
+        if UIDevice.current.userInterfaceIdiom == .mac {
+            var items = toolbar.items ?? []
+            if items.count > 2 {
+                items.removeSubrange(items.count - 2 ..< items.count)
+            }
+            toolbar.items = items
         }
             
         placeholderLabel.font = UIFont.sa_preferredFont(forTextStyle: .body)
