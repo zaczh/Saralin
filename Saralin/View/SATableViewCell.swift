@@ -137,6 +137,7 @@ class SABoardTableViewCell: SAThemedTableViewCell {
         topStack.alignment = .leading
         topStack.spacing = 8
         topStack.addArrangedSubview(customNameLabel)
+        topStack.addArrangedSubview(UIView())
         topStack.addArrangedSubview(timeLabelStack)
         contentStack.addArrangedSubview(topStack)
         

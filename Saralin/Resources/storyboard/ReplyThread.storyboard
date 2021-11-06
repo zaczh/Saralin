@@ -70,7 +70,7 @@
                                     <barButtonItem systemItem="flexibleSpace" id="tcf-4a-9vJ"/>
                                     <barButtonItem image="Happy-50" id="3Z7-fD-rtz">
                                         <connections>
-                                            <segue destination="sXu-f3-iWo" kind="popoverPresentation" popoverAnchorBarButtonItem="3Z7-fD-rtz" id="Xmm-p0-wo2">
+                                            <segue destination="sXu-f3-iWo" kind="popoverPresentation" identifier="show_reply_emoji_view_controller" popoverAnchorBarButtonItem="3Z7-fD-rtz" id="Xmm-p0-wo2">
                                                 <popoverArrowDirection key="popoverArrowDirection" up="YES" down="YES" left="YES" right="YES"/>
                                             </segue>
                                         </connections>
@@ -218,7 +218,7 @@
         <!--Navigation Controller-->
         <scene sceneID="LgH-24-bfG">
             <objects>
-                <navigationController id="7On-98-Cvm" customClass="SANavigationController" customModule="Saralin" customModuleProvider="target" sceneMemberID="viewController">
+                <navigationController storyboardIdentifier="me.zaczh.saralin.useractivity.replythread" useStoryboardIdentifierAsRestorationIdentifier="YES" id="7On-98-Cvm" customClass="SANavigationController" customModule="Saralin" customModuleProvider="target" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="kcP-fm-8FM">
                         <rect key="frame" x="0.0" y="44" width="414" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>

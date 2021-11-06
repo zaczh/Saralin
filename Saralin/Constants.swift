@@ -17,6 +17,7 @@ let SAHTTPAPIErrorDomain = "API Error"
 let SAContentViewControllerReadableAreaMaxWidth = 800
 
 enum SAActivityType: String {
+    case main = "me.zaczh.saralin.useractivity.main"
     case viewBoard = "me.zaczh.saralin.useractivity.viewboard"
     case viewThread = "me.zaczh.saralin.useractivity.viewthread"
     case viewImage = "me.zaczh.saralin.useractivity.viewimage"
@@ -27,6 +28,8 @@ enum SAActivityType: String {
 
     func title() -> String {
         switch self {
+        case .main:
+            return ""
         case .viewBoard:
             return "查看板块"
         case .viewThread:
@@ -62,9 +65,13 @@ typealias NSToolbarItem = UIMenu
 let SAToolbarItemIdentifierAddButton = NSToolbarItem.Identifier(rawValue: "ToolbarItemAdd")
 let SAToolbarItemIdentifierTitle = NSToolbarItem.Identifier(rawValue: "ToolbarItemTitle")
 let SAToolbarItemIdentifierShare = NSToolbarItem.Identifier(rawValue: "ToolbarItemShare")
+let SAToolbarItemIdentifierSearch = NSToolbarItem.Identifier(rawValue: "ToolbarItemSearch")
 let SAToolbarItemIdentifierSelectCatagory = NSToolbarItem.Identifier(rawValue: "ToolbarItemSelectCatagory")
 let SAToolbarItemIdentifierReorder = NSToolbarItem.Identifier(rawValue: "ToolbarItemReorder")
 let SAToolbarItemIdentifierReply = NSToolbarItem.Identifier(rawValue: "ToolbarItemReply")
+let SAToolbarItemIdentifierReplyInsertAlbumImage = NSToolbarItem.Identifier(rawValue: "ToolbarItemReplyInsertAlbumImage")
+let SAToolbarItemIdentifierReplyInsertEmoji = NSToolbarItem.Identifier(rawValue: "ToolbarItemReplyInsertEmoji")
+let SAToolbarItemIdentifierReplyInsertExternalLink = NSToolbarItem.Identifier(rawValue: "ToolbarItemReplyInsertExternalLink")
 let SAToolbarItemIdentifierRefresh = NSToolbarItem.Identifier(rawValue: "ToolbarItemRefresh")
 let SAToolbarItemIdentifierFavorite = NSToolbarItem.Identifier(rawValue: "ToolbarItemFavorite")
 let SAToolbarItemIdentifierSubmit = NSToolbarItem.Identifier(rawValue: "ToolbarItemSubmit")

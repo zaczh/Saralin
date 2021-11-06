@@ -81,11 +81,7 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
         }
         
         if UIDevice.current.userInterfaceIdiom == .mac {
-            var items = toolbar.items ?? []
-            if items.count > 2 {
-                items.removeSubrange(items.count - 2 ..< items.count)
-            }
-            toolbar.items = items
+            toolbar.isHidden = true
         }
             
         placeholderLabel.font = UIFont.sa_preferredFont(forTextStyle: .body)
@@ -169,7 +165,12 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
                 dest.popoverPresentationController?.delegate = self
             }
             dest.preferredContentSize = CGSize(width: view.frame.size.width * 0.8, height: 200)
-            dest.popoverPresentationController?.barButtonItem = sender as? UIBarButtonItem
+            if let barItem = sender as? UIBarButtonItem {
+                dest.popoverPresentationController?.barButtonItem = barItem
+            } else {
+                dest.popoverPresentationController?.sourceView = view
+                dest.popoverPresentationController?.sourceRect = view.bounds
+            }
             dest.cellDelegate = self
         }
     }
@@ -210,6 +211,27 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
                 item.isEnabled = viewAppeared
                 item.target = self
                 item.action = #selector(handleSendBarItemClick(_:))
+            }
+
+            if item.itemIdentifier.rawValue == SAToolbarItemIdentifierTitle.rawValue {
+                if let t = self.title {
+                    item.title = t
+                }
+            }
+            
+            if item.itemIdentifier.rawValue == SAToolbarItemIdentifierReplyInsertEmoji.rawValue {
+                item.target = self
+                item.action = #selector(handleEmojiButtonItemClick(_:))
+            }
+            
+            if item.itemIdentifier.rawValue == SAToolbarItemIdentifierReplyInsertAlbumImage.rawValue {
+                item.target = self
+                item.action = #selector(handleUploadImageBarItemClick(_:))
+            }
+            
+            if item.itemIdentifier.rawValue == SAToolbarItemIdentifierReplyInsertExternalLink.rawValue {
+                item.target = self
+                item.action = #selector(handleAddLinkItemClick(_:))
             }
         }
     }
@@ -659,6 +681,10 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
             self.view.layoutIfNeeded()
         }) { (finished) in
         }
+    }
+    
+    @IBAction func handleEmojiButtonItemClick(_ sender: AnyObject) {
+        performSegue(withIdentifier: "show_reply_emoji_view_controller", sender: sender)
     }
     
     @IBAction func handleImgBarItemClick(_ sender: AnyObject) {

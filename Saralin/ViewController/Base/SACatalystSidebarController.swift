@@ -164,12 +164,6 @@ class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, 
         NotificationCenter.default.addObserver(self, selector: #selector(handleUserLoggedIn(_:)), name: .SAUserLoggedInNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleUserLoggedOut(_:)), name: .SAUserLoggedOutNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleUserPreferenceChange(_:)), name: .SAUserPreferenceChangedNotification, object: nil)
-
-        let searchBar = UISearchBar(frame: CGRect(x: 0, y: 0, width: 0, height: 44))
-        searchBar.delegate = self
-        if UIDevice.current.userInterfaceIdiom == .mac {
-            upperTableView.tableHeaderView = searchBar
-        }
         refreshTableViewCompletion(nil)
     }
     
@@ -497,9 +491,4 @@ class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, 
             refreshTableViewCompletion(nil)
         }
     }
-}
-
-@available(iOS 13.0, *)
-extension SACatalystSidebarController: UISearchBarDelegate {
-    
 }

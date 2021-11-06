@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="DVr-aV-MUS">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19455" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="DVr-aV-MUS">
     <device id="ipad12_9" orientation="landscape" layout="fullscreen" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19454"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -14,7 +15,7 @@
                 <navigationController storyboardIdentifier="acount_tab_navigation" useStoryboardIdentifierAsRestorationIdentifier="YES" id="oOd-Ha-PHb" customClass="SANavigationController" customModule="Saralin" customModuleProvider="target" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" title="Account" image="Circled_User_Male_Filled_50" id="kBR-Nt-qjQ"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" largeTitles="YES" id="dej-e1-ax3">
-                        <rect key="frame" x="0.0" y="0.0" width="1366" height="102"/>
+                        <rect key="frame" x="0.0" y="20" width="1366" height="102"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>
@@ -82,7 +83,7 @@
                 <navigationController storyboardIdentifier="favorite_tab_navigation" useStoryboardIdentifierAsRestorationIdentifier="YES" id="XRI-rP-qPg" customClass="SANavigationController" customModule="Saralin" customModuleProvider="target" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" title="Favorites" image="black_5_favorite_cricle_star" id="u5T-QU-IoO"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" largeTitles="YES" id="JQQ-fz-isI">
-                        <rect key="frame" x="0.0" y="0.0" width="1366" height="102"/>
+                        <rect key="frame" x="0.0" y="20" width="1366" height="102"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>
@@ -131,7 +132,7 @@
                 <navigationController storyboardIdentifier="hot_tab_navigation" useStoryboardIdentifierAsRestorationIdentifier="YES" id="iaK-uB-2V9" customClass="SANavigationController" customModule="Saralin" customModuleProvider="target" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" title="Hot" image="Fire_Element" id="DG4-as-arH"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" largeTitles="YES" id="Bh2-Qt-3rr">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="102"/>
+                        <rect key="frame" x="0.0" y="20" width="320" height="102"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>
@@ -151,7 +152,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="请从左侧打开一个帖子" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Emg-3M-oc4" userLabel=";">
-                                <rect key="frame" x="436" y="502" width="173.5" height="20.5"/>
+                                <rect key="frame" x="436" y="512" width="173.5" height="20.5"/>
                                 <fontDescription key="fontDescription" name=".AppleSystemUIFont" family=".AppleSystemUIFont" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
@@ -195,7 +196,7 @@
                 <navigationController storyboardIdentifier="forum_tab_navigation" useStoryboardIdentifierAsRestorationIdentifier="YES" id="h9Y-TQ-gHy" customClass="SANavigationController" customModule="Saralin" customModuleProvider="target" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" title="Forum" image="Home_Filled_50" id="PZP-OK-yaI"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" largeTitles="YES" id="ni0-NV-Les">
-                        <rect key="frame" x="0.0" y="0.0" width="1366" height="102"/>
+                        <rect key="frame" x="0.0" y="20" width="1366" height="102"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>
@@ -209,7 +210,7 @@
         <!--Split View Controller-->
         <scene sceneID="VOS-mq-ayT">
             <objects>
-                <splitViewController allowDoubleColumnStyle="YES" maximumPrimaryColumnWidth="180" minimumPrimaryColumnWidth="180" maximumSupplementaryColumnWidth="320" minimumSupplementaryColumnWidth="240" id="DVr-aV-MUS" customClass="SASplitViewController" customModule="Saralin" customModuleProvider="target" sceneMemberID="viewController">
+                <splitViewController storyboardIdentifier="me.zaczh.saralin.useractivity.main" useStoryboardIdentifierAsRestorationIdentifier="YES" allowDoubleColumnStyle="YES" maximumPrimaryColumnWidth="180" minimumPrimaryColumnWidth="180" maximumSupplementaryColumnWidth="320" minimumSupplementaryColumnWidth="240" id="DVr-aV-MUS" customClass="SASplitViewController" customModule="Saralin" customModuleProvider="target" sceneMemberID="viewController">
                     <connections>
                         <segue destination="iaK-uB-2V9" kind="relationship" relationship="supplementaryViewController" id="jwa-oc-qBP"/>
                         <segue destination="riS-ZR-nM6" kind="relationship" relationship="compactViewController" id="Rbj-Ne-9Vn"/>
@@ -226,7 +227,7 @@
             <objects>
                 <navigationController id="ZbO-hN-Pa4" customClass="SANavigationController" customModule="Saralin" customModuleProvider="target" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="Voi-0F-luZ">
-                        <rect key="frame" x="0.0" y="0.0" width="280" height="50"/>
+                        <rect key="frame" x="0.0" y="20" width="280" height="50"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>

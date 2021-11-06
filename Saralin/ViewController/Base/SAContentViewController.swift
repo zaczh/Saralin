@@ -52,6 +52,10 @@ class SAContentViewController: SABaseViewController, WKNavigationDelegate, SFSaf
             // Fallback on earlier versions
         }
         
+        if UIDevice.current.userInterfaceIdiom == .mac {
+            automaticallySetTitleWhenFinishLoading = true
+        }
+        
         webView = WKWebView(frame: view.bounds, configuration: getWebViewConfiguration())
         webView.allowsLinkPreview = false
         webView.scrollView.delegate = self
@@ -205,6 +209,7 @@ class SAContentViewController: SABaseViewController, WKNavigationDelegate, SFSaf
             if automaticallySetTitleWhenFinishLoading {
                 if let pageTitle = change![NSKeyValueChangeKey.newKey] as? String {
                     self.title = pageTitle
+                    self.updateToolBar(true)
                 }
             }
         } else if keyPath == #keyPath(WKWebView.isLoading) {

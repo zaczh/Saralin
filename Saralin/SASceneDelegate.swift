@@ -212,28 +212,37 @@ class SASceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let titlebar = scene.titlebar else {
             return
         }
+        titlebar.titleVisibility = .hidden
         
-        if let userActivity = userActivity {
-            titlebar.titleVisibility = .hidden
-            var newToolBar: NSToolbar?
-            let saactivityType = SAActivityType(rawValue: userActivity.activityType)
-            switch saactivityType {
+        var newToolBar: NSToolbar?
+        var saactivityType: SAActivityType = .main
+        
+        if let userActivity = userActivity, let type = SAActivityType(rawValue: userActivity.activityType) {
+            saactivityType = type
+        } else if let storyboardId = window.rootViewController?.restorationIdentifier, let type = SAActivityType(rawValue: storyboardId) {
+            saactivityType = type
+        } else {
+            fatalError("unknown activity type")
+        }
+        
+        switch saactivityType {
             case .replyThread:
                 newToolBar = NSToolbar(identifier: SAToolbarIdentifierReplyThread)
+                newToolBar!.centeredItemIdentifier = SAToolbarItemIdentifierTitle
             case .composeThread:
                 newToolBar = NSToolbar(identifier: SAToolbarIdentifierComposeThread)
             case .viewImage:
                 newToolBar = NSToolbar(identifier: SAToolbarIdentifierImageViewer)
             case .settings:
                 newToolBar = NSToolbar(identifier: SAToolbarIdentifierSettings)
+            case .main:
+                newToolBar = NSToolbar(identifier: SAToolbarIdentifierMain)
             default:
-                return
-            }
-            newToolBar?.delegate = self
-            titlebar.toolbar = newToolBar
-            return
+                fatalError("unknown activity type")
         }
         
+        newToolBar?.delegate = self
+        titlebar.toolbar = newToolBar
 //        guard let tab = AppController.current.findTabBarController(rootViewController: window.rootViewController!),
 //            let split = tab.splitViewController else {
 //            fatalError()
@@ -248,11 +257,6 @@ class SASceneDelegate: UIResponder, UIWindowSceneDelegate {
 //        
 //        split.maximumPrimaryColumnWidth = 320
 //        split.minimumPrimaryColumnWidth = 320
-        
-        titlebar.titleVisibility = .hidden
-        let toolbar = NSToolbar(identifier: SAToolbarIdentifierMain)
-        toolbar.delegate = self
-        titlebar.toolbar = toolbar
         #endif
     }
     
@@ -384,14 +388,39 @@ extension SASceneDelegate: NSToolbarDelegate {
             let barButton = UIBarButtonItem(image: UIImage(systemName: "eye"), style: .plain, target: self, action: #selector(toolbarActionShare(sender:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButton)
             return button
+        }else if (itemIdentifier == SAToolbarItemIdentifierSearch) {
+            let barButton = UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(toolbarActionSubmit(sender:)))
+            let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButton)
+            return button
+        } else if (itemIdentifier == SAToolbarItemIdentifierReplyInsertAlbumImage) {
+            let barButton = UIBarButtonItem(image: UIImage(systemName: "camera.badge.ellipsis"), style: .plain, target: self, action: #selector(toolbarActionShare(sender:)))
+            let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButton)
+            return button
+        } else if (itemIdentifier == SAToolbarItemIdentifierReplyInsertEmoji) {
+            let barButton = UIBarButtonItem(image: UIImage(systemName: "face.smiling"), style: .plain, target: self, action: #selector(toolbarActionShare(sender:)))
+            let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButton)
+            return button
+        } else if (itemIdentifier == SAToolbarItemIdentifierReplyInsertExternalLink) {
+            let barButton = UIBarButtonItem(image: UIImage(systemName: "link"), style: .plain, target: self, action: #selector(toolbarActionShare(sender:)))
+            let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButton)
+            return button
         }
         return nil
     }
 
     func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
         if toolbar.identifier == SAToolbarIdentifierMain {
-            return [SAToolbarItemIdentifierGoBack, NSToolbarItem.Identifier.space, SAToolbarItemIdentifierAddButton, SAToolbarItemIdentifierReorder, SAToolbarItemIdentifierSelectCatagory, NSToolbarItem.Identifier.flexibleSpace,
-                    SAToolbarItemIdentifierTitle, NSToolbarItem.Identifier.flexibleSpace, SAToolbarItemIdentifierScrollToComment, SAToolbarItemIdentifierViewDeskTopPage, SAToolbarItemIdentifierRefresh, SAToolbarItemIdentifierFavorite, SAToolbarItemIdentifierAddToWatchList, SAToolbarItemIdentifierReply, SAToolbarItemIdentifierShare]
+            return [
+                NSToolbarItem.Identifier.toggleSidebar,
+                NSToolbarItem.Identifier.primarySidebarTrackingSeparatorItemIdentifier,
+                SAToolbarItemIdentifierGoBack,
+                SAToolbarItemIdentifierAddButton,
+                SAToolbarItemIdentifierReorder,
+                SAToolbarItemIdentifierSelectCatagory,
+                NSToolbarItem.Identifier.supplementarySidebarTrackingSeparatorItemIdentifier,
+                SAToolbarItemIdentifierTitle,
+                NSToolbarItem.Identifier.flexibleSpace,
+                SAToolbarItemIdentifierScrollToComment, SAToolbarItemIdentifierViewDeskTopPage, SAToolbarItemIdentifierRefresh, SAToolbarItemIdentifierFavorite, SAToolbarItemIdentifierAddToWatchList, SAToolbarItemIdentifierReply, SAToolbarItemIdentifierShare, SAToolbarItemIdentifierSearch]
         }
         
         if toolbar.identifier == SAToolbarIdentifierImageViewer {
@@ -399,7 +428,7 @@ extension SASceneDelegate: NSToolbarDelegate {
         }
         
         if toolbar.identifier == SAToolbarIdentifierReplyThread {
-            return [NSToolbarItem.Identifier.flexibleSpace, SAToolbarItemIdentifierTitle, NSToolbarItem.Identifier.flexibleSpace, SAToolbarItemIdentifierReply]
+            return [SAToolbarItemIdentifierReply, NSToolbarItem.Identifier.flexibleSpace, SAToolbarItemIdentifierTitle, NSToolbarItem.Identifier.flexibleSpace, SAToolbarItemIdentifierReplyInsertAlbumImage, SAToolbarItemIdentifierReplyInsertEmoji, SAToolbarItemIdentifierReplyInsertExternalLink]
         }
         
         if toolbar.identifier == SAToolbarIdentifierComposeThread {

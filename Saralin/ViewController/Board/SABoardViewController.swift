@@ -212,6 +212,7 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
     
     deinit {
         os_log("SABoardViewController deinit")
+        prefetchOperations.removeAll()
     }
     
     override func createSearchController() -> SASearchController {

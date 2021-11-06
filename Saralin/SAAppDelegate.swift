@@ -145,6 +145,8 @@ class SAAppDelegate: UIResponder, UIApplicationDelegate, UITabBarControllerDeleg
                 config.storyboard = UIStoryboard(name: "ViewBoard", bundle: nil)
             case .login:
                 config.storyboard = UIStoryboard(name: "Login", bundle: nil)
+            case .main:
+                config.storyboard = UIStoryboard(name: "Main", bundle: nil)
             }
         } else {
             config.storyboard = UIStoryboard(name: "Main", bundle: nil)
