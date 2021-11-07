@@ -71,7 +71,7 @@ class SAAccountManager {
             let fileUrl = URL(fileURLWithPath: path)
             let fileData = try! Data(contentsOf: fileUrl)
             do {
-                guard let savedAccount = try NSKeyedUnarchiver.unarchivedObject(ofClasses: [SAAccount.self, NSDictionary.self, NSMutableDictionary.self, NSArray.self, NSDate.self], from: fileData) as? SAAccount else {
+                guard let savedAccount = try NSKeyedUnarchiver.unarchivedObject(ofClasses: SAAccount.archiveClasses, from: fileData) as? SAAccount else {
                     fatalError("failed to restore account info")
                 }
                 account = savedAccount
@@ -94,7 +94,7 @@ class SAAccountManager {
             let fileUrl = URL(fileURLWithPath: path)
             let fileData = try! Data(contentsOf: fileUrl)
             do {
-                guard let savedAccount = try NSKeyedUnarchiver.unarchivedObject(ofClasses: [SAAccount.self, NSMutableDictionary.self, NSDictionary.self, NSArray.self, NSDate.self], from: fileData) as? SAAccount else {
+                guard let savedAccount = try NSKeyedUnarchiver.unarchivedObject(ofClasses: SAAccount.archiveClasses, from: fileData) as? SAAccount else {
                     fatalError("failed to restore account info")
                 }
                 account = savedAccount
@@ -437,7 +437,7 @@ class SAAccountManager {
         let fileData = try! Data(contentsOf: fileUrl)
         
         do {
-            guard let account = try NSKeyedUnarchiver.unarchivedObject(ofClasses: [SAAccount.self, NSDictionary.self, NSMutableDictionary.self, NSArray.self, NSDate.self], from: fileData) as? SAAccount else {
+            guard let account = try NSKeyedUnarchiver.unarchivedObject(ofClasses: SAAccount.archiveClasses, from: fileData) as? SAAccount else {
                 activeAccount = SAAccountManager.guestAccount
                 accountState = .notLoggedIn
                 return

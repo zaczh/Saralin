@@ -7,8 +7,10 @@
 //
 
 import UIKit
+import Foundation
 
 class SAAccount: NSObject, NSSecureCoding {
+    static let archiveClasses: [AnyClass] = [SAAccount.self, NSDictionary.self, NSMutableDictionary.self, NSArray.self, NSDate.self, NSString.self, NSNumber.self]
     // keys
     enum Preference : String {
         case useGoogleSearch = "k_user_preferences_useGoogleSearch"
