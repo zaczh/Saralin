@@ -336,19 +336,19 @@ extension SASceneDelegate: NSToolbarDelegate {
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButton)
             return button
         } else if (itemIdentifier == SAToolbarItemIdentifierShare) {
-            let barButton = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(toolbarActionShare(sender:)))
+            let barButton = UIBarButtonItem(barButtonSystemItem: .action, target: nil, action: #selector(toolbarActionShare(sender:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButton)
             return button
         } else if (itemIdentifier == SAToolbarItemIdentifierScrollToComment) {
-            let barButton = UIBarButtonItem(image: UIImage(systemName: "chevron.up.circle"), style: .plain, target: self, action: #selector(toolbarActionShare(sender:)))
+            let barButton = UIBarButtonItem(image: UIImage(systemName: "arrow.up.arrow.down"), style: .plain, target: nil, action: #selector(toolbarActionShare(sender:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButton)
             return button
         } else if (itemIdentifier == SAToolbarItemIdentifierViewDeskTopPage) {
-            let barButton = UIBarButtonItem(image: UIImage(systemName: "desktopcomputer"), style: .plain, target: self, action: #selector(toolbarActionShare(sender:)))
+            let barButton = UIBarButtonItem(image: UIImage(systemName: "desktopcomputer"), style: .plain, target: nil, action: #selector(toolbarActionShare(sender:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButton)
             return button
         } else if (itemIdentifier == SAToolbarItemIdentifierRefresh) {
-            let barButton = UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(toolbarActionShare(sender:)))
+            let barButton = UIBarButtonItem(barButtonSystemItem: .refresh, target: nil, action: #selector(toolbarActionShare(sender:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButton)
             return button
         } else if (itemIdentifier == SAToolbarItemIdentifierReorder) {
@@ -360,48 +360,52 @@ extension SASceneDelegate: NSToolbarDelegate {
             button.itemMenu = newMenu
             return button
         } else if (itemIdentifier == SAToolbarItemIdentifierFavorite) {
-            let barButton = UIBarButtonItem(image: UIImage(systemName: "star"), style: .plain, target: self, action: #selector(toolbarActionShare(sender:)))
+            let barButton = UIBarButtonItem(image: UIImage(systemName: "star"), style: .plain, target: nil, action: #selector(toolbarActionShare(sender:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButton)
             return button
         } else if (itemIdentifier == SAToolbarItemIdentifierSelectCatagory) {
-            let barButton = UIBarButtonItem(image: UIImage(systemName: "square.grid.2x2"), style: .plain, target: self, action: #selector(toolbarActionShare(sender:)))
+            let barButton = UIBarButtonItem(image: UIImage(systemName: "square.grid.2x2"), style: .plain, target: nil, action: #selector(toolbarActionShare(sender:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButton)
             return button
         } else if (itemIdentifier == SAToolbarItemIdentifierReply) {
-            let barButton = UIBarButtonItem(barButtonSystemItem: .reply, target: self, action: #selector(toolbarActionShare(sender:)))
+            let barButton = UIBarButtonItem(barButtonSystemItem: .reply, target: nil, action: #selector(toolbarActionShare(sender:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButton)
             return button
         } else if (itemIdentifier == SAToolbarItemIdentifierSubmit) {
-            let barButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(toolbarActionSubmit(sender:)))
+            let barButton = UIBarButtonItem(barButtonSystemItem: .done, target: nil, action: #selector(toolbarActionShare(sender:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButton)
             return button
         } else if (itemIdentifier == SAToolbarItemIdentifierGoBack) {
-            let barButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .plain, target: self, action: #selector(toolbarActionGoBack(sender:)))
+            let barButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .plain, target: nil, action: #selector(toolbarActionShare(sender:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButton)
             button.isNavigational = true
             return button
         } else if (itemIdentifier == SAToolbarItemIdentifierSendMessage) {
-            let barButton = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(toolbarActionSendMessage(sender:)))
+            let barButton = UIBarButtonItem(barButtonSystemItem: .close, target: nil, action: #selector(toolbarActionShare(sender:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButton)
             return button
         } else if (itemIdentifier == SAToolbarItemIdentifierAddToWatchList) {
-            let barButton = UIBarButtonItem(image: UIImage(systemName: "eye"), style: .plain, target: self, action: #selector(toolbarActionShare(sender:)))
+            let barButton = UIBarButtonItem(image: UIImage(systemName: "eye"), style: .plain, target: nil, action: #selector(toolbarActionShare(sender:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButton)
             return button
         }else if (itemIdentifier == SAToolbarItemIdentifierSearch) {
-            let barButton = UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(toolbarActionSubmit(sender:)))
+            let barButton = UIBarButtonItem(barButtonSystemItem: .search, target: nil, action: #selector(toolbarActionShare(sender:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButton)
             return button
         } else if (itemIdentifier == SAToolbarItemIdentifierReplyInsertAlbumImage) {
-            let barButton = UIBarButtonItem(image: UIImage(systemName: "camera.badge.ellipsis"), style: .plain, target: self, action: #selector(toolbarActionShare(sender:)))
+            let barButton = UIBarButtonItem(image: UIImage(systemName: "camera.badge.ellipsis"), style: .plain, target: nil, action: #selector(toolbarActionShare(sender:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButton)
             return button
         } else if (itemIdentifier == SAToolbarItemIdentifierReplyInsertEmoji) {
-            let barButton = UIBarButtonItem(image: UIImage(systemName: "face.smiling"), style: .plain, target: self, action: #selector(toolbarActionShare(sender:)))
+            let barButton = UIBarButtonItem(image: UIImage(systemName: "face.smiling"), style: .plain, target: nil, action: #selector(toolbarActionShare(sender:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButton)
             return button
         } else if (itemIdentifier == SAToolbarItemIdentifierReplyInsertExternalLink) {
-            let barButton = UIBarButtonItem(image: UIImage(systemName: "link"), style: .plain, target: self, action: #selector(toolbarActionShare(sender:)))
+            let barButton = UIBarButtonItem(image: UIImage(systemName: "link"), style: .plain, target: nil, action: #selector(toolbarActionShare(sender:)))
+            let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButton)
+            return button
+        } else if (itemIdentifier == SAToolbarItemIdentifierReplySubmit) {
+            let barButton = UIBarButtonItem(barButtonSystemItem: .reply, target: nil, action: #selector(toolbarActionShare(sender:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButton)
             return button
         }
@@ -428,7 +432,7 @@ extension SASceneDelegate: NSToolbarDelegate {
         }
         
         if toolbar.identifier == SAToolbarIdentifierReplyThread {
-            return [SAToolbarItemIdentifierReply, NSToolbarItem.Identifier.flexibleSpace, SAToolbarItemIdentifierTitle, NSToolbarItem.Identifier.flexibleSpace, SAToolbarItemIdentifierReplyInsertAlbumImage, SAToolbarItemIdentifierReplyInsertEmoji, SAToolbarItemIdentifierReplyInsertExternalLink]
+            return [SAToolbarItemIdentifierReplySubmit, NSToolbarItem.Identifier.flexibleSpace, SAToolbarItemIdentifierTitle, NSToolbarItem.Identifier.flexibleSpace, SAToolbarItemIdentifierReplyInsertAlbumImage, SAToolbarItemIdentifierReplyInsertEmoji, SAToolbarItemIdentifierReplyInsertExternalLink]
         }
         
         if toolbar.identifier == SAToolbarIdentifierComposeThread {

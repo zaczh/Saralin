@@ -202,12 +202,12 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
     override func updateToolBar(_ viewAppeared: Bool) {
         super.updateToolBar(viewAppeared)
         
-        guard let titlebar = UIApplication.shared.windows.first?.windowScene?.titlebar, let titleItems = titlebar.toolbar?.items else {
+        guard let titlebar = view.window?.windowScene?.titlebar, let titleItems = titlebar.toolbar?.items else {
             return
         }
         
         for item in titleItems {
-            if item.itemIdentifier.rawValue == SAToolbarItemIdentifierReply.rawValue {
+            if item.itemIdentifier.rawValue == SAToolbarItemIdentifierReplySubmit.rawValue {
                 item.isEnabled = viewAppeared
                 item.target = self
                 item.action = #selector(handleSendBarItemClick(_:))
@@ -664,7 +664,12 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
         alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { (action) in
             
         }))
-        alert.popoverPresentationController?.barButtonItem = sender as? UIBarButtonItem
+        if let barItem = sender as? UIBarButtonItem {
+            alert.popoverPresentationController?.barButtonItem = barItem
+        } else {
+            alert.popoverPresentationController?.sourceView = view
+            alert.popoverPresentationController?.sourceRect = view.bounds
+        }
         present(alert, animated: true, completion: nil)
     }
     
@@ -723,11 +728,16 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
         alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { (action) in
             
         }))
-        alert.popoverPresentationController?.barButtonItem = sender as? UIBarButtonItem
+        if let barItem = sender as? UIBarButtonItem {
+            alert.popoverPresentationController?.barButtonItem = barItem
+        } else {
+            alert.popoverPresentationController?.sourceView = view
+            alert.popoverPresentationController?.sourceRect = view.bounds
+        }
         present(alert, animated: true, completion: nil)
     }
     
-    @IBAction func handleUploadImageBarItemClick(_ sender: UIBarButtonItem) {
+    @IBAction func handleUploadImageBarItemClick(_ sender: AnyObject) {
         
         if uploadingImages.count > 0 {
             if textView.isFirstResponder {
@@ -750,7 +760,12 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
         }
         
         let sheet = UIAlertController(title: "上传本地图片", message: "选择照片源", preferredStyle: .actionSheet)
-        sheet.popoverPresentationController?.barButtonItem = sender
+        if let barItem = sender as? UIBarButtonItem {
+            sheet.popoverPresentationController?.barButtonItem = barItem
+        } else {
+            sheet.popoverPresentationController?.sourceView = view
+            sheet.popoverPresentationController?.sourceRect = view.bounds
+        }
         
         sheet.addAction(UIAlertAction(title: "系统相册", style: .default) { (action) in
             if UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
@@ -792,7 +807,7 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
     }
     
     
-    @objc func handleSendBarItemClick(_ sender: UIBarButtonItem) {
+    @objc func handleSendBarItemClick(_ sender: AnyObject) {
         if textView.isFirstResponder {
             textView.resignFirstResponder()
         }

@@ -69,6 +69,7 @@ let SAToolbarItemIdentifierSearch = NSToolbarItem.Identifier(rawValue: "ToolbarI
 let SAToolbarItemIdentifierSelectCatagory = NSToolbarItem.Identifier(rawValue: "ToolbarItemSelectCatagory")
 let SAToolbarItemIdentifierReorder = NSToolbarItem.Identifier(rawValue: "ToolbarItemReorder")
 let SAToolbarItemIdentifierReply = NSToolbarItem.Identifier(rawValue: "ToolbarItemReply")
+let SAToolbarItemIdentifierReplySubmit = NSToolbarItem.Identifier(rawValue: "ToolbarItemReplySubmit")
 let SAToolbarItemIdentifierReplyInsertAlbumImage = NSToolbarItem.Identifier(rawValue: "ToolbarItemReplyInsertAlbumImage")
 let SAToolbarItemIdentifierReplyInsertEmoji = NSToolbarItem.Identifier(rawValue: "ToolbarItemReplyInsertEmoji")
 let SAToolbarItemIdentifierReplyInsertExternalLink = NSToolbarItem.Identifier(rawValue: "ToolbarItemReplyInsertExternalLink")

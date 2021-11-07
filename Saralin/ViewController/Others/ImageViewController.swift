@@ -234,7 +234,7 @@ class ImageViewController: UIViewController, UIViewControllerTransitioningDelega
         setActionButtons(hidden: false)
         
         #if targetEnvironment(macCatalyst)
-        if let titlebar = UIApplication.shared.windows.first?.windowScene?.titlebar, let titleItems = titlebar.toolbar?.items {
+        if let titlebar = view.window?.windowScene?.titlebar, let titleItems = titlebar.toolbar?.items {
             for item in titleItems {
                 
                 if item.itemIdentifier.rawValue == SAToolbarItemIdentifierShare.rawValue {

@@ -304,7 +304,7 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
     #if targetEnvironment(macCatalyst)
     override func updateToolBar(_ viewAppeared: Bool) {
         super.updateToolBar(viewAppeared)
-        guard let titlebar = UIApplication.shared.windows.first?.windowScene?.titlebar, let titleItems = titlebar.toolbar?.items else {
+        guard let titlebar = view.window?.windowScene?.titlebar, let titleItems = titlebar.toolbar?.items else {
             return
         }
         

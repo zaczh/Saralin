@@ -31,12 +31,18 @@ class SABaseViewController: UIViewController {
         super.viewWillAppear(animated)
         #if targetEnvironment(macCatalyst)
         navigationController?.setNavigationBarHidden(true, animated: animated)
+        #endif
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        #if targetEnvironment(macCatalyst)
         updateToolBar(true)
         #endif
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
         #if targetEnvironment(macCatalyst)
         updateToolBar(false)
         #endif
