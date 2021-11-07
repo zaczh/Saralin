@@ -79,9 +79,7 @@ class SABaseViewController: UIViewController {
         }
     }
     
-    #if targetEnvironment(macCatalyst)
     open func updateToolBar(_ viewAppeared: Bool) {
         
     }
-    #endif
 }
