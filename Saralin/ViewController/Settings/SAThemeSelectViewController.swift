@@ -99,7 +99,7 @@ class SAThemeSelectViewController: SABaseCollectionViewController {
                 cell.previewTitleLabel.textColor = .clear
                 cell.previewSubTitleLabel.textColor = .clear
                 cell.previewBodyLabel.textColor = .clear
-                cell.isSelected = autoSwitchEnabled
+                cell.isChecked = autoSwitchEnabled
                 return cell
             }
         } else {
@@ -116,12 +116,12 @@ class SAThemeSelectViewController: SABaseCollectionViewController {
         cell.previewBodyLabel.textColor = UIColor.sa_colorFromHexString(theme.tableCellTextColor)
         
         if autoSwitchEnabled {
-            cell.isSelected = false
+            cell.isChecked = false
         } else {
             if let index = themes.firstIndex(of: Theme()), index == indexPath.item {
-                cell.isSelected = true
+                cell.isChecked = true
             } else {
-                cell.isSelected = false
+                cell.isChecked = false
             }
         }
         

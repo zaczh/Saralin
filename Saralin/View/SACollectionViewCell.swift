@@ -208,9 +208,9 @@ class SAThemeSelectCell: UICollectionViewCell {
     let titleLabel = UILabel()
     let checkButton = UIButton()
     
-    override var isSelected: Bool {
+    var isChecked: Bool = false {
         didSet {
-            if isSelected {
+            if isChecked {
                 checkButton.setBackgroundImage(UIImage(named:"Checked_Circle")?.withRenderingMode(.alwaysTemplate), for: .normal)
                 layer.borderColor = UIColor.sa_colorFromHexString(Theme().globalTintColor).cgColor
                 layer.borderWidth = 2

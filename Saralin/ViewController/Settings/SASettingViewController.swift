@@ -42,6 +42,13 @@ class SASettingViewController: SABaseTableViewController {
              "description":NSLocalizedString("OPTION_THREADS_DISPLAY_ORDER_DESCRIPTION", comment: "设置帖子列表的排序规则")
             ],
             
+            ["summary":"",
+             "items":[
+                ["title":NSLocalizedString("SETTINGS_OPTION_ENABLE_MULTI_WINDOWS", comment: "开启多窗口"), "detail":"", "bindKey":SAAccount.Preference.enable_multi_windows.rawValue, "bottom":"", "eventId":"enable_multi_windows", "isSwitch":"1"],
+                ],
+             "description":NSLocalizedString("SETTINGS_OPTION_ENABLE_MULTI_WINDOWS_DESCRIPTION", comment: "")
+            ],
+            
 //            ["summary":"",
 //             "items":[
 //                ["title":NSLocalizedString("OPTION_HOT_TAB_SHOW_BOARD_FID", comment: "热门Tab显示子版块"), "detail":"", "bindKey":SAAccount.Preference.hot_tab_board_fid.rawValue,  "bottom":"", "clickable":"1", "eventId":"hot_tab_board_fid", "disclosure":"1"],
@@ -91,10 +98,23 @@ class SASettingViewController: SABaseTableViewController {
         dataSource.append(debugEntry)
         #endif
         
+        filterDataSource()
+        
         updateNotificationSetting()
         
         NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: nil) { [weak self] (_) in
             self?.updateNotificationSetting()
+        }
+    }
+    
+    private func filterDataSource() {
+        for i in (0 ..< dataSource.count).reversed() {
+            let item = (dataSource[i]["items"] as! [[String:String]]).first
+            if let eventId = item?["eventId"], eventId == "enable_multi_windows" {
+                if UIDevice.current.userInterfaceIdiom != .mac {
+                    dataSource.remove(at: i)
+                }
+            }
         }
     }
     
@@ -126,6 +146,10 @@ class SASettingViewController: SABaseTableViewController {
         if let indexPath = tableView.indexPathForSelectedRow {
             tableView.deselectRow(at: indexPath, animated: animated)
         }
+    }
+    
+    @IBAction func handleSettingsClose(_ sender: UIBarButtonItem) {
+        splitViewController?.presentingViewController?.dismiss(animated: true, completion: nil)
     }
     
     override func viewDidAppear(_ animated: Bool) {

@@ -178,15 +178,7 @@ class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, 
     }
     
     @objc func handleMacKeyCommandPreferences(_ sender: AnyObject) {
-        let userActivity = NSUserActivity(activityType: SAActivityType.settings.rawValue)
-        userActivity.isEligibleForHandoff = true
-        userActivity.title = SAActivityType.settings.title()
-        userActivity.userInfo = nil
-        let options = UIScene.ActivationRequestOptions()
-        options.requestingScene = view.window?.windowScene
-        UIApplication.shared.requestSceneSessionActivation(AppController.current.findSceneSession(activityType: SAActivityType.settings.rawValue), userActivity: userActivity, options: options) { (error) in
-            os_log("request new scene returned: %@", error.localizedDescription)
-        }
+        AppController.current.presentSettingsViewController(self)
     }
     
     func refreshTableViewCompletion(_ completion: ((SALoadingViewController.LoadingResult, NSError?) -> Void)?) {
@@ -431,46 +423,7 @@ class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, 
     }
     
     @objc func handleAvatarViewSettingsGearClick(_ sender: UIButton) {
-        if UIDevice.current.userInterfaceIdiom == .mac {
-            let macCatalystExtensionBundlePath = Bundle.main.builtInPlugInsPath! + "/CatalystExtension.bundle"
-            let bundle = Bundle.init(path: macCatalystExtensionBundlePath)!
-            if let cls = bundle.principalClass as? NSObject.Type {
-                cls.perform(NSSelectorFromString("runCommand:object:"), with: "ShowSettingsWindow", with: nil)
-            }
-            return
-        }
-        
-        if #available(iOS 13.0, *) {
-            if UIApplication.shared.supportsMultipleScenes && (Account().preferenceForkey(.enable_multi_windows, defaultValue: false as AnyObject) as! Bool) {
-                let userActivity = NSUserActivity(activityType: SAActivityType.settings.rawValue)
-                userActivity.isEligibleForHandoff = true
-                userActivity.title = SAActivityType.viewImage.title()
-                userActivity.userInfo = nil
-                let options = UIScene.ActivationRequestOptions()
-                options.requestingScene = view.window?.windowScene
-                UIApplication.shared.requestSceneSessionActivation(AppController.current.findSceneSession(), userActivity: userActivity, options: options) { (error) in
-                    os_log("request new scene returned: %@", error.localizedDescription)
-                }
-            } else {
-                let split = AppController.current.instantiateInitialViewController(for: .settings) as! UISplitViewController
-                let navi = split.viewControllers.first as! UINavigationController
-                let settings = navi.topViewController! as! SASettingViewController
-                settings.navigationItem.rightBarButtonItem = UIBarButtonItem(title: NSLocalizedString("CLOSE", comment: "Close"), style: .plain, target: self, action: #selector(handleSettingsClose(_:)))
-                present(navi, animated: true, completion: nil)
-            }
-        } else {
-            // Fallback on earlier versions
-            let split = AppController.current.instantiateInitialViewController(for: .settings) as! UISplitViewController
-            let navi = split.viewControllers.first as! UINavigationController
-            split.modalPresentationStyle = .formSheet
-            let settings = navi.topViewController! as! SASettingViewController
-            settings.navigationItem.rightBarButtonItem = UIBarButtonItem(title: NSLocalizedString("CLOSE", comment: "Close"), style: .plain, target: self, action: #selector(handleSettingsClose(_:)))
-            present(split, animated: true, completion: nil)
-        }
-    }
-    
-    @objc func handleSettingsClose(_ sender: AnyObject) {
-        dismiss(animated: true, completion: nil)
+        AppController.current.presentSettingsViewController(self)
     }
     
     // MARK: - Notification handling

@@ -237,6 +237,8 @@ class SASceneDelegate: UIResponder, UIWindowSceneDelegate {
                 newToolBar = NSToolbar(identifier: SAToolbarIdentifierSettings)
             case .main:
                 newToolBar = NSToolbar(identifier: SAToolbarIdentifierMain)
+            case .login:
+                newToolBar = NSToolbar(identifier: SAToolbarIdentifierLogin)
             default:
                 fatalError("unknown activity type")
         }
@@ -276,7 +278,7 @@ class SASceneDelegate: UIResponder, UIWindowSceneDelegate {
         print("Button submit")
     }
     
-    @objc func toolbarActionGoBack(sender: UIAction) {
+    @objc func toolbarActionGoBack(sender: AnyObject) {
         print("Button Go Back")
         guard let sidebarSplit = window?.rootViewController as? UISplitViewController else {
             if let navigation = window?.rootViewController as? UINavigationController {
@@ -376,7 +378,7 @@ extension SASceneDelegate: NSToolbarDelegate {
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButton)
             return button
         } else if (itemIdentifier == SAToolbarItemIdentifierGoBack) {
-            let barButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .plain, target: nil, action: #selector(toolbarActionShare(sender:)))
+            let barButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .plain, target: self, action: #selector(toolbarActionGoBack(sender:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButton)
             button.isNavigational = true
             return button
@@ -437,6 +439,10 @@ extension SASceneDelegate: NSToolbarDelegate {
         
         if toolbar.identifier == SAToolbarIdentifierComposeThread {
             return [NSToolbarItem.Identifier.flexibleSpace, SAToolbarItemIdentifierTitle, NSToolbarItem.Identifier.flexibleSpace, SAToolbarItemIdentifierSubmit]
+        }
+        
+        if toolbar.identifier == SAToolbarIdentifierLogin {
+            return [NSToolbarItem.Identifier.flexibleSpace, SAToolbarItemIdentifierTitle, NSToolbarItem.Identifier.flexibleSpace]
         }
         
         if toolbar.identifier == SAToolbarIdentifierSettings {

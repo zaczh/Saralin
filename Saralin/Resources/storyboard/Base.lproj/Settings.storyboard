@@ -47,6 +47,7 @@
                     <connections>
                         <segue destination="ITi-xE-umC" kind="relationship" relationship="masterViewController" id="dWh-uB-op3"/>
                         <segue destination="FVk-cs-eIJ" kind="relationship" relationship="detailViewController" id="O67-zl-T1n"/>
+                        <segue destination="ITi-xE-umC" kind="relationship" relationship="compactViewController" id="bLM-jc-usH"/>
                     </connections>
                 </splitViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="QxX-qO-naa" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -63,13 +64,22 @@
                         <viewLayoutGuide key="safeArea" id="X71-g3-Sav"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </view>
-                    <navigationItem key="navigationItem" id="dEq-aJ-ruw"/>
+                    <navigationItem key="navigationItem" id="dEq-aJ-ruw">
+                        <barButtonItem key="rightBarButtonItem" title="Close" id="jC3-57-jKr">
+                            <connections>
+                                <action selector="handleSettingsClose:" destination="Dy7-K3-fip" id="7Cv-2T-OBF"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="QvK-XL-saP" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="467" y="418"/>
         </scene>
     </scenes>
+    <inferredMetricsTieBreakers>
+        <segue reference="dWh-uB-op3"/>
+    </inferredMetricsTieBreakers>
     <resources>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

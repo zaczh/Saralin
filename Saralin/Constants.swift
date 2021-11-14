@@ -55,6 +55,7 @@ let SAToolbarIdentifierImageViewer = NSToolbar.Identifier("ImageViewer")
 let SAToolbarIdentifierReplyThread = NSToolbar.Identifier("ReplyThread")
 let SAToolbarIdentifierComposeThread = NSToolbar.Identifier("ComposeThread")
 let SAToolbarIdentifierSettings = NSToolbar.Identifier("Settings")
+let SAToolbarIdentifierLogin = NSToolbar.Identifier("Login")
 
 #endif
 

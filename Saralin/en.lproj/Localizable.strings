@@ -114,7 +114,7 @@
 
 "SETTINGS_OPTION_ENABLE_MULTI_WINDOWS" = "Enable Multi-window Feature";
 "SETTINGS_OPTION_ENABLE_MULTI_WINDOWS_DETAIL" = "Click To Enable";
-"SETTINGS_OPTION_ENABLE_MULTI_WINDOWS_DESCRIPTION" = "When enabled, some interfaces(Replying, Composing and Image Viewing) will be opened in a new window.";
+"SETTINGS_OPTION_ENABLE_MULTI_WINDOWS_DESCRIPTION" = "When enabled, some UI will be opened in a new window.";
 
 "OPTION_DOMAIN_SETTING" = "Domain";
 "OPTION_DOMAIN_SETTING_DESCRIPTION" = "";

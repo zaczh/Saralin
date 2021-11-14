@@ -68,6 +68,24 @@ class SALoginViewController: SABaseViewController, UITableViewDataSource, UITabl
         tableHeightConstraint.constant = tableHeight
     }
     
+    #if targetEnvironment(macCatalyst)
+    override func updateToolBar(_ viewAppeared: Bool) {
+        super.updateToolBar(viewAppeared)
+        
+        guard let titlebar = view.window?.windowScene?.titlebar, let titleItems = titlebar.toolbar?.items else {
+            return
+        }
+        
+        for item in titleItems {
+            if item.itemIdentifier.rawValue == SAToolbarItemIdentifierTitle.rawValue {
+                if let t = self.title {
+                    item.title = t
+                }
+            }
+        }
+    }
+    #endif
+    
     @IBAction func handleWebLoginAction(_ sender: Any) {
         let webLogin = SAWebLoginViewController()
         navigationController?.pushViewController(webLogin, animated: true)

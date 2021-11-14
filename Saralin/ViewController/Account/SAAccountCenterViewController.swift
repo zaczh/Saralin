@@ -406,31 +406,7 @@ class SAAccountCenterViewController: SABaseTableViewController {
     
     // MARK: - UI events handlling
     @objc func handleSettingsBarButtonClick(_ sender:AnyObject) {
-        if #available(iOS 13.0, *) {
-            if UIApplication.shared.supportsMultipleScenes && ((Account().preferenceForkey(.enable_multi_windows) as? Bool) ?? false) {
-                let userActivity = NSUserActivity(activityType: SAActivityType.settings.rawValue)
-                userActivity.isEligibleForHandoff = true
-                userActivity.title = SAActivityType.settings.title()
-                userActivity.userInfo = [:]
-                let options = UIScene.ActivationRequestOptions()
-                options.requestingScene = view.window?.windowScene
-                UIApplication.shared.requestSceneSessionActivation(AppController.current.findSceneSession(), userActivity: userActivity, options: options) { (error) in
-                    os_log("request new scene returned: %@", error.localizedDescription)
-                }
-                return
-            }
-        }
-        
-        let split = AppController.current.instantiateInitialViewController(for: .settings) as! UISplitViewController
-        let navi = split.viewControllers.first as! UINavigationController
-        let vc = navi.topViewController! as! SASettingViewController
-        if splitViewController!.isCollapsed {
-            navigationController?.pushViewController(vc, animated: true)
-        } else {
-            // wrap with a navigation so that new secondary vc replacing old one.
-            let navi = SANavigationController(rootViewController: vc)
-            splitViewController?.setViewController(navi, for: .secondary)
-        }
+        AppController.current.presentSettingsViewController(self)
     }
 
     @objc func handleUserLoggedOut(_ notification: NSNotification) {

@@ -197,12 +197,7 @@ class SAAccount: NSObject, NSSecureCoding {
         }
         if let value = preferences[key.rawValue] {
             if key == .enable_multi_windows {
-                // multi window support on the ipad is not good enough.
-                #if targetEnvironment(macCatalyst)
                 return true as AnyObject
-                #else
-                return false as AnyObject
-                #endif
             }
             return value as AnyObject?
         }
@@ -237,11 +232,7 @@ class SAAccount: NSObject, NSSecureCoding {
         case .insert_client_signature:
             value = false as AnyObject
         case .enable_multi_windows:
-            #if targetEnvironment(macCatalyst)
             value = true as AnyObject
-            #else
-            value = false as AnyObject
-            #endif
         default:
             return nil
         }

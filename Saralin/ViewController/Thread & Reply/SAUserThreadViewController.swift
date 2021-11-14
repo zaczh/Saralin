@@ -56,6 +56,14 @@ class SAUserThreadViewController<DataModel>: SABaseTableViewController {
         loadingController.setLoading()
     }
     
+    override func getTableView() -> UITableView {
+        if UIDevice.current.userInterfaceIdiom == .mac {
+            return UITableView(frame: .zero, style: .insetGrouped)
+        }
+        
+        return super.getTableView()
+    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
