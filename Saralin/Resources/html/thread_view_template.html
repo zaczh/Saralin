@@ -420,8 +420,8 @@ function loadDataForPage(page, isUpward, scollToInitialFloor) {
         updatePageInfo(threadInfoNew);
         if (threadInfo != null) {
             threadInfo["formhash"] = formHash;
+            document.title = threadInfo["subject"]
         }
-        document.title = threadInfo["subject"]
         
         var hasLoadedPage = false;
         loadedPages.forEach(page => {

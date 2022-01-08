@@ -55,7 +55,7 @@ class SAHTMLAPI: NSObject {
         guard let aurl = URL(string: url) else {
             fatalError()
         }
-        os_log("getTopicList url: %@", log: .network, type: .debug, aurl as CVarArg)
+        sa_log_v2("getTopicList url: %@", log: .network, type: .debug, aurl as CVarArg)
         
         var request = URLRequest(url: aurl)
         request.setValue("max-age=0", forHTTPHeaderField: "Cache-Control")
@@ -86,7 +86,7 @@ class SAHTMLAPI: NSObject {
     
     func handleHTMLResult(_ response:  URLResponse?, data: Data?, error: NSError?, completion: ((AnyObject?, NSError?) -> Void)?) -> Void {
        if error != nil {
-           os_log("HTTP Request Error: %@", log: .network, type: .error, error! as CVarArg)
+           sa_log_v2("HTTP Request Error: %@", log: .network, type: .error, error! as CVarArg)
            completion?(nil, error!)
            return
        }

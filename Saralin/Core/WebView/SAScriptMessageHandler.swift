@@ -33,7 +33,7 @@ class SABaseScriptLogHandler: NSObject, WKScriptMessageHandler {
     
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         if let log = message.body as? String {
-            os_log("[ScriptHandler] %@", log: .webView, log)
+            sa_log_v2("[ScriptHandler] %@", log: .webView, log)
         }
     }
 }
@@ -47,12 +47,12 @@ class SAScriptWebPageHandler: NSObject, WKScriptMessageHandler {
     
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         guard let data = message.body as? [String:AnyObject] else {
-            os_log("[ScriptHandler] bad script message", type: .error)
+            sa_log_v2("[ScriptHandler] bad script message", type: .error)
             return
         }
         
         guard let _ = self.viewController as? SAThreadContentViewController else {
-            os_log("[ScriptHandler] SAScriptWebPageHandler can only be installed on a SAThreadContentViewController", type: .error)
+            sa_log_v2("[ScriptHandler] SAScriptWebPageHandler can only be installed on a SAThreadContentViewController", type: .error)
             return
         }
         
@@ -92,7 +92,7 @@ class SAScriptWebPageHandler: NSObject, WKScriptMessageHandler {
 class SAScriptImageLazyLoadHandler: SABaseScriptLogHandler {
     override func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         if let log = message.body as? String {
-            os_log("[ScriptHandler] %@", log: .webView, log)
+            sa_log_v2("[ScriptHandler] %@", log: .webView, log)
         }
     }
 }
@@ -100,14 +100,14 @@ class SAScriptImageLazyLoadHandler: SABaseScriptLogHandler {
 class SAScriptImageViewHandler: SABaseScriptLogHandler, UIDocumentInteractionControllerDelegate {
     var documentViewController: UIDocumentInteractionController?
     override func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        os_log("[SAScriptImageViewHandler]", log: .webView)
+        sa_log_v2("[SAScriptImageViewHandler]", log: .webView)
         guard let content = viewController as? SAThreadContentViewController else {
             return
         }
         
         guard let webView = message.webView else { return }
         guard let data = message.body as? [String:AnyObject] else {
-            os_log("bad script content", log: .webView, type: .error)
+            sa_log_v2("bad script content", log: .webView, type: .error)
             return
         }
         
@@ -119,12 +119,12 @@ class SAScriptImageViewHandler: SABaseScriptLogHandler, UIDocumentInteractionCon
         frame = insetFrameFromWebViewFrame(frame, webView: message.webView!)
         
         guard let selectedImageLink = data["url"] as? String, let _ = data["allimages"] as? [String] else {
-            os_log("image data wrong!", log: .webView, type: .error)
+            sa_log_v2("image data wrong!", log: .webView, type: .error)
             return
         }
         
         guard let originalUrl = URL.init(string: selectedImageLink) else {
-            os_log("image url bad!", log: .webView, type: .error)
+            sa_log_v2("image url bad!", log: .webView, type: .error)
             return
         }
         
@@ -132,18 +132,18 @@ class SAScriptImageViewHandler: SABaseScriptLogHandler, UIDocumentInteractionCon
         snapshot.frame = webView.convert(frame, to: nil)
         
         guard originalUrl.scheme == sa_wk_url_scheme else {
-            os_log("unknown script message from sa custom url scheme url: %@", log: .webView, type: .error, originalUrl as CVarArg)
+            sa_log_v2("unknown script message from sa custom url scheme url: %@", log: .webView, type: .error, originalUrl as CVarArg)
             return
         }
         
         guard let realUrlStr = originalUrl.sa_queryString("url"), let realUrl = URL.init(string: realUrlStr) else {
-            os_log("image url bad! %@", log: .webView, type: .error, originalUrl as CVarArg)
+            sa_log_v2("image url bad! %@", log: .webView, type: .error, originalUrl as CVarArg)
             return
         }
         
         if originalUrl.host == SAURLSchemeHostType.attachment.rawValue {
             guard let attachmentURL = content.getSavedFilePath(of: realUrl) else {
-                os_log("attachment not found %@", log: .webView, type: .error, realUrl as CVarArg)
+                sa_log_v2("attachment not found %@", log: .webView, type: .error, realUrl as CVarArg)
                 return
             }
             
@@ -163,7 +163,7 @@ class SAScriptImageViewHandler: SABaseScriptLogHandler, UIDocumentInteractionCon
                 do {
                     try FileManager.default.copyItem(atPath: attachmentURL.path, toPath: tempFileName)
                 } catch {
-                    os_log("can not copy log file", type: .error)
+                    sa_log_v2("can not copy log file", type: .error)
                     return
                 }
                 let documentViewController = UIDocumentInteractionController.init(url: tempFileURL)
@@ -174,18 +174,18 @@ class SAScriptImageViewHandler: SABaseScriptLogHandler, UIDocumentInteractionCon
             viewController?.present(action, animated: true, completion: nil)
             return
         } else if originalUrl.host == SAURLSchemeHostType.failure.rawValue {
-            os_log("tap an image that fails to load, image url is %@", log: .webView, type: .error, originalUrl as CVarArg)
+            sa_log_v2("tap an image that fails to load, image url is %@", log: .webView, type: .error, originalUrl as CVarArg)
             // loading and failure url state only differs in their scheme.
             var loadingUrlComponents = URLComponents.init(url: originalUrl, resolvingAgainstBaseURL: false)
             loadingUrlComponents?.host = SAURLSchemeHostType.loading.rawValue
             if let loadingUrl = loadingUrlComponents?.url {
                 content.reloadHTMLPlaceholderImageTag(fromURL: originalUrl, toURL: loadingUrl)
             } else {
-                os_log("can not create loading url from image url: %@", log:.webView, type: .error, originalUrl as CVarArg)
+                sa_log_v2("can not create loading url from image url: %@", log:.webView, type: .error, originalUrl as CVarArg)
             }
             return
         } else if originalUrl.host == SAURLSchemeHostType.imageFormatNotSupported.rawValue {
-            os_log("tap an image that not supported, image url is %@", log: .webView, type: .error, originalUrl as CVarArg)
+            sa_log_v2("tap an image that not supported, image url is %@", log: .webView, type: .error, originalUrl as CVarArg)
             return
         }
         
@@ -219,7 +219,7 @@ class SAScriptImageViewHandler: SABaseScriptLogHandler, UIDocumentInteractionCon
             let options = UIScene.ActivationRequestOptions()
             options.requestingScene = webView.window?.windowScene
             UIApplication.shared.requestSceneSessionActivation(AppController.current.findSceneSession(), userActivity: userActivity, options: options) { (error) in
-                os_log("request new scene returned: %@", error.localizedDescription)
+                sa_log_v2("request new scene returned: %@", error.localizedDescription)
             }
         } else {
             // Fallback on earlier versions
@@ -237,9 +237,9 @@ class SAScriptImageViewHandler: SABaseScriptLogHandler, UIDocumentInteractionCon
 
 class SAScriptReportAbuseHandler: SABaseScriptLogHandler {
     override func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        os_log("[SAScriptImageViewHandler] report abuse", log: .webView)
+        sa_log_v2("[SAScriptImageViewHandler] report abuse", log: .webView)
         guard let info = message.body as? [String : String] else {
-            os_log("bad script message", type: .error)
+            sa_log_v2("bad script message", type: .error)
             return
         }
         let rid = info["replyID"]
@@ -260,9 +260,9 @@ class SAScriptReportAbuseHandler: SABaseScriptLogHandler {
 
 class SAScriptReportAbuseUserHandler: SABaseScriptLogHandler {
     override func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        os_log("[SAScriptImageViewHandler] report abuse user", log: .webView)
+        sa_log_v2("[SAScriptImageViewHandler] report abuse user", log: .webView)
         guard let info = message.body as? [String : String] else {
-            os_log("bad script message", type: .error)
+            sa_log_v2("bad script message", type: .error)
             return
         }
         let rid = info["authorID"]
@@ -284,9 +284,9 @@ class SAScriptReportAbuseUserHandler: SABaseScriptLogHandler {
 
 class SAScriptUnblockAbuseUserHandler: SABaseScriptLogHandler {
     override func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        os_log("[SAScriptImageViewHandler] report abuse user", log: .webView)
+        sa_log_v2("[SAScriptImageViewHandler] report abuse user", log: .webView)
         guard let info = message.body as? [String : String] else {
-            os_log("bad script message", type: .error)
+            sa_log_v2("bad script message", type: .error)
             return
         }
         let rid = info["authorID"]
@@ -309,7 +309,7 @@ class SAScriptUnblockAbuseUserHandler: SABaseScriptLogHandler {
 
 class SAScriptThreadActionHandler: SABaseScriptLogHandler {
     override func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        os_log("[SAScriptThreadActionHandler] message", log: .webView)
+        sa_log_v2("[SAScriptThreadActionHandler] message", log: .webView)
         guard let info = message.body as? [String:String] else {
             return
         }
@@ -324,7 +324,7 @@ class SAScriptThreadActionHandler: SABaseScriptLogHandler {
         
         if scriptAction == "trigger_bottom_refreshing" {
             thread.enableBottomRefreshing = true
-            os_log("[SAScriptImageViewHandler] enabled bottom refreshing", type: .info)
+            sa_log_v2("[SAScriptImageViewHandler] enabled bottom refreshing", type: .info)
             return
         }
         
@@ -333,7 +333,7 @@ class SAScriptThreadActionHandler: SABaseScriptLogHandler {
                 let rect = info["rect"],
                 let replyTime = info["replyTime"],
                 let replyAuthorName = info["replyAuthorName"] else {
-                os_log("[SAScriptImageViewHandler] bad reply format!", type: .error)
+                sa_log_v2("[SAScriptImageViewHandler] bad reply format!", type: .error)
                 return
             }
             // add contentInset
@@ -359,7 +359,7 @@ class SAScriptThreadActionHandler: SABaseScriptLogHandler {
             guard let authorID = info["authorID"],
                 let rect = info["rect"],
                 let replyAuthorName = info["replyAuthorName"] else {
-                os_log("[SAScriptImageViewHandler] bad reply format!", type: .error)
+                sa_log_v2("[SAScriptImageViewHandler] bad reply format!", type: .error)
                 return
             }
             // add contentInset
@@ -373,7 +373,7 @@ class SAScriptThreadActionHandler: SABaseScriptLogHandler {
         if scriptAction == "report_abuse" {
             guard let replyID = info["replyID"],
                 let rect = info["rect"] else {
-                os_log("[SAScriptImageViewHandler] bad reply format!", type: .error)
+                sa_log_v2("[SAScriptImageViewHandler] bad reply format!", type: .error)
                 return
             }
             // add contentInset
@@ -389,7 +389,7 @@ class SAScriptThreadActionHandler: SABaseScriptLogHandler {
 
 class SAScriptThreadReplyHandler: SABaseScriptLogHandler {
     override func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        os_log("[SAScriptThreadReplyHandler] reply", log: .webView)
+        sa_log_v2("[SAScriptThreadReplyHandler] reply", log: .webView)
         guard var info = message.body as? [String:String] else {
             return
         }
@@ -404,7 +404,7 @@ class SAScriptThreadReplyHandler: SABaseScriptLogHandler {
         //reply to replier
         let authorName = info["replyAuthorName"]
         guard replyID != nil && authorName != nil else {
-            os_log("[SAScriptImageViewHandler] bad reply format!", type: .error)
+            sa_log_v2("[SAScriptImageViewHandler] bad reply format!", type: .error)
             return;
         }
         
@@ -427,7 +427,7 @@ class SAScriptThreadReplyHandler: SABaseScriptLogHandler {
 
 class SAScriptThreadDeleteHandler: SABaseScriptLogHandler {
     override func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        os_log("[SAScriptThreadDeleteHandler] reply", log: .webView, type: .debug)
+        sa_log_v2("[SAScriptThreadDeleteHandler] reply", log: .webView, type: .debug)
         guard message.body is [String:String] else {
             return
         }
@@ -441,7 +441,7 @@ class SAScriptThreadDeleteHandler: SABaseScriptLogHandler {
 //        let forumID = info["forumID"]
 
         //TODO: DELETE REPLY
-        os_log("delete reply")
+        sa_log_v2("delete reply")
     }
 }
 
@@ -469,7 +469,7 @@ class SAScriptThreadLoadMoreDataHandler: NSObject, WKScriptMessageHandlerWithRep
         }
         
         guard let tid = webview.url?.sa_queryString("tid") else {
-            os_log("thread page url tid is nil", log: .webView, type: .error)
+            sa_log_v2("thread page url tid is nil", log: .webView, type: .error)
             replyHandler(nil, "thread page url tid is nil")
             return
         }
@@ -479,7 +479,7 @@ class SAScriptThreadLoadMoreDataHandler: NSObject, WKScriptMessageHandlerWithRep
                 let errorMsg = error!.localizedDescription
                 let result: [Any] = [errorMsg, false, NSNull(), NSNull(), NSNull()]
                 replyHandler(result, nil)
-                os_log("loadMoreDataAndInsertHTML failed", log: .webView, type: .error)
+                sa_log_v2("loadMoreDataAndInsertHTML failed", log: .webView, type: .error)
                 return
             }
 
@@ -497,7 +497,7 @@ class SAScriptThreadLoadMoreDataHandler: NSObject, WKScriptMessageHandlerWithRep
                     }
                 let result: [Any] = [errorMsg, false, NSNull(), NSNull(), NSNull()]
                 replyHandler(result, nil)
-                os_log("loadMoreDataAndInsertHTML failed", log: .ui, type: .error)
+                sa_log_v2("loadMoreDataAndInsertHTML failed", log: .ui, type: .error)
                 return
             }
             
@@ -508,7 +508,7 @@ class SAScriptThreadLoadMoreDataHandler: NSObject, WKScriptMessageHandlerWithRep
                 guard !content.isEmpty else {
                     let result: [Any] = [NSNull(), false, NSNull(), thread, formhash]
                     replyHandler(result, nil)
-                    os_log("loadMoreDataAndInsertHTML failed", log: .webView, type: .error)
+                    sa_log_v2("loadMoreDataAndInsertHTML failed", log: .webView, type: .error)
                     return
                 }
                 
@@ -552,18 +552,18 @@ class SAScriptThreadPollHandler: NSObject, WKScriptMessageHandlerWithReply {
             }
             
             guard error == nil else {
-                os_log("get poll error: %@", log: .ui, type: .error, error!)
+                sa_log_v2("get poll error: %@", log: .ui, type: .error, error!)
                 return
             }
                         
             guard let result = obj as? [String:AnyObject] else {
                 let error = NSError(domain: NSPOSIXErrorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey:"Bad response from server."])
-                os_log("%@", log: .ui, type: .error, error.localizedDescription)
+                sa_log_v2("%@", log: .ui, type: .error, error.localizedDescription)
                 return
             }
             
             guard let success = result["success"] as? Int, success == 1 else {
-                os_log("%@", log: .ui, type: .info, "no poll in this thread")
+                sa_log_v2("%@", log: .ui, type: .info, "no poll in this thread")
                 return
             }
             pollInfo = result
@@ -575,15 +575,15 @@ class SAScriptThreadPollHandler: NSObject, WKScriptMessageHandlerWithReply {
                 }
                 
                 guard error == nil else {
-                    os_log("get poll error: %@", log: .ui, type: .error, error!)
+                    sa_log_v2("get poll error: %@", log: .ui, type: .error, error!)
                     return
                 }
                 
-                os_log("get poll result: %@", log: .ui, type: .debug, obj?.description ?? "")
+                sa_log_v2("get poll result: %@", log: .ui, type: .debug, obj?.description ?? "")
                 
                 guard let result = obj as? [String:AnyObject] else {
                     let error = NSError(domain: NSPOSIXErrorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey:"Bad response from server.[GetPoolOption]"])
-                    os_log("%@", log: .ui, type: .error, error.localizedDescription)
+                    sa_log_v2("%@", log: .ui, type: .error, error.localizedDescription)
                     return
                 }
                 
@@ -605,7 +605,7 @@ class SAScriptThreadPollHandler: NSObject, WKScriptMessageHandlerWithReply {
             }
             
             replyHandler(pollContent, nil)
-            os_log("reload poll finished", type: .info)
+            sa_log_v2("reload poll finished", type: .info)
         }
     }
 }

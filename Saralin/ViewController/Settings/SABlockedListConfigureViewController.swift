@@ -37,7 +37,7 @@ class SABlockedListConfigureViewController: SABaseTableViewController, NSFetched
         tableView.register(SABoardTableViewCell.self, forCellReuseIdentifier: "SABoardTableViewCell")
         
         refreshTableViewCompletion(nil)
-        loginObeserver = NotificationCenter.default.addObserver(forName: NSNotification.Name.SAUserLoggedInNotification, object: nil, queue: nil) { [weak self] (notification) in
+        loginObeserver = NotificationCenter.default.addObserver(forName: NSNotification.Name.SAUserLoggedIn, object: nil, queue: nil) { [weak self] (notification) in
             self?.refreshTableViewCompletion(nil)
         }
     }
@@ -224,7 +224,7 @@ class SABlockedListConfigureViewController: SABaseTableViewController, NSFetched
             let managedObject = fetchController!.object(at: indexPath) as! BlockedUser
             guard let uid = managedObject.uid else {return}
             guard let url = URL(string: SAGlobalConfig().profile_url_template.replacingOccurrences(of: "%{UID}", with: uid)) else {
-                os_log("bad record in db of type `BlockedUser` uid: %@", log: .database, type:.fault, uid)
+                sa_log_v2("bad record in db of type `BlockedUser` uid: %@", log: .database, type:.fault, uid)
                 return
             }
             let page = SAAccountInfoViewController(url: url)
@@ -233,7 +233,7 @@ class SABlockedListConfigureViewController: SABaseTableViewController, NSFetched
             let managedObject = fetchController!.object(at: indexPath) as! BlockedThread
             guard let tid = managedObject.tid else {return}
             guard let url = URL(string: SAGlobalConfig().forum_base_url + "forum.php?mod=viewthread&tid=\(tid)&page=1&mobile=1&simpletype=no") else {
-                os_log("bad record in db of type `BlockedThread` tid: %@", log: .database, type:.fault, tid)
+                sa_log_v2("bad record in db of type `BlockedThread` tid: %@", log: .database, type:.fault, tid)
                 return
             }
             let contentViewer = SAThreadContentViewController(url: url)

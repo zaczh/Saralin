@@ -24,7 +24,7 @@ private class SAImageFetchingOperation: Operation {
             return
         }
         
-        os_log("image download start", log: .ui, type: .debug)
+        sa_log_v2("image download start", log: .ui, type: .debug)
         
         var downloadedData: Data?
         
@@ -34,7 +34,7 @@ private class SAImageFetchingOperation: Operation {
         let task = URLSession.saCustomized.dataTask(with: imageURL) { (data, response, error) in
             UIApplication.shared.hideNetworkIndicator()
             if error != nil {
-                os_log("image download failed error: %@", log: .ui, type: .error, error! as CVarArg)
+                sa_log_v2("image download failed error: %@", log: .ui, type: .error, error! as CVarArg)
             }
             downloadedData = data
             group.leave()
@@ -43,13 +43,13 @@ private class SAImageFetchingOperation: Operation {
         group.wait()
         if downloadedData != nil {
             guard let image = UIImage.init(data: downloadedData!) else {
-                os_log("image download failed: not an image", log: .ui, type: .error)
+                sa_log_v2("image download failed: not an image", log: .ui, type: .error)
                 return
             }
             self.resultImage = image
-            os_log("image download succeeded", log: .ui, type: .debug)
+            sa_log_v2("image download succeeded", log: .ui, type: .debug)
         } else {
-            os_log("image download failed: no data", log: .ui, type: .error)
+            sa_log_v2("image download failed: no data", log: .ui, type: .error)
         }
     }
 }

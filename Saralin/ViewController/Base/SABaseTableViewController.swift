@@ -145,11 +145,11 @@ class SABaseTableViewController: SABaseViewController, UITableViewDataSource, UI
         }
         #endif
         
-        NotificationCenter.default.addObserver(self, selector: #selector(SABaseTableViewController.handleGetUserLoginNotification(_:)), name: Notification.Name.SAUserLoggedInNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(SABaseTableViewController.handleGetUserLogoutNotification(_:)), name: Notification.Name.SAUserLoggedOutNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(SABaseTableViewController.handleGetUserLoginNotification(_:)), name: Notification.Name.SAUserLoggedIn, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(SABaseTableViewController.handleGetUserLogoutNotification(_:)), name: Notification.Name.SAUserLoggedOut, object: nil)
         
         _ = NotificationCenter.default.addObserver(forName: UIApplication.significantTimeChangeNotification, object: nil, queue: nil, using: { [weak self] (notification) in
-            os_log("significantTimeChangeNotification", log: .ui, type: .info)
+            sa_log_v2("significantTimeChangeNotification", log: .ui, type: .info)
             self?.shouldRefreshTableWhenNextTimeViewAppear = true
         })
     }
@@ -308,7 +308,7 @@ class SABaseTableViewController: SABaseViewController, UITableViewDataSource, UI
     }
     
     open func refreshControllWillShow() {
-        os_log("refreshControllWillShow", log: .ui, type: .debug)
+        sa_log_v2("refreshControllWillShow", log: .ui, type: .debug)
         if let lastView = thisTimeReloadingDate {
             thisTimeReloadingDate = lastView
         }

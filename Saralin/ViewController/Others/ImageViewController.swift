@@ -587,7 +587,7 @@ class ImageViewController: UIViewController, UIViewControllerTransitioningDelega
                     let options = UIWindowSceneDestructionRequestOptions()
                     options.windowDismissalAnimation = .standard
                     UIApplication.shared.requestSceneSessionDestruction(sceneSession, options: options, errorHandler: { (error) in
-                        os_log("request scene session destruction returned: %@", error.localizedDescription)
+                        sa_log_v2("request scene session destruction returned: %@", error.localizedDescription)
                     })
                 }
             } else {
@@ -717,7 +717,7 @@ extension ImageViewController {
         let query = CKQuery(recordType: recordType, predicate: predicate)
         database.perform(query, inZoneWith: nil) { (returnedRecords, error) in
             guard error == nil else {
-                os_log("query database failed: %@", log: .cloudkit, type:.error, error!.localizedDescription)
+                sa_log_v2("query database failed: %@", log: .cloudkit, type:.error, error!.localizedDescription)
                 return
             }
             
@@ -776,19 +776,19 @@ extension ImageViewController {
                         recordType: CKRecord.RecordType,
                         retryAttempt: Int = 0) {
         if retryAttempt >= SACloudKitSyncRequestMaxAttempt {
-            os_log("retry reaches limit", log: .cloudkit, type:.info)
+            sa_log_v2("retry reaches limit", log: .cloudkit, type:.info)
             return
         }
         
         if retryAttempt > 0 {
-            os_log("retry syncing ui and cloudkit", log: .cloudkit, type:.info)
+            sa_log_v2("retry syncing ui and cloudkit", log: .cloudkit, type:.info)
         }
         
         let predicate = NSPredicate(format: "url = %@", imageURL)
         let query = CKQuery(recordType: recordType, predicate: predicate)
         database.perform(query, inZoneWith: nil) { (returnedRecords, error) in
             guard error == nil else {
-                os_log("save database failed: %@", log: .cloudkit, type:.error, error!.localizedDescription)
+                sa_log_v2("save database failed: %@", log: .cloudkit, type:.error, error!.localizedDescription)
                 DispatchQueue.global().asyncAfter(deadline: .now() + 1) {
                     ImageViewController.doSync(uid: uid, upvoted: upvoted, imageURL: imageURL, database: database, recordType: recordType, retryAttempt: retryAttempt + 1)
                 }
@@ -796,7 +796,7 @@ extension ImageViewController {
             }
             
             guard let record = returnedRecords?.first else {
-                os_log("no record. Create new one.", log: .cloudkit, type:.info)
+                sa_log_v2("no record. Create new one.", log: .cloudkit, type:.info)
                 let recordID = CKRecord.ID(recordName: imageURL)
                 let record = CKRecord(recordType: recordType, recordID: recordID)
                 record["url"] = imageURL
@@ -805,7 +805,7 @@ extension ImageViewController {
                 record["upvoted"] = upvoted ? [uid] : [String]()
                 database.save(record) { (returnedRecord, error) in
                     guard error == nil else {
-                        os_log("save database failed: %@", log: .cloudkit, type:.error, error!.localizedDescription)
+                        sa_log_v2("save database failed: %@", log: .cloudkit, type:.error, error!.localizedDescription)
                         DispatchQueue.global().asyncAfter(deadline: .now() + 1) {
                             ImageViewController.doSync(uid: uid, upvoted: upvoted, imageURL: imageURL, database: database, recordType: recordType, retryAttempt: retryAttempt + 1)
                         }
@@ -840,7 +840,7 @@ extension ImageViewController {
                     return
                 }
                 
-                os_log("save database failed: %@", log: .cloudkit, type:.error, error!.localizedDescription)
+                sa_log_v2("save database failed: %@", log: .cloudkit, type:.error, error!.localizedDescription)
                 DispatchQueue.global().asyncAfter(deadline: .now() + 1) {
                     ImageViewController.doSync(uid: uid, upvoted: upvoted, imageURL: imageURL, database: database, recordType: recordType, retryAttempt: retryAttempt + 1)
                 }

@@ -158,7 +158,7 @@ class SAContentViewController: SABaseViewController, WKNavigationDelegate, SFSaf
             }
             
             guard error == nil else {
-                os_log("wrong data from url: %@", log: .ui, type: .debug, strongSelf.url!.absoluteString)
+                sa_log_v2("wrong data from url: %@", log: .ui, type: .debug, strongSelf.url!.absoluteString)
                 return
             }
             
@@ -173,7 +173,7 @@ class SAContentViewController: SABaseViewController, WKNavigationDelegate, SFSaf
     // MARK: - KVO
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         guard (object as? WKWebView) == webView else {
-            os_log("I am not observing this keyPath!", log: .ui, type: .debug)
+            sa_log_v2("I am not observing this keyPath!", log: .ui, type: .debug)
             super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
             return
         }
@@ -229,7 +229,7 @@ class SAContentViewController: SABaseViewController, WKNavigationDelegate, SFSaf
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         
         if let url = navigationAction.request.url {
-            os_log("decidePolicyForNavigationAction: %@", log: .ui, type: .debug, url.absoluteString)
+            sa_log_v2("decidePolicyForNavigationAction: %@", log: .ui, type: .debug, url.absoluteString)
         }
         
         guard navigationAction.request.url != nil else {
@@ -240,7 +240,7 @@ class SAContentViewController: SABaseViewController, WKNavigationDelegate, SFSaf
         if navigationAction.navigationType != .linkActivated {
             if let frame = navigationAction.targetFrame, !frame.isMainFrame, let url = navigationAction.request.url, url.sa_isExternal() {
                 decisionHandler(.cancel)
-                os_log("cancel external requests: %@", log: .ui, type: .debug, url.absoluteString)
+                sa_log_v2("cancel external requests: %@", log: .ui, type: .debug, url.absoluteString)
                 return
             }
             
@@ -267,7 +267,7 @@ class SAContentViewController: SABaseViewController, WKNavigationDelegate, SFSaf
 
         if navigationAction.request.url!.sa_isExternal() {
             guard presentedViewController == nil else {
-                os_log("Cannot present two view controllers at same time!")
+                sa_log_v2("Cannot present two view controllers at same time!")
                 return
             }
             
@@ -318,7 +318,7 @@ class SAContentViewController: SABaseViewController, WKNavigationDelegate, SFSaf
     }
     
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        os_log("didFailNavigation")
+        sa_log_v2("didFailNavigation")
         //do nothing
     }
     
@@ -330,14 +330,14 @@ class SAContentViewController: SABaseViewController, WKNavigationDelegate, SFSaf
     
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         //do nothing
-        os_log("webView did finish load", log: .webView, type: .info)
+        sa_log_v2("webView did finish load", log: .webView, type: .info)
     }
     
     // Sometimes when app awake from background, webview display a blank page.
     // This is because the web process has been terminated by system.
     // We need to refresh page if this happends
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
-        os_log("web process has been terminated")
+        sa_log_v2("web process has been terminated")
         let error = NSError.init(domain: SAGeneralErrorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey:"Web进程已终止。"])
         loadingController.setFailed(with: error)
     }
@@ -348,10 +348,10 @@ class SAContentViewController: SABaseViewController, WKNavigationDelegate, SFSaf
     }
     
     func openUsingSharedApplication(_ url: Foundation.URL) {
-        os_log("open url with shared application", log: .ui, type: .info)
+        sa_log_v2("open url with shared application", log: .ui, type: .info)
         if #available(iOS 10.0, *) {
             UIApplication.shared.open(url, options: [:], completionHandler: { (success: Bool) in
-                os_log("open result: %d", log: .ui, type: .info, success as CVarArg)
+                sa_log_v2("open result: %d", log: .ui, type: .info, success as CVarArg)
             })
         } else {
             // Fallback on earlier versions

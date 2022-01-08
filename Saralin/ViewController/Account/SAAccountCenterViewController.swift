@@ -25,15 +25,16 @@ class SAAccountCenterViewController: SABaseTableViewController {
         tableView.register(SAThemedTableHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: "SAThemedTableHeaderFooterView")
         
         title = NSLocalizedString("ACCOUNT_CENTER_VC_TITLE", comment: "account center view title")
-        NotificationCenter.default.addObserver(self, selector: #selector(handleUserLoggedOut(_:)), name: Notification.Name.SAUserLoggedOutNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(handleUserLoggedIn(_:)), name: Notification.Name.SAUserLoggedInNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleUserLoggedOut(_:)), name: Notification.Name.SAUserLoggedOut, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleUserLoggedIn(_:)), name: Notification.Name.SAUserLoggedIn, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleBackgroundTaskRefreshNotification(_:)), name: Notification.Name.SABackgroundTaskDidFinish, object: nil)
         
         refreshTableViewCompletion(nil)
     }
     
     deinit {
-        NotificationCenter.default.removeObserver(self, name: Notification.Name.SAUserLoggedOutNotification, object: nil)
-        NotificationCenter.default.removeObserver(self, name: Notification.Name.SAUserLoggedInNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: Notification.Name.SAUserLoggedOut, object: nil)
+        NotificationCenter.default.removeObserver(self, name: Notification.Name.SAUserLoggedIn, object: nil)
     }
     
     override func refreshTableViewCompletion(_ completion: ((SALoadingViewController.LoadingResult, NSError?) -> Void)?) {
@@ -63,8 +64,8 @@ class SAAccountCenterViewController: SABaseTableViewController {
             ],
         ]
         
-        reloadData()
         if Account().isGuest {
+            reloadData()
             completion?(.newData, nil)
             return
         }
@@ -114,6 +115,12 @@ class SAAccountCenterViewController: SABaseTableViewController {
                 cell.hasCheckedIn = Account().hasCheckedInToday
             }
         }
+        reloadData()
+    }
+    
+    override func viewDidBecomeActive() {
+        super.viewDidBecomeActive()
+        reloadData()
     }
     
     override var showsRefreshControl: Bool {
@@ -185,7 +192,7 @@ class SAAccountCenterViewController: SABaseTableViewController {
             URLSession.saCustomized.dataTask(with: url, completionHandler: { (data, response, error) in
                 UIApplication.shared.hideNetworkIndicator()
                 guard error == nil && data != nil else {
-                    os_log("image download failed", log: .ui, type: .error)
+                    sa_log_v2("image download failed", log: .ui, type: .error)
                     return
                 }
                 
@@ -218,6 +225,10 @@ class SAAccountCenterViewController: SABaseTableViewController {
         let detail = items[indexPath.row]["detail"]
         cell.textLabel?.text = title
         cell.detailTextLabel!.text = detail
+        
+        if indexPath.section == 1 && indexPath.row == 1 {
+            refreshTabAndCellBadgeValue(cell)
+        }
         
         return cell
     }
@@ -404,6 +415,27 @@ class SAAccountCenterViewController: SABaseTableViewController {
         return indexPath
     }
     
+    private func refreshTabAndCellBadgeValue(_ cell: UITableViewCell?) {
+        // currently only new direct messages show badge
+        let newMsgCount = AppController.current.getService(of: SABackgroundTaskManager.self)!.unreadDirectMessageCount
+        if newMsgCount > 0 {
+            tabBarItem.badgeValue = "\(newMsgCount)"
+            parent?.tabBarItem.badgeValue = "\(newMsgCount)"
+            let buttonDemension = CGFloat(24)
+            let button = UIButton(frame: CGRect(x: 0, y: 0, width: buttonDemension, height: buttonDemension))
+            button.setTitleColor(.white, for: .normal)
+            button.backgroundColor = .systemRed
+            button.setTitle("\(newMsgCount)", for: .normal)
+            button.clipsToBounds = true
+            button.layer.cornerRadius = buttonDemension/2.0
+            cell?.accessoryView = button
+        } else {
+            tabBarItem.badgeValue = nil
+            parent?.tabBarItem.badgeValue = nil
+            cell?.accessoryView = nil
+        }
+    }
+    
     // MARK: - UI events handlling
     @objc func handleSettingsBarButtonClick(_ sender:AnyObject) {
         AppController.current.presentSettingsViewController(self)
@@ -415,5 +447,9 @@ class SAAccountCenterViewController: SABaseTableViewController {
     
     @objc func handleUserLoggedIn(_ notification: NSNotification) {
         refreshTableViewCompletion(nil)
+    }
+    
+    @objc func handleBackgroundTaskRefreshNotification(_ notification: NSNotification) {
+        refreshTabAndCellBadgeValue(tableView.cellForRow(at: IndexPath(row: 0, section: 1)))
     }
 }

@@ -24,7 +24,7 @@ class SADebuggingViewController: SABaseTableViewController {
         viewUserDefaultsCell.textLabel?.text = "查看用户配置"
         
         let crashCell = SAThemedTableViewCell.init(style: .default, reuseIdentifier: nil)
-        crashCell.textLabel?.text = "分析日志"
+        crashCell.textLabel?.text = "性能分析"
         cells = [
             viewLogCell, viewFileCell, viewUserDefaultsCell, crashCell
         ]
@@ -32,7 +32,7 @@ class SADebuggingViewController: SABaseTableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        os_log("open debug entry", log: .ui, type: .info)
+        sa_log_v2("open debug entry", log: .ui, type: .info)
 
         title = NSLocalizedString("DEBUG_ENTRY", comment: "DEBUG ENTRY")
         if #available(iOS 11.0, *) {
@@ -71,7 +71,7 @@ class SADebuggingViewController: SABaseTableViewController {
     
     @objc private func handleLogShareButtonClick(_ sender: UIBarButtonItem) {
         let url = URL.init(fileURLWithPath: sa_current_log_file_path())
-        os_log("clicked share button", log: .ui, type: .info)
+        sa_log_v2("clicked share button", log: .ui, type: .info)
         let activityController = UIActivityViewController(activityItems: [url], applicationActivities: nil)
         activityController.modalPresentationStyle = .popover
         activityController.completionWithItemsHandler = { (activityType, completed, returnedItems, activityError) in

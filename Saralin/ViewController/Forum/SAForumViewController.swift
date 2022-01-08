@@ -38,9 +38,9 @@ class SAForumViewController: SABaseTableViewController {
         
         title = NSLocalizedString("FORUM_VC_TITLE", comment: "forum vc title")
 
-        NotificationCenter.default.addObserver(self, selector: #selector(SAForumViewController.handleUserLoggedIn(_:)), name: .SAUserLoggedInNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(SAForumViewController.handleUserLoggedOut(_:)), name: .SAUserLoggedOutNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(SAForumViewController.handleUserPreferenceChange(_:)), name: .SAUserPreferenceChangedNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(SAForumViewController.handleUserLoggedIn(_:)), name: .SAUserLoggedIn, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(SAForumViewController.handleUserLoggedOut(_:)), name: .SAUserLoggedOut, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(SAForumViewController.handleUserPreferenceChange(_:)), name: .SAUserPreferenceChanged, object: nil)
         
         refreshTableViewCompletion(nil)
     }

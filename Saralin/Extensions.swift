@@ -100,8 +100,18 @@ extension UIViewController: SAViewControllerTheming {
         
         for vc in children {
             vc.needsUpdateTheme = true
-            vc.viewThemeDidChange(newTheme)
-            vc.needsUpdateTheme = false
+            if vc.isViewLoaded {
+                vc.viewThemeDidChange(newTheme)
+                vc.needsUpdateTheme = false
+            }
+        }
+        
+        if let vc = presentedViewController {
+            vc.needsUpdateTheme = true
+            if vc.isViewLoaded {
+                vc.viewThemeDidChange(newTheme)
+                vc.needsUpdateTheme = false
+            }
         }
     }
     
@@ -263,7 +273,7 @@ extension UIImageView {
         if self.saImageURLKey == url {
             self.image = image
         } else {
-            os_log("image changed", log:.network)
+            sa_log_v2("image changed", log:.network)
         }
     }
     
@@ -303,7 +313,7 @@ extension UIImageView {
             }
             
             URLCache.shared.removeCachedResponse(for: request)
-            os_log("cached response corrupted, remove it. task: %@.", log:.network, url.absoluteString)
+            sa_log_v2("cached response corrupted, remove it. task: %@.", log:.network, url.absoluteString)
         }
         
         UIImageView.saImageViewLoadingTasksLock.lock()
@@ -317,7 +327,7 @@ extension UIImageView {
             }
         }
         UIImageView.saImageViewLoadingTasksLock.unlock()
-        os_log("new task: %@", log:.network, url.absoluteString)
+        sa_log_v2("new task: %@", log:.network, url.absoluteString)
         let session = URLSession(configuration: URLSessionConfiguration.default)
         let task = session.dataTask(with: url) { [weak self] (data, response, error) in
             UIImageView.saImageViewLoadingTasksLock.lock()
@@ -330,17 +340,17 @@ extension UIImageView {
             UIImageView.saImageViewLoadingTasksLock.unlock()
 
             guard error == nil else {
-                os_log("task failed: %@", log:.network, error!.localizedDescription)
+                sa_log_v2("task failed: %@", log:.network, error!.localizedDescription)
                 return
             }
             
             guard let data = data, let response = response, let responseURL = response.url else {
-                os_log("task no data or response: %@", log:.network, url.absoluteString)
+                sa_log_v2("task no data or response: %@", log:.network, url.absoluteString)
                 return
             }
             
             guard let image = UIImage(data: data) else {
-                os_log("task no image: %@", log:.network, url.absoluteString)
+                sa_log_v2("task no image: %@", log:.network, url.absoluteString)
                 return
             }
             

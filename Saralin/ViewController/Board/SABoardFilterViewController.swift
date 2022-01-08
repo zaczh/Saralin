@@ -12,7 +12,7 @@ protocol SABoardFilterDelegate: NSObjectProtocol {
     func boardFilterViewController(_: SABoardFilterViewController, didChooseSubBoardID fid: String, categoryID cid: String)
 }
 
-class SABoardFilterViewController: UITableViewController {
+class SABoardFilterViewController: SAUITableViewController {
     
     weak var delegate: SABoardFilterDelegate?
     var isEmpty: Bool = true {
@@ -52,6 +52,11 @@ class SABoardFilterViewController: UITableViewController {
         tableView.backgroundColor = Theme().backgroundColor.sa_toColor()
         
         tableView.sectionHeaderHeight = 50
+        if #available(iOS 15.0, *) {
+            tableView.sectionHeaderTopPadding = 0
+        } else {
+            // Fallback on earlier versions
+        }
         tableView.rowHeight = 50.0
         tableView.tableFooterView = UIView()
         tableView.separatorStyle = .none
@@ -199,7 +204,7 @@ class SABoardFilterViewController: UITableViewController {
                     }
                 }
                 guard forum != nil else {
-                    os_log("forum is nil. Showing all", log: .ui, type: .debug)
+                    sa_log_v2("forum is nil. Showing all", log: .ui, type: .debug)
                     return 1
                 }
                 
@@ -242,7 +247,7 @@ class SABoardFilterViewController: UITableViewController {
             }
         }
         guard forum != nil else {
-            os_log("forum is nil", log: .ui, type: .debug)
+            sa_log_v2("forum is nil", log: .ui, type: .debug)
             return cell
         }
         
@@ -279,7 +284,7 @@ class SABoardFilterViewController: UITableViewController {
             }
         }
         guard forum != nil else {
-            os_log("forum is nil", log: .ui, type: .debug)
+            sa_log_v2("forum is nil", log: .ui, type: .debug)
             return
         }
         
@@ -311,7 +316,7 @@ class SABoardFilterViewController: UITableViewController {
         
         var categorylist: [[String:String]]!
         if forum == nil {
-            os_log("forum is nil", log: .ui, type: .debug)
+            sa_log_v2("forum is nil", log: .ui, type: .debug)
             categorylist = []
         } else {
             categorylist = (forum["types"] as! [[String:String]])

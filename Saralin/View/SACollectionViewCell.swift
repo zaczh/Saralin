@@ -106,7 +106,7 @@ class SAEmojiCollectionWrapperView: UICollectionViewCell, UICollectionViewDataSo
             }
         }
         
-        os_log("emoji image not found", log: .ui, type: .error)
+        sa_log_v2("emoji image not found", log: .ui, type: .error)
         cell.imageView.image = nil
         return cell
     }
@@ -142,6 +142,8 @@ class SAReplyImageAndContentPreviewCollectionViewCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         deleteButton.setImage(UIImage(named:"Cancel")?.withRenderingMode(.alwaysTemplate), for: .normal)
+        deleteButton.tintColor = UIColor.white
+        deleteButton.backgroundColor = .clear
         deleteButton.translatesAutoresizingMaskIntoConstraints = false
         deleteButton.addTarget(self, action: #selector(handleDeleteButtonClick(_:)), for: .touchUpInside)
         addSubview(deleteButton)

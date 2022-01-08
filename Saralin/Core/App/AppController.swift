@@ -117,7 +117,7 @@ class AppController: NSObject {
             for session in UIApplication.shared.openSessions {
                 if let type = session.stateRestorationActivity?.activityType {
                     if type == requestedType {
-                        os_log("findSceneSession reuse activity type: %@", log: .ui, type: .info, requestedType)
+                        sa_log_v2("findSceneSession reuse activity type: %@", log: .ui, type: .info, requestedType)
                         return session
                     }
                     continue
@@ -128,7 +128,7 @@ class AppController: NSObject {
             return nil
         }
         
-        os_log("findSceneSession return nil, will create new one.", log: .ui, type: .info)
+        sa_log_v2("findSceneSession return nil, will create new one.", log: .ui, type: .info)
         return nil
     }
     
@@ -248,14 +248,14 @@ class AppController: NSObject {
         for dir in [appTemporaryDirectory, appPersistentDirectory, threadHtmlFileDirectory, databaseDirectory, configDirectory, emojiDirectory, accountDirectory, diagnosticsReportFilesDirectory] {
             if !fm.fileExists(atPath: dir.path) {
                 try! fm.createDirectory(at: dir, withIntermediateDirectories: true, attributes: nil)
-                os_log("created directory at: %@", log: .ui, type: .info, dir.path)
+                sa_log_v2("created directory at: %@", log: .ui, type: .info, dir.path)
             }
         }
         
         if !fm.fileExists(atPath: mahjongEmojiDirectory.path) {
             let bundleURL = Bundle.main.url(forResource: "Mahjong", withExtension: nil)!
             try? fm.copyItem(at: bundleURL, to: mahjongEmojiDirectory)
-            os_log("created dir at: %@", log: .ui, type: .info, mahjongEmojiDirectory.path)
+            sa_log_v2("created dir at: %@", log: .ui, type: .info, mahjongEmojiDirectory.path)
         }
         
         for file in [appOnlineConfigFileURL, forumInfoConfigFileURL, userGroupInfoConfigFileURL] {
@@ -267,16 +267,16 @@ class AppController: NSObject {
             let fileExtension = lastComponent.pathExtension
             let bundleURL = Bundle.main.url(forResource: fileName, withExtension: fileExtension)!
             try? fm.copyItem(at: bundleURL, to: file)
-            os_log("created file at: %@", log: .ui, type: .info, file.path)
+            sa_log_v2("created file at: %@", log: .ui, type: .info, file.path)
         }
         
-        os_log("appPersistentDirectory is: %@", log: .ui, type: .info, appPersistentDirectory.path)
+        sa_log_v2("appPersistentDirectory is: %@", log: .ui, type: .info, appPersistentDirectory.path)
     }
     
     private func migrateLagacyFilesIfNeeded() {
         let fm = FileManager.default
         if let lastMigratedVersion = UserDefaults.standard.string(forKey: SAUserDefaultsKey.appVersionOfLastLagacyFileMigration.rawValue) {
-            os_log("No need to do migration this version, last version: %@", log: .config, type: .info, lastMigratedVersion)
+            sa_log_v2("No need to do migration this version, last version: %@", log: .config, type: .info, lastMigratedVersion)
             return
         }
         
@@ -284,7 +284,7 @@ class AppController: NSObject {
         UserDefaults.standard.set(localVersion, forKey: SAUserDefaultsKey.appVersionOfLastLagacyFileMigration.rawValue)
         
         // load lagacy files of older app versions
-        os_log("begin migrating lagacy files.", log: .ui, type: .info)
+        sa_log_v2("begin migrating lagacy files.", log: .ui, type: .info)
         // Account
         repeat  {
             let existed = NSHomeDirectory() + "/Documents/account_v2"
@@ -293,9 +293,9 @@ class AppController: NSObject {
                     try fm.removeItem(at: accountDirectory)
                     try fm.moveItem(atPath: existed, toPath: accountDirectory.path)
                 } catch {
-                    os_log("failed to move file to: %@", log: .ui, type: .error, accountDirectory.path)
+                    sa_log_v2("failed to move file to: %@", log: .ui, type: .error, accountDirectory.path)
                 }
-                os_log("finished migrating files at %@", log: .ui, type: .info, existed)
+                sa_log_v2("finished migrating files at %@", log: .ui, type: .info, existed)
             }
         } while false
         
@@ -310,20 +310,20 @@ class AppController: NSObject {
                     do {
                         try  fm.moveItem(atPath: existed, toPath: newPlace.path)
                     } catch {
-                        os_log("failed to move file at: %@", log: .ui, type: .error, newPlace.path)
+                        sa_log_v2("failed to move file at: %@", log: .ui, type: .error, newPlace.path)
                     }
-                    os_log("finished migrating files at %@", log: .ui, type: .info, existed)
+                    sa_log_v2("finished migrating files at %@", log: .ui, type: .info, existed)
                 }
             }
         } while false
-        os_log("finished migrating lagacy files.", log: .ui, type: .info)
+        sa_log_v2("finished migrating lagacy files.", log: .ui, type: .info)
     }
     
     private func removeTemporaryDirectories() {
         let fm = FileManager.default
         if fm.fileExists(atPath: appTemporaryDirectory.path) {
             try! fm.removeItem(atPath: appTemporaryDirectory.path)
-            os_log("removed directory at: %@", log: .ui, type: .info, appTemporaryDirectory.path)
+            sa_log_v2("removed directory at: %@", log: .ui, type: .info, appTemporaryDirectory.path)
         }
     }
     
@@ -333,14 +333,14 @@ class AppController: NSObject {
             notificationCenter.getNotificationSettings(completionHandler: { (settings) in
                 if settings.authorizationStatus == .notDetermined {
                     notificationCenter.requestAuthorization(options: [.badge, .sound, .alert], completionHandler: { (result, error) in
-                        os_log("requestAuthorization: %@", log: .ui, type: .info, result ? "true" : "false")
+                        sa_log_v2("requestAuthorization: %@", log: .ui, type: .info, result ? "true" : "false")
                     })
                 }
                 else if settings.authorizationStatus == .denied {
-                    os_log("requestAuthorization denied", log: .ui, type: .info)
+                    sa_log_v2("requestAuthorization denied", log: .ui, type: .info)
                 }
                 else if settings.authorizationStatus == .authorized {
-                    os_log("requestAuthorization authorized", log: .ui, type: .info)
+                    sa_log_v2("requestAuthorization authorized", log: .ui, type: .info)
                 }
             })
         #endif
@@ -406,7 +406,7 @@ class AppController: NSObject {
         }
         
         let nc = NotificationCenter.default
-        nc.addObserver(forName: Notification.Name.SAUserPreferenceChangedNotification, object: nil, queue: nil) { (notification) in
+        nc.addObserver(forName: Notification.Name.SAUserPreferenceChanged, object: nil, queue: nil) { (notification) in
             let userInfo = notification.userInfo
             guard let key = userInfo?[SAAccount.Preference.changedPreferenceNameKey] as? SAAccount.Preference else {
                 return
@@ -419,11 +419,11 @@ class AppController: NSObject {
             }
         }
         
-        nc.addObserver(forName: Notification.Name.SAUserLoggedInNotification, object: nil, queue: nil) { (notification) in
+        nc.addObserver(forName: Notification.Name.SAUserLoggedIn, object: nil, queue: nil) { (notification) in
             viewThemeDidChange()
         }
         
-        nc.addObserver(forName: Notification.Name.SAUserLoggedOutNotification, object: nil, queue: nil) { (notification) in
+        nc.addObserver(forName: Notification.Name.SAUserLoggedOut, object: nil, queue: nil) { (notification) in
             viewThemeDidChange()
         }
         
@@ -435,30 +435,30 @@ class AppController: NSObject {
     private var isUpdatingOnlineConfigFiles = false
     func updateOnlineConfigFiles() {
         if isUpdatingOnlineConfigFiles {
-            os_log("already downloading online config files", log: .config, type: .info)
+            sa_log_v2("already downloading online config files", log: .config, type: .info)
             return
         }
         
         let fm = FileManager.default
-        os_log("downloading online config files", log: .config, type: .info)
+        sa_log_v2("downloading online config files", log: .config, type: .info)
         let url = URL(string: SAGlobalConfig().online_config_file_url)!
         URLSession.saCustomized.dataTask(with: url) { (data, response, error) in
             defer {
                 self.isUpdatingOnlineConfigFiles = false
             }
             guard let data = data else {
-                os_log("online config fail to download", log: .network, type: .fault)
+                sa_log_v2("online config fail to download", log: .network, type: .fault)
                 return
             }
             
             guard let dict = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String:AnyObject] else {
-                os_log("online config bad format.", log: .network, type: .fault)
+                sa_log_v2("online config bad format.", log: .network, type: .fault)
                 return
             }
             
             if !fm.fileExists(atPath: self.appOnlineConfigFileURL.path)  {
                 fm.createFile(atPath: self.appOnlineConfigFileURL.path, contents: data, attributes: nil)
-                os_log("online config first time downloaded", log: .config, type: .info)
+                sa_log_v2("online config first time downloaded", log: .config, type: .info)
                 return
             }
             
@@ -468,27 +468,27 @@ class AppController: NSObject {
                 let minimumOnlineCompatibleAppVersion = dict["MinimumCompatibleAppVersion"] as? String,
                 let maximumOnlineCompatibleAppVersion = dict["MaximumCompatibleAppVersion"] as? String,
                 let localVersion = localDict["ConfigVersion"] as? String else {
-                    os_log("config error", log: .config, type: .info)
+                    sa_log_v2("config error", log: .config, type: .info)
                     return
             }
             
             if self.compare(version1: onlineVersion, version2: localVersion) == .orderedSame {
-                os_log("online config same version: %@", log: .config, type: .info, onlineVersion)
+                sa_log_v2("online config same version: %@", log: .config, type: .info, onlineVersion)
                 return
             }
             
             let bundleVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as! String
             if self.compare(version1: bundleVersion, version2: minimumOnlineCompatibleAppVersion) == .orderedAscending {
-                os_log("online config not compatible to this version of app, online config minimum compatible version: %@, app version: %@", log: .config, type: .info, minimumOnlineCompatibleAppVersion, bundleVersion)
+                sa_log_v2("online config not compatible to this version of app, online config minimum compatible version: %@, app version: %@", log: .config, type: .info, minimumOnlineCompatibleAppVersion, bundleVersion)
                 return
             }
             
             if self.compare(version1: bundleVersion, version2: maximumOnlineCompatibleAppVersion) == .orderedDescending {
-                os_log("online config not compatible to this version of app, online config maximum compatible version: %@, app version: %@", log: .config, type: .info, maximumOnlineCompatibleAppVersion, bundleVersion)
+                sa_log_v2("online config not compatible to this version of app, online config maximum compatible version: %@, app version: %@", log: .config, type: .info, maximumOnlineCompatibleAppVersion, bundleVersion)
                 return
             }
             
-            os_log("online config updated to version: %@", log: .config, type: .info, onlineVersion)
+            sa_log_v2("online config updated to version: %@", log: .config, type: .info, onlineVersion)
             try? data.write(to: self.appOnlineConfigFileURL)
             
             self.handleOnlineConfigFileNewVersion()
@@ -517,19 +517,19 @@ class AppController: NSObject {
             let subConfigVersion = subConfig["Version"] as? String,
             let subConfigDownloadUrl = subConfig["DownloadUrl"] as? String,
             let downloadUrl = URL.init(string: subConfigDownloadUrl) else {
-                os_log("no config url or url not recognized", log: .config, type: .error)
+                sa_log_v2("no config url or url not recognized", log: .config, type: .error)
                 return
         }
         
         guard let localData = try? Data.init(contentsOf: self.forumInfoConfigFileURL),
             let localDict = try? PropertyListSerialization.propertyList(from: localData, options: [], format: nil) as? [String:AnyObject],
             let localVersion = localDict["version"] as? String else {
-                os_log("no config url or url not recognized", log: .config, type: .error)
+                sa_log_v2("no config url or url not recognized", log: .config, type: .error)
                 return
         }
         
         if self.compare(version1: localVersion, version2: subConfigVersion) != .orderedAscending {
-            os_log("config same version: ForumInfo", log: .config, type: .error)
+            sa_log_v2("config same version: ForumInfo", log: .config, type: .error)
             return
         }
         
@@ -539,16 +539,16 @@ class AppController: NSObject {
                 group.leave()
             }
             guard let data = data else {
-                os_log("no data", log: .config, type: .fault)
+                sa_log_v2("no data", log: .config, type: .fault)
                 return
             }
             
             do {
                 try data.write(to: self.forumInfoConfigFileURL)
             } catch {
-                os_log("write to file failed error: %@", log: .config, type: .fault, error.localizedDescription as CVarArg)
+                sa_log_v2("write to file failed error: %@", log: .config, type: .fault, error.localizedDescription as CVarArg)
             }
-            os_log("downloadNewForumInfoConfigFiles finished", log: .config, type: .info)
+            sa_log_v2("downloadNewForumInfoConfigFiles finished", log: .config, type: .info)
         }.resume()
     }
     
@@ -563,19 +563,19 @@ class AppController: NSObject {
             let subConfigVersion = subConfig["Version"] as? String,
             let subConfigDownloadUrl = subConfig["DownloadUrl"] as? String,
             let downloadUrl = URL.init(string: subConfigDownloadUrl) else {
-                os_log("no config url or url not recognized", log: .config, type: .error)
+                sa_log_v2("no config url or url not recognized", log: .config, type: .error)
                 return
         }
         
         guard let localData = try? Data.init(contentsOf: self.userGroupInfoConfigFileURL),
             let localDict = try? PropertyListSerialization.propertyList(from: localData, options: [], format: nil) as? [String:AnyObject],
             let localVersion = localDict["version"] as? String else {
-                os_log("no config url or url not recognized", log: .config, type: .error)
+                sa_log_v2("no config url or url not recognized", log: .config, type: .error)
                 return
         }
         
         if self.compare(version1: localVersion, version2: subConfigVersion) != .orderedAscending {
-            os_log("config same version: UserGroupInfo", log: .config, type: .error)
+            sa_log_v2("config same version: UserGroupInfo", log: .config, type: .error)
             return
         }
         
@@ -585,16 +585,16 @@ class AppController: NSObject {
                 group.leave()
             }
             guard let data = data else {
-                os_log("no data", log: .config, type: .fault)
+                sa_log_v2("no data", log: .config, type: .fault)
                 return
             }
             
             do {
                 try data.write(to: self.userGroupInfoConfigFileURL)
             } catch {
-                os_log("write to file failed error: %@", log: .config, type: .fault, error.localizedDescription as CVarArg)
+                sa_log_v2("write to file failed error: %@", log: .config, type: .fault, error.localizedDescription as CVarArg)
             }
-            os_log("downloadNewUserGroupInfoConfigFiles finished", log: .config, type: .info)
+            sa_log_v2("downloadNewUserGroupInfoConfigFiles finished", log: .config, type: .info)
         }.resume()
     }
     
@@ -618,17 +618,17 @@ class AppController: NSObject {
         guard let localData = try? Data.init(contentsOf: mahjongPlistFileURL),
             let localDict = try? PropertyListSerialization.propertyList(from: localData, options: [], format: nil) as? [String:AnyObject],
             let localVersion = localDict["version"] as? String else {
-                os_log("no config url or url not recognized", log: .config, type: .error)
+                sa_log_v2("no config url or url not recognized", log: .config, type: .error)
                 return
         }
         
         if self.compare(version1: localVersion, version2: mahjongEmojiVersion) != .orderedAscending {
-            os_log("config same version: MahjongEmoji", log: .config, type: .error)
+            sa_log_v2("config same version: MahjongEmoji", log: .config, type: .error)
             return
         }
         
         guard let url = URL(string: mahjongEmojiDownloadUrl) else {
-            os_log("bad url", log: .config, type: .fault)
+            sa_log_v2("bad url", log: .config, type: .fault)
             return
         }
         
@@ -639,12 +639,12 @@ class AppController: NSObject {
             }
             
             guard error == nil else {
-                os_log("download config error: %@", log: .config, type: .fault, error!.localizedDescription)
+                sa_log_v2("download config error: %@", log: .config, type: .fault, error!.localizedDescription)
                 return
             }
             
             guard let tempFileURL = url else {
-                os_log("url is nil", log: .config, type: .fault)
+                sa_log_v2("url is nil", log: .config, type: .fault)
                 return
             }
             
@@ -652,11 +652,11 @@ class AppController: NSObject {
             do {
                 try SSZipArchive.unzipFile(atPath: tempFileURL.path, toDestination: targetPath.path, overwrite: true, password: nil)
             } catch {
-                os_log("decompress failed. error: %@", log: .config, type: .fault, error.localizedDescription)
+                sa_log_v2("decompress failed. error: %@", log: .config, type: .fault, error.localizedDescription)
                 return
             }
             
-            os_log("decompress finished", log: .config, type: .info)
+            sa_log_v2("decompress finished", log: .config, type: .info)
         }.resume()
     }
     
@@ -668,7 +668,7 @@ class AppController: NSObject {
         
         // keychain fetching must be made when app is active
         if UIApplication.shared.applicationState != .active {
-            os_log("app no active, delay request.", log: .keychain, type: .info)
+            sa_log_v2("app no active, delay request.", log: .keychain, type: .info)
             var ob: NSObjectProtocol?
             ob = NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: nil) { [weak self] (_) in
                 NotificationCenter.default.removeObserver(ob!, name: UIApplication.didBecomeActiveNotification, object: nil)
@@ -679,24 +679,24 @@ class AppController: NSObject {
         
         // Is device id set?
         if let identifier = SAKeyChainService.getIdentifier() {
-            os_log("found existed device identifier: %@", log: .keychain, type: .info, identifier)
+            sa_log_v2("found existed device identifier: %@", log: .keychain, type: .info, identifier)
             currentDeviceIdentifier = identifier
             return
         }
         
         let uuid = CFUUIDCreateString(nil, CFUUIDCreate(nil)) as String
         if !SAKeyChainService.saveIdentifier(uuid) {
-            os_log("save keychain failed", log: .keychain, type: .error)
+            sa_log_v2("save keychain failed", log: .keychain, type: .error)
         }
         currentDeviceIdentifier = uuid
-        os_log("create new device id: %@", log: .keychain, type: .info, uuid)
+        sa_log_v2("create new device id: %@", log: .keychain, type: .info, uuid)
     }
     
     // call this method after user logged in
     func updateAccountInfo() {
         let account = Account()
         if !account.uid.isEmpty {
-            os_log("update notification account: %@", log: .account, type: .info, "\(account.uid)")
+            sa_log_v2("update notification account: %@", log: .account, type: .info, "\(account.uid)")
         }
     }
     
@@ -755,7 +755,7 @@ class AppController: NSObject {
             let options = UIScene.ActivationRequestOptions()
             options.requestingScene = view.window?.windowScene
             UIApplication.shared.requestSceneSessionActivation(findSceneSession(), userActivity: userActivity, options: options) { (error) in
-                os_log("request new scene returned: %@", error.localizedDescription)
+                sa_log_v2("request new scene returned: %@", error.localizedDescription)
             }
         } else {
             let split = instantiateInitialViewController(for: .settings) as! UISplitViewController
@@ -771,7 +771,7 @@ class AppController: NSObject {
             let options = UIScene.ActivationRequestOptions()
             options.requestingScene = self.currentActiveWindow?.windowScene
             UIApplication.shared.requestSceneSessionActivation(findSceneSession(), userActivity: userActivity, options: options) { (error) in
-                os_log("request new scene returned: %@", error.localizedDescription)
+                sa_log_v2("request new scene returned: %@", error.localizedDescription)
             }
         } else {
             let loginContentViewer = UIStoryboard(name: "Login", bundle: nil).instantiateInitialViewController() as! SALoginViewController
@@ -1040,44 +1040,44 @@ class AppController: NSObject {
     
     func applicationWillTerminate() {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
-        os_log("applicationWillTerminate uptime: %@", log: .ui, type: .info, "\(upTime)")
+        sa_log_v2("applicationWillTerminate uptime: %@", log: .ui, type: .info, "\(upTime)")
         removeTemporaryDirectories()
     }
     
     func applicationDidReceiveRemoteNotification(userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        os_log("didReceive notification: %@", log: .ui, type: .info, "\(userInfo)")
+        sa_log_v2("didReceive notification: %@", log: .ui, type: .info, "\(userInfo)")
         notificationManager.handle(notification: userInfo, fetchCompletionHandler: completionHandler)
     }
     
     func applicationDidFailToRegisterForRemoteNotificationsWithError(error: Error) {
         // The token is not currently available.
-        os_log("Remote notification support is unavailable due to error: %@", type: .error, error.localizedDescription)
+        sa_log_v2("Remote notification support is unavailable due to error: %@", type: .error, error.localizedDescription)
     }
     
     func applicationPerformFetchWithCompletionHandler(completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        os_log("perform background fetch", log: .ui, type: .info)
+        sa_log_v2("perform background fetch", log: .ui, type: .info)
         backgroundTaskManager.startBackgroundTask(with: completionHandler)
     }
     
     func applicationOpen(url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-        os_log("open url: %@", log: .ui, type: .info, url as CVarArg)
+        sa_log_v2("open url: %@", log: .ui, type: .info, url as CVarArg)
         return open(url: url, sender: currentActiveWindow?.rootViewController)
     }
     
     func applicationDidReceiveMemoryWarning() {
-        os_log("applicationDidReceiveMemoryWarning", log: .ui, type: .info)
+        sa_log_v2("applicationDidReceiveMemoryWarning", log: .ui, type: .info)
     }
     
     func applicationWillResignActive() {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
-        os_log("applicationWillResignActive uptime: %@", log: .ui, type: .info, "\(upTime)")
+        sa_log_v2("applicationWillResignActive uptime: %@", log: .ui, type: .info, "\(upTime)")
     }
     
     func applicationDidEnterBackground() {
         // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-        os_log("applicationDidEnterBackground uptime: %@", log: .ui, type: .info, "\(upTime)")
+        sa_log_v2("applicationDidEnterBackground uptime: %@", log: .ui, type: .info, "\(upTime)")
         
         // save core data
         coreDataManager.saveContext(completion: nil)
@@ -1090,7 +1090,7 @@ class AppController: NSObject {
     
     func applicationWillEnterForeground() {
         // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
-        os_log("applicationWillEnterForeground uptime: %@", log: .ui, type: .info, "\(upTime)")
+        sa_log_v2("applicationWillEnterForeground uptime: %@", log: .ui, type: .info, "\(upTime)")
         
         cookieManager.renewCookiesIfNeeded()
         backgroundTaskManager.start()
@@ -1098,7 +1098,7 @@ class AppController: NSObject {
     
     func applicationDidBecomeActive() {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-        os_log("applicationDidBecomeActive uptime: %@", log: .ui, type: .info, "\(upTime)")
+        sa_log_v2("applicationDidBecomeActive uptime: %@", log: .ui, type: .info, "\(upTime)")
         updateOnlineConfigFiles()
     }
     
@@ -1173,7 +1173,7 @@ class AppController: NSObject {
             font?.restorationIdentifier = identifier
             vc = font
         } else {
-            os_log("unhandled restoration identifier: %@", identifier)
+            sa_log_v2("unhandled restoration identifier: %@", identifier)
         }
         return vc
     }

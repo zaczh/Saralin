@@ -47,7 +47,7 @@ extension UIViewController {
                 return
             }
             
-            os_log("maybe a viewcontroller leak: %@ %p", log: .debugging, type: .fault, classNameStr, vc)
+            sa_log_v2("maybe a viewcontroller leak: %@ %p", log: .debugging, type: .debug, classNameStr, vc)
         }
     }
 }

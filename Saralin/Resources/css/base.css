@@ -1,6 +1,7 @@
 html {
     -webkit-text-size-adjust: 100%; /* Prevent font scaling in landscape while allowing user zoom */
 }
+
 * {
     margin: 0;
     padding: 0;
@@ -34,13 +35,10 @@ span[style] {
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", sans-serif !important;
     font-size: ${normal-font-size} !important;
-    color: ${text-color};
-    background-color: ${background-color};
     line-height: 1.3125;
 }
 
 .content_body {
-    background-color: ${foreground-color};
     ${ipad-body-style}
 }
 
@@ -106,7 +104,6 @@ img {
 }
 
 div.post_header {
-    color: ${block-quote-text-color};
     height: 40pt;
     padding-top: 10px;
     padding-left:15px;
@@ -117,7 +114,6 @@ div.post_header {
 .loading {
     height: 20px;
     padding-top: 10px;
-    background-color: ${background-color};
 }
 
 .bm_h {
@@ -146,20 +142,17 @@ span.edit_time {
 
 div.seperator_line {
     height:0.5px;
-    background-color:${table-cell-seperator-color};
     margin-left:15px;
 }
 
 .post_wrapper {
     overflow:hidden;
     position: relative;
-    background-color: ${foreground-color};
 }
 
 div.block_overlay {
     width: 100%;
     height: 100%;
-    background-color: ${block-quote-background-color};
     position: absolute;
     left: 0px;
     top: 0px;
@@ -169,7 +162,6 @@ div.block_overlay {
 }
 
 div.post_footer {
-    color: ${block-quote-text-color};
     margin-top:4px;
     margin-bottom:10px;
     padding-left:15px;
@@ -257,7 +249,6 @@ blockquote {
     margin-top: 10px;
     margin-bottom: 10px;
     padding-left: 10px;
-    border-left: 2px  ${text-color} solid;
 }
 
 fieldset {
@@ -267,7 +258,6 @@ fieldset {
 div.loadMoreRetry {
     height: 60px;
     display: flex;
-    background-color: ${background-color};
 }
 
 blockquote img {
@@ -292,7 +282,6 @@ progress.poll {
 }
 
 span.xg1 {
-    color: ${text-color};
 }
 
 .expandArrow {
@@ -334,3 +323,112 @@ span.xg1 {
     }
 }
 
+@media (prefers-color-scheme: light) {
+    body {
+        color: ${text-color};
+        background-color: ${background-color};
+    }
+
+    .content_body {
+        background-color: ${foreground-color};
+    }
+
+    div.post_header {
+        color: ${block-quote-text-color};
+    }
+
+    .loading {
+        background-color: ${background-color};
+    }
+
+    div.post_header {
+        color: ${block-quote-text-color};
+    }
+
+    .loading {
+        background-color: ${background-color};
+    }
+
+    div.seperator_line {
+        background-color:${table-cell-seperator-color};
+    }
+
+    .post_wrapper {
+        background-color: ${foreground-color};
+    }
+
+    div.block_overlay {
+        background-color: ${block-quote-background-color};
+    }
+
+    div.post_footer {
+        color: ${block-quote-text-color};
+    }
+
+    blockquote {
+        border-left: 2px  ${text-color} solid;
+    }
+
+    div.loadMoreRetry {
+        background-color: ${background-color};
+    }
+
+    span.xg1 {
+        color: ${text-color};
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    body {
+        color: ${text-color-dark};
+        background-color: ${background-color-dark};
+    }
+
+    .content_body {
+        background-color: ${foreground-color-dark};
+    }
+
+    div.post_header {
+        color: ${block-quote-text-color-dark};
+    }
+
+    .loading {
+        background-color: ${background-color-dark};
+    }
+
+    div.post_header {
+        color: ${block-quote-text-color-dark};
+    }
+
+    .loading {
+        background-color: ${background-color-dark};
+    }
+
+    div.seperator_line {
+        background-color:${table-cell-seperator-color-dark};
+    }
+
+    .post_wrapper {
+        background-color: ${foreground-color-dark};
+    }
+
+    div.block_overlay {
+        background-color: ${block-quote-background-color-dark};
+    }
+
+    div.post_footer {
+        color: ${block-quote-text-color-dark};
+    }
+
+    blockquote {
+        border-left: 2px  ${text-color-dark} solid;
+    }
+
+    div.loadMoreRetry {
+        background-color: ${background-color-dark};
+    }
+
+    span.xg1 {
+        color: ${text-color-dark};
+    }
+}

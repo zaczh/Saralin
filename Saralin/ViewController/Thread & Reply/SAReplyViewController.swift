@@ -289,7 +289,7 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
         let uid = Account().uid
         
         guard let fid = quoteInfo["fid"] as? String, let tid = quoteInfo["tid"] as? String else {
-            os_log("bad data, not save draft", log: .ui, type: .error)
+            sa_log_v2("bad data, not save draft", log: .ui, type: .error)
             return
         }
         let quote_id = quoteInfo["quote_id"] as? String
@@ -325,26 +325,26 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
     private func deleteDraftAfterSent() {
         let uid = Account().uid
         guard let fid = quoteInfo["fid"] as? String, let tid = quoteInfo["tid"] as? String else {
-            os_log("bad data, not delete draft", log: .ui, type: .error)
+            sa_log_v2("bad data, not delete draft", log: .ui, type: .error)
             return
         }
         let quote_id = quoteInfo["quote_id"] as? String
         let predicate = NSPredicate(format: "fid==%@ AND tid==%@ AND quote_id==%@ AND uid==%@", fid, tid, quote_id ?? NSNull(), uid)
         AppController.current.getService(of: SACoreDataManager.self)!.delete(predicate: predicate) { (entities: [ReplyDraft]) in
-            os_log("draft deleted", log: .ui, type: .info)
+            sa_log_v2("draft deleted", log: .ui, type: .info)
         }
     }
     
     private func saveDraft() {
         if textView.text.isEmpty && uploadingImages.isEmpty {
-            os_log("reply view empty, not save to draft")
+            sa_log_v2("reply view empty, not save to draft")
             return
         }
         
         let uid = Account().uid
         guard let fid = quoteInfo["fid"] as? String,
             let tid = quoteInfo["tid"] as? String else {
-                os_log("bad data, not save draft", log: .ui, type: .error)
+                sa_log_v2("bad data, not save draft", log: .ui, type: .error)
                 return
         }
         let quote_id = quoteInfo["quote_id"] as? String
@@ -738,6 +738,9 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
     }
     
     @IBAction func handleUploadImageBarItemClick(_ sender: AnyObject) {
+        if textView.isFirstResponder {
+            textView.resignFirstResponder()
+        }
         
         if uploadingImages.count > 0 {
             if textView.isFirstResponder {
@@ -831,7 +834,7 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
         let activity = SAModalActivityViewController()
         present(activity, animated: true, completion: nil)
         if uploadingImages.count > 0 {
-            urlSession.uploadImage(to: fid, image: uploadingImages.first!, progress: nil) { (result, error) in
+            urlSession.uploadImage(to: fid, tid: tid, image: uploadingImages.first!, progress: nil) { (result, error) in
                 if error != nil || result == nil {
                     self.delegate?.replyDidFail(self)
                     activity.hideAndShowResult(of: false, info: "失败") { () in
@@ -856,7 +859,7 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
                                         let options = UIWindowSceneDestructionRequestOptions()
                                         options.windowDismissalAnimation = .commit
                                         UIApplication.shared.requestSceneSessionDestruction(sceneSession, options: options, errorHandler: { (error) in
-                                            os_log("request scene session destruction returned: %@", error.localizedDescription)
+                                            sa_log_v2("request scene session destruction returned: %@", error.localizedDescription)
                                         })
                                     }
                                 } else {
@@ -888,7 +891,7 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
                                     let options = UIWindowSceneDestructionRequestOptions()
                                     options.windowDismissalAnimation = .commit
                                     UIApplication.shared.requestSceneSessionDestruction(sceneSession, options: options, errorHandler: { (error) in
-                                        os_log("request scene session destruction returned: %@", error.localizedDescription)
+                                        sa_log_v2("request scene session destruction returned: %@", error.localizedDescription)
                                     })
                                 }
                             } else {
@@ -929,7 +932,7 @@ class SAReplyViewController: SABaseViewController, UITextViewDelegate, UICollect
                     let options = UIWindowSceneDestructionRequestOptions()
                     options.windowDismissalAnimation = .decline
                     UIApplication.shared.requestSceneSessionDestruction(sceneSession, options: options, errorHandler: { (error) in
-                        os_log("request scene session destruction returned: %@", error.localizedDescription)
+                        sa_log_v2("request scene session destruction returned: %@", error.localizedDescription)
                     })
                 }
             } else {

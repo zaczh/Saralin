@@ -98,7 +98,7 @@ class SANotificationManager: NSObject, UNUserNotificationCenterDelegate {
             if let additionalInfo = customInfo["a"] as? [AnyHashable:Any] {
                 /* handle push commands here */
                 if let _ = additionalInfo["sa_fetch"] {
-                    os_log("receive background fetch notification", log: .ui, type: .info)
+                    sa_log_v2("receive background fetch notification", log: .ui, type: .info)
                     AppController.current.getService(of: SABackgroundTaskManager.self)!.startBackgroundTask(with: completionHandler)
                     return
                 } else  if let _ = additionalInfo["sa_clear"] {
@@ -118,7 +118,7 @@ class SANotificationManager: NSObject, UNUserNotificationCenterDelegate {
     
     @available(iOS 10.0, *)
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        os_log("user clicked notification %@", log: .ui, type: .info, response)
+        sa_log_v2("user clicked notification %@", log: .ui, type: .info, response)
         defer {
             completionHandler()
         }
@@ -136,7 +136,7 @@ class SANotificationManager: NSObject, UNUserNotificationCenterDelegate {
         }
         
         guard let navigationController = AppController.current.findDeailNavigationController(rootViewController: rootViewController!) else {
-           os_log("found no tab bar controller", log: .ui, type: .info)
+           sa_log_v2("found no tab bar controller", log: .ui, type: .info)
             return
         }
         

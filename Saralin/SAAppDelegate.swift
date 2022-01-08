@@ -24,21 +24,17 @@ class SAAppDelegate: UIResponder, UIApplicationDelegate, UITabBarControllerDeleg
     private var launchedShortcutItem: UIApplicationShortcutItem?
 
     func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-        os_log("application willFinishLaunchingWithOptions", log: .ui, type: .debug)
+        sa_log_v2("application willFinishLaunchingWithOptions", log: .ui, type: .debug)
         self.launchOptions = launchOptions
         return true
     }
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        os_log("application didFinishLaunchingWithOptions", log: .ui, type: .debug)
+        sa_log_v2("application didFinishLaunchingWithOptions", log: .ui, type: .debug)
         
         #if !targetEnvironment(macCatalyst)
         let shared = MXMetricManager.shared
         shared.add(self)
-        #endif
-        
-        #if DEBUG
-        setSavingLogTypes(OSLogType.allTypes)
         #endif
                 
         URLCache.shared.diskCapacity = 1024 * 1024 * 400 //400M
@@ -170,7 +166,7 @@ class SAAppDelegate: UIResponder, UIApplicationDelegate, UITabBarControllerDeleg
 #if !targetEnvironment(macCatalyst)
 extension SAAppDelegate: MXMetricManagerSubscriber {
     func didReceive(_ payloads: [MXMetricPayload]) {
-        os_log("Receive new metric report.", log: .ui, type: .info)
+        sa_log_v2("Receive new metric report.", log: .ui, type: .info)
         // clean first
         let directoryURL = AppController.current.diagnosticsReportFilesDirectory
         FileManager.default.sa_removeAllFilesIn(dir: directoryURL) { (name) -> Bool in
@@ -182,13 +178,13 @@ extension SAAppDelegate: MXMetricManagerSubscriber {
             do {
                 try payload.jsonRepresentation().write(to: diagnosticFileUrl)
             } catch {
-                os_log("fail to write report", log: .ui, type: .fault)
+                sa_log_v2("fail to write report", log: .ui, type: .fault)
             }
         }
     }
     
     func didReceive(_ payloads: [MXDiagnosticPayload]) {
-        os_log("Receive new diagnostic report.", log: .ui, type: .info)
+        sa_log_v2("Receive new diagnostic report.", log: .ui, type: .info)
         // clean first
         let directoryURL = AppController.current.diagnosticsReportFilesDirectory
         FileManager.default.sa_removeAllFilesIn(dir: directoryURL) { (name) -> Bool in
@@ -200,7 +196,7 @@ extension SAAppDelegate: MXMetricManagerSubscriber {
             do {
                 try payload.jsonRepresentation().write(to: diagnosticFileUrl)
             } catch {
-                os_log("fail to write report", log: .ui, type: .fault)
+                sa_log_v2("fail to write report", log: .ui, type: .fault)
             }
         }
     }

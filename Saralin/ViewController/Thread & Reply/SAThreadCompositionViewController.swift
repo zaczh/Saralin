@@ -394,7 +394,7 @@ class SAThreadCompositionViewController: SAUITableViewController {
                     let options = UIWindowSceneDestructionRequestOptions()
                     options.windowDismissalAnimation = .commit
                     UIApplication.shared.requestSceneSessionDestruction(sceneSession, options: options, errorHandler: { (error) in
-                        os_log("request scene session destruction returned: %@", error.localizedDescription)
+                        sa_log_v2("request scene session destruction returned: %@", error.localizedDescription)
                     })
                 }
             } else {
@@ -461,7 +461,7 @@ class SAThreadCompositionViewController: SAUITableViewController {
                                     let options = UIWindowSceneDestructionRequestOptions()
                                     options.windowDismissalAnimation = .commit
                                     UIApplication.shared.requestSceneSessionDestruction(sceneSession, options: options, errorHandler:{ (error) in
-                                        os_log("request scene session destruction returned: %@", error.localizedDescription)
+                                        sa_log_v2("request scene session destruction returned: %@", error.localizedDescription)
                                     })
                                 }
                             } else {

@@ -25,10 +25,10 @@ func Account() -> SAAccount {
 }
 
 extension Notification.Name {
-    static let SAAccountManagerAccountStateChangedNotification = Notification.Name(rawValue: "SAAccountManagerAccountStateChangedNotification")
-    static let SAUserLoggedInNotification = Notification.Name(rawValue: "SAUserLoggedInNotificatoin")
-    static let SAUserLoggedOutNotification = Notification.Name(rawValue: "Notification.Name.SAUserLoggedOutNotification")
-    static let SAUserPreferenceChangedNotification = Notification.Name(rawValue: "Notification.Name.SAUserPreferenceChangedNotification")
+    static let SAUserAccountStateChanged = Notification.Name(rawValue: "SAUserAccountStateChanged")
+    static let SAUserLoggedIn = Notification.Name(rawValue: "SAUserLoggedIn")
+    static let SAUserLoggedOut = Notification.Name(rawValue: "SAUserLoggedOut")
+    static let SAUserPreferenceChanged = Notification.Name(rawValue: "SAUserPreferenceChanged")
 }
 
 extension AnyHashable {
@@ -54,7 +54,7 @@ class SAAccountManager {
     var activeAccount: SAAccount?
     private(set) var accountState: AccountState = .notLoggedIn {
         didSet {
-            let notification = Notification.init(name: .SAAccountManagerAccountStateChangedNotification, object: self, userInfo: [.SAAccountStateChangedNotificationValueKey:accountState])
+            let notification = Notification.init(name: .SAUserAccountStateChanged, object: self, userInfo: [.SAAccountStateChangedNotificationValueKey:accountState])
             NotificationCenter.default.post(notification)
         }
     }
@@ -151,7 +151,7 @@ class SAAccountManager {
         }
         
         var ob: NSObjectProtocol?
-        ob = NotificationCenter.default.addObserver(forName: .SAAccountManagerAccountStateChangedNotification, object: nil, queue: nil) { (notfication) in
+        ob = NotificationCenter.default.addObserver(forName: .SAUserAccountStateChanged, object: nil, queue: nil) { (notfication) in
             if let state = notfication.userInfo?["value"] as? AccountState, filter(state) {
                 completion?()
                 NotificationCenter.default.removeObserver(ob!)
@@ -162,7 +162,7 @@ class SAAccountManager {
     
     // must set activeAccount beforehand
     private func makeActiveAccountLoggedIn(accountVerified: Bool) {
-        os_log("makeActiveAccountLoggedIn active account: %@", log: .account, type: .info, activeAccount!)
+        sa_log_v2("makeActiveAccountLoggedIn active account: %@", log: .account, type: .info, activeAccount!)
         
         if accountState != .notValidated {
             accountState = .notValidated
@@ -180,29 +180,29 @@ class SAAccountManager {
             }
             
             if self.accountState != .loggedIn {
-                os_log("account login state not consistent, maybe verify failed? account: %@.", log: .account, type: .info, self.activeAccount!)
+                sa_log_v2("account login state not consistent, maybe verify failed? account: %@.", log: .account, type: .info, self.activeAccount!)
                 return
             }
             
-            os_log("on-disk account logged in %@.", log: .account, type: .info, self.activeAccount!)
+            sa_log_v2("on-disk account logged in %@.", log: .account, type: .info, self.activeAccount!)
             self.postUserLoggedInNotification()
             self.postPreferenceChangedNotification()
         }
         
         /// if we are sure of this account, we skip the verifying process.
         if accountVerified {
-            os_log("account was verified, no need to auto login.", log: .account, type: .info)
+            sa_log_v2("account was verified, no need to auto login.", log: .account, type: .info)
             return
         }
         
         /// This account needs to be varified
-        os_log("checking on-disk account...", log: .account, type: .info)
+        sa_log_v2("checking on-disk account...", log: .account, type: .info)
         
         // Keychain service has some conficts with application state restoration.
         // Keychain item can not be fetched before app state changes to active.
         // So we wait for state changing here.
         if UIApplication.shared.applicationState != .active {
-            os_log("checking on-disk account app state not active, waiting", log: .account, type: .info)
+            sa_log_v2("checking on-disk account app state not active, waiting", log: .account, type: .info)
             return
         }
         
@@ -210,20 +210,20 @@ class SAAccountManager {
     }
     
     private func postUserLoggedInNotification() {
-        let notification = Notification(name: Notification.Name.SAUserLoggedInNotification, object: self, userInfo: nil)
+        let notification = Notification(name: Notification.Name.SAUserLoggedIn, object: self, userInfo: nil)
         NotificationCenter.default.post(notification)
     }
     
     private func postPreferenceChangedNotification() {
         for preference in SAAccount.Preference.allPreferences {
-            let notification = Notification(name: Notification.Name.SAUserPreferenceChangedNotification, object: self, userInfo: [SAAccount.Preference.changedPreferenceNameKey:preference])
+            let notification = Notification(name: Notification.Name.SAUserPreferenceChanged, object: self, userInfo: [SAAccount.Preference.changedPreferenceNameKey:preference])
             NotificationCenter.default.post(notification)
         }
     }
     
     private func saveAccountCredentialsToKeychain(_ credentials: CredentialInfo) {
         let saved = SAKeyChainService.saveCredential(credentials)
-        os_log("keychain saved result: %@", log: .account, type: .info, saved ? "true" : "false")
+        sa_log_v2("keychain saved result: %@", log: .account, type: .info, saved ? "true" : "false")
     }
     
     private func getCurrentActiveAccountCredentials() -> CredentialInfo? {
@@ -236,7 +236,7 @@ class SAAccountManager {
             }
         }
         
-        os_log("fatal: keychain item missing.", log: .account, type: .fault)
+        sa_log_v2("fatal: keychain item missing.", log: .account, type: .fault)
         return nil
     }
     
@@ -293,7 +293,7 @@ class SAAccountManager {
     }
     
     func logoutCurrentActiveAccount(_ completion: (() -> Void)?) {
-        os_log("logged out %@", log: .account, type: .info, activeAccount!)
+        sa_log_v2("logged out %@", log: .account, type: .info, activeAccount!)
         if activeAccount!.isGuest {
             completion?()
             return
@@ -304,7 +304,7 @@ class SAAccountManager {
         clearCookie {
             self.activeAccount = SAAccountManager.guestAccount
             self.accountState = .notLoggedIn
-            let notification = Notification(name: Notification.Name.SAUserLoggedOutNotification, object: self, userInfo: ["account":previousAccount])
+            let notification = Notification(name: Notification.Name.SAUserLoggedOut, object: self, userInfo: ["account":previousAccount])
             NotificationCenter.default.post(notification)
             completion?()
         }
@@ -313,24 +313,24 @@ class SAAccountManager {
     // This method can be called multi times.
     private func performAutoLogin(force: Bool) {
         guard let account = activeAccount else {
-            os_log("[AccountManager] Auto login failed because no active account was found.", log: .account, type: .info)
+            sa_log_v2("[AccountManager] Auto login failed because no active account was found.", log: .account, type: .info)
             return
         }
 
         if !account.sid.isEmpty && !force && account.lastDateAuthPass != nil && account.lastDateAuthPass!.timeIntervalSinceNow > -2 * 24 * 3600 {
-            os_log("[AccountManager] account does not expire yet, autologin finished.", log: .account, type: .info)
+            sa_log_v2("[AccountManager] account does not expire yet, autologin finished.", log: .account, type: .info)
             return
         }
         
         guard let credential = getCurrentActiveAccountCredentials() else {
-            os_log("[AccountManager] Auto login failed because no credentials. will log out", log: .account, type: .fault)
+            sa_log_v2("[AccountManager] Auto login failed because no credentials. will log out", log: .account, type: .fault)
             DispatchQueue.main.async {
                 self.logoutCurrentActiveAccount(nil)
             }
             return
         }
         
-        os_log("[AccountManager] autologin start", log: .account, type: .info)
+        sa_log_v2("[AccountManager] autologin start", log: .account, type: .info)
         
         let group = DispatchGroup()
         
@@ -342,7 +342,7 @@ class SAAccountManager {
             }
             
             guard error == nil, let _ = content else {
-                os_log("[AccountManager] Auto login failed due to network issue.", log: .account, type: .info)
+                sa_log_v2("[AccountManager] Auto login failed due to network issue.", log: .account, type: .info)
                 return
             }
             
@@ -365,17 +365,17 @@ class SAAccountManager {
         
         group.notify(queue: .global()) {
             guard let str = loginObject as? String, let loginV2 = loginV2Obj as? [String:AnyObject] else {
-                os_log("[AccountManager] Auto login failed.", log: .account, type: .info)
+                sa_log_v2("[AccountManager] Auto login failed.", log: .account, type: .info)
                 return
             }
             
             guard let parser = try? HTMLParser.init(string: str) else {
-                os_log("[AccountManager] Auto login failed due to bad response from server.", log: .account, type: .info)
+                sa_log_v2("[AccountManager] Auto login failed due to bad response from server.", log: .account, type: .info)
                 return
             }
             
             guard let _ = parser.body()?.findChild(withAttribute: "title", matchingName: "退出", allowPartial: true) else {
-                os_log("[AccountManager] auto login failed because of unknown response from server.", log: .account, type: .info)
+                sa_log_v2("[AccountManager] auto login failed because of unknown response from server.", log: .account, type: .info)
                 DispatchQueue.main.async {
                     self.accountState = .validatingFailed
                 }
@@ -383,14 +383,14 @@ class SAAccountManager {
             }
             
             guard let data = loginV2["data"] as? [String:AnyObject], let sid = data["sid"] as? String else {
-                os_log("[AccountManager] auto login failed because of loginV2 failure.", log: .account, type: .info)
+                sa_log_v2("[AccountManager] auto login failed because of loginV2 failure.", log: .account, type: .info)
                 DispatchQueue.main.async {
                     self.accountState = .validatingFailed
                 }
                 return
             }
             
-            os_log("[AccountManager] autologin succeeded", log: .account, type: .info)
+            sa_log_v2("[AccountManager] autologin succeeded", log: .account, type: .info)
             DispatchQueue.main.async {
                 account.sid = sid
                 account.lastDateAuthPass = Date()
@@ -401,7 +401,7 @@ class SAAccountManager {
     // MARK: - save, load & delete active account file
     func saveActiveAccount() {
         guard let account = activeAccount else {
-            os_log("no active account", log: .account, type: .debug)
+            sa_log_v2("no active account", log: .account, type: .debug)
             return
         }
         
@@ -412,9 +412,9 @@ class SAAccountManager {
             do {
                 try fileManager.createDirectory(atPath: s_accountHistoryDirectory, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                os_log("create history directory failed with error: %@", log: .account, type: .error, error as NSError)
+                sa_log_v2("create history directory failed with error: %@", log: .account, type: .error, error as NSError)
             }
-            os_log("create history directory", log: .account, type: .debug)
+            sa_log_v2("create history directory", log: .account, type: .debug)
         }
         
         //save to history accounts
@@ -452,7 +452,7 @@ class SAAccountManager {
             activeAccount = account
             makeActiveAccountLoggedIn(accountVerified: false)
         } catch {
-            os_log("unarchivedObject failed: %@", log: .account, type: .fault, error as CVarArg)
+            sa_log_v2("unarchivedObject failed: %@", log: .account, type: .fault, error as CVarArg)
         }
     }
     
@@ -460,8 +460,8 @@ class SAAccountManager {
         do {
             try FileManager.default.removeItem(atPath: s_activeAccountPath)
         } catch {
-            os_log("delete active account error: %@", log: .account, type: .debug, error as NSError)
+            sa_log_v2("delete active account error: %@", log: .account, type: .debug, error as NSError)
         }
-        os_log("active account file deleted", log: .account, type: .debug)
+        sa_log_v2("active account file deleted", log: .account, type: .debug)
     }
 }

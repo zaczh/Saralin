@@ -69,7 +69,7 @@ class SAWebLoginViewController: SABaseViewController {
         navigationItem.rightBarButtonItems = [rightItem]
         title = NSLocalizedString("LOGIN", comment: "Login")
         
-        os_log("delete account cookie before doing login", log: .account, type: .info)
+        sa_log_v2("delete account cookie before doing login", log: .account, type: .info)
         AppController.current.getService(of: SAAccountManager.self)!.logoutCurrentActiveAccount {
             self.reloadWebPage()
         }
@@ -99,7 +99,7 @@ class SAWebLoginViewController: SABaseViewController {
     }
     
     deinit {
-        os_log("[Login Web] deinit", log: .ui, type: .info)
+        sa_log_v2("[Login Web] deinit", log: .ui, type: .info)
     }
 
     override func didReceiveMemoryWarning() {
@@ -134,16 +134,16 @@ class SAWebLoginViewController: SABaseViewController {
         }
         
         guard !isLoading else {
-            os_log("[Login Web] still loading", log: .ui, type: .info)
+            sa_log_v2("[Login Web] still loading", log: .ui, type: .info)
             return
         }
         
         if !doCheckingWhenLoadingFinished {
-            os_log("[Login Web] ignore finish loading", log: .ui, type: .info)
+            sa_log_v2("[Login Web] ignore finish loading", log: .ui, type: .info)
             return
         }
         // login succeeded
-        os_log("[Login Web] login succeeded", log: .ui, type: .info)
+        sa_log_v2("[Login Web] login succeeded", log: .ui, type: .info)
         let fetchAccountInfoUrl = URL(string: "api/mobile/index.php?module=login", relativeTo: URL(string: SAGlobalConfig().forum_base_url)!)!
         webView!.evaluateJavaScript("var url = '\(fetchAccountInfoUrl.absoluteString)';" +
             "var oReq = new XMLHttpRequest();" +
@@ -158,22 +158,22 @@ class SAWebLoginViewController: SABaseViewController {
             "oReq.send();" +
             "", completionHandler: {(result, error) in
                 guard error == nil else {
-                    os_log("[Login Web] js execute error: %@", log: .ui, type: .error, error!.localizedDescription)
+                    sa_log_v2("[Login Web] js execute error: %@", log: .ui, type: .error, error!.localizedDescription)
                     return
                 }
 
-                os_log("[Login Web] form submitted: %@", log: .ui, type: .info, result.debugDescription)
+                sa_log_v2("[Login Web] form submitted: %@", log: .ui, type: .info, result.debugDescription)
         })
     }
     
     func willSubmitForm(_ data: [String:AnyObject]) {
         // redirect
-        os_log("[Login Web] form submitted", log: .ui, type: .info)
+        sa_log_v2("[Login Web] form submitted", log: .ui, type: .info)
         guard let username = data["username"] as? String,
               let password = data["password"] as? String,
               let questionid = data["questionid"] as? String,
               let answer = data["answer"] as? String else {
-            os_log("[Login Web] form not enough info", log: .ui, type: .error)
+            sa_log_v2("[Login Web] form not enough info", log: .ui, type: .error)
             return
         }
         
@@ -189,27 +189,27 @@ class SAWebLoginViewController: SABaseViewController {
     
     func parseAccountInfoResult(data: Data) {
         guard let obj = try? JSONSerialization.jsonObject(with: data, options: []) as AnyObject else {
-            os_log("[Login Web] parse account info failed: not json", log: .ui, type: .error)
+            sa_log_v2("[Login Web] parse account info failed: not json", log: .ui, type: .error)
             self.loginFailed()
             return
         }
         
         guard let info = savedFormRecords else {
-            os_log("login finished but no form info", log: .ui, type: .error)
+            sa_log_v2("login finished but no form info", log: .ui, type: .error)
             self.loginFailed()
             return
         }
         
         let error = AppController.current.getService(of: SAAccountManager.self)!.parseAccountInfoResponse(obj, credential: info)
         if error != nil {
-            os_log("[Login Web] parse account info failed error: %@", log: .ui, type: .error, error! as CVarArg)
+            sa_log_v2("[Login Web] parse account info failed error: %@", log: .ui, type: .error, error! as CVarArg)
             self.loginFailed()
             return
         }
         
         AppController.current.getService(of: SACookieManager.self)!.syncWKCookiesToNSCookieStorage {
             self.loginSucceeded()
-            os_log("[Login Web] xhr result OK", log: .ui, type: .info)
+            sa_log_v2("[Login Web] xhr result OK", log: .ui, type: .info)
         }
     }
 
@@ -226,7 +226,7 @@ class SAWebLoginViewController: SABaseViewController {
     @objc func handleRegisterButtonItemClicked(_ sender: AnyObject) {
         let url = Foundation.URL(string: SAGlobalConfig().register_url)!
         UIApplication.shared.open(url, options: [:]) { (succeeded) in
-            os_log("[Login] register open", log: .ui, type: .info)
+            sa_log_v2("[Login] register open", log: .ui, type: .info)
         }
     }
 }

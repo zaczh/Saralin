@@ -161,9 +161,9 @@ class SACatalystSidebarController: SABaseViewController, UITableViewDataSource, 
             upperTableView.bottomAnchor.constraint(equalTo: avatarView.bottomAnchor, constant: 0)
         ])
         
-        NotificationCenter.default.addObserver(self, selector: #selector(handleUserLoggedIn(_:)), name: .SAUserLoggedInNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(handleUserLoggedOut(_:)), name: .SAUserLoggedOutNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(handleUserPreferenceChange(_:)), name: .SAUserPreferenceChangedNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleUserLoggedIn(_:)), name: .SAUserLoggedIn, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleUserLoggedOut(_:)), name: .SAUserLoggedOut, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleUserPreferenceChange(_:)), name: .SAUserPreferenceChanged, object: nil)
         refreshTableViewCompletion(nil)
     }
     

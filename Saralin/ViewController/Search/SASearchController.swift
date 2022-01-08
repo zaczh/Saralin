@@ -33,7 +33,7 @@ class SASearchController: SABaseViewController {
     let searchBar = UISearchBar(frame: .zero)
 
     deinit {
-        os_log("SASearchController deinit")
+        sa_log_v2("SASearchController deinit")
     }
     
     override func viewDidLoad() {
@@ -97,7 +97,7 @@ class SASearchController: SABaseViewController {
         let resultController = searchResultsController
         
         guard !keyword.isEmpty else {
-            os_log("keyword isEmpty", log: .search, type: .info)
+            sa_log_v2("keyword isEmpty", log: .search, type: .info)
             searchingTimer?.fireDate = Date.distantFuture
             resultController.data.removeAll()
             resultController.localData.removeAll()
@@ -106,7 +106,7 @@ class SASearchController: SABaseViewController {
         }
         
         if currentSearchingKeyword == keyword {
-            os_log("keyword same", log: .search, type: .info)
+            sa_log_v2("keyword same", log: .search, type: .info)
             return
         }
         resultController.loadingController.setLoading()
@@ -115,12 +115,12 @@ class SASearchController: SABaseViewController {
     }
     
     @objc func searchingTimerFired(_ timer: Timer) {
-        os_log("searchingTimerFired", log: .search, type: .info)
+        sa_log_v2("searchingTimerFired", log: .search, type: .info)
         searchingTimer?.fireDate = Date.distantFuture
         let resultController = searchResultsController
         guard let keyword = currentSearchingKeyword else { return }
         saveSearchHistory(keyword)
-        os_log("begin searching keyword: %@", log: .search, type: .info, keyword)
+        sa_log_v2("begin searching keyword: %@", log: .search, type: .info, keyword)
         let group = DispatchGroup()
         if resultType == .onlineGlobalSearch {
             // only online searching needs show this
@@ -132,7 +132,7 @@ class SASearchController: SABaseViewController {
                 }
                 
                 guard let self = self else {
-                    os_log("self is nil, searching canceled", log: .search, type: .error)
+                    sa_log_v2("self is nil, searching canceled", log: .search, type: .error)
                     return
                 }
                 
@@ -142,16 +142,16 @@ class SASearchController: SABaseViewController {
                 }
                 
                 guard let result = result else {
-                    os_log("Error occurs when doing search", log: .search, type: .error)
+                    sa_log_v2("Error occurs when doing search", log: .search, type: .error)
                     return
                 }
                 
                 if self.currentSearchingKeyword != keyword {
-                    os_log("currentSearchingKeyword not match", log: .search, type: .error)
+                    sa_log_v2("currentSearchingKeyword not match", log: .search, type: .error)
                     return
                 }
                 resultController.data = result
-                os_log("finished online searching: %@", log: .search, type: .info, keyword)
+                sa_log_v2("finished online searching: %@", log: .search, type: .info, keyword)
             }
         } else {
             group.enter()
@@ -161,7 +161,7 @@ class SASearchController: SABaseViewController {
                 }
                 
                 guard error == nil, let result = result else {
-                    os_log("Error occurs when doing search")
+                    sa_log_v2("Error occurs when doing search")
                     return
                 }
                 
@@ -169,7 +169,7 @@ class SASearchController: SABaseViewController {
                     return
                 }
                 resultController.localData = result
-                os_log("finished local searching: %@", log: .search, type: .info, keyword)
+                sa_log_v2("finished local searching: %@", log: .search, type: .info, keyword)
             }
         }
         

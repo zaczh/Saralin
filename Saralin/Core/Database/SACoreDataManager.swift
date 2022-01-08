@@ -50,7 +50,7 @@ class SACoreDataManager {
         } else {
             persistentContainer.loadPersistentStores { [weak self] (description, error) in
                 guard error == nil else {
-                    os_log("error occured when loadPersistentStores", log: .ui, type: .error)
+                    sa_log_v2("error occured when loadPersistentStores", log: .ui, type: .error)
                     return
                 }
                 
@@ -88,10 +88,10 @@ class SACoreDataManager {
         
         persistentContainer.persistentStoreDescriptions = [config]
         onReady { [weak self] (_) in
-            NotificationCenter.default.addObserver(forName: Notification.Name.SAUserLoggedOutNotification, object: nil, queue: nil) { [weak self] (notification) in
+            NotificationCenter.default.addObserver(forName: Notification.Name.SAUserLoggedOut, object: nil, queue: nil) { [weak self] (notification) in
                 self?.cache = nil
             }
-            NotificationCenter.default.addObserver(forName: Notification.Name.SAUserLoggedInNotification, object: nil, queue: nil, using: { [weak self] (notification) in
+            NotificationCenter.default.addObserver(forName: Notification.Name.SAUserLoggedIn, object: nil, queue: nil, using: { [weak self] (notification) in
                 self?.rebuildCache(completion: nil)
             })
             self?.rebuildCache(completion: nil)
@@ -135,7 +135,7 @@ class SACoreDataManager {
                     for object in objects {
                         if object != objects.first {
                             context.delete(object)
-                            os_log("delete redundant object of %@", log: .ui, type: .error, className)
+                            sa_log_v2("delete redundant object of %@", log: .ui, type: .error, className)
                         }
                     }
                     
@@ -181,7 +181,7 @@ class SACoreDataManager {
             try context.save()
         } catch {
             let nserror = error as NSError
-            os_log("Unresolved error %@", log: .ui, type: .fault, nserror)
+            sa_log_v2("Unresolved error %@", log: .ui, type: .fault, nserror)
         }
     }
     
@@ -221,7 +221,7 @@ class SACoreDataManager {
                 for object in objects {
                     if object != objects.first {
                         context.delete(object)
-                        os_log("delete redundant object of %@", log: .ui, type: .info, className)
+                        sa_log_v2("delete redundant object of %@", log: .ui, type: .info, className)
                     }
                 }
                 
@@ -268,7 +268,7 @@ class SACoreDataManager {
                 for object in objects {
                     context.delete(object as NSManagedObject)
                 }
-                os_log("core data cleaned up %@ records", log: .database, type: .info, "\(objects.count)")
+                sa_log_v2("core data cleaned up %@ records", log: .database, type: .info, "\(objects.count)")
             }
         }
     }
@@ -296,7 +296,7 @@ class SACoreDataManager {
                 fetch.predicate = NSPredicate(format: "(uid == %@)", uid)
                 fetch.sortDescriptors = []
                 guard let objects = try? context.fetch(fetch) else {
-                    os_log("no history of this thread", log: .ui, type: .debug)
+                    sa_log_v2("no history of this thread", log: .ui, type: .debug)
                     DispatchQueue.main.async {
                         completion?([])
                     }
@@ -331,7 +331,7 @@ class SACoreDataManager {
                 fetch.predicate = NSPredicate(format: "reporteruid==%@", uid)
                 fetch.sortDescriptors = []
                 guard let objects = try? context.fetch(fetch) else {
-                    os_log("error occured when fetching viewed threads", log: .ui, type: .debug)
+                    sa_log_v2("error occured when fetching viewed threads", log: .ui, type: .debug)
                     DispatchQueue.main.async {
                         completion?([])
                     }
@@ -365,7 +365,7 @@ class SACoreDataManager {
                 fetch.predicate = NSPredicate(format: "uid==%@", uid)
                 fetch.sortDescriptors = []
                 guard let objects = try? context.fetch(fetch) else {
-                    os_log("error occured when fetching blocked threads", log: .ui, type: .debug)
+                    sa_log_v2("error occured when fetching blocked threads", log: .ui, type: .debug)
                     DispatchQueue.main.async {
                         completion?([])
                     }
@@ -446,7 +446,7 @@ class SACoreDataManager {
                     }
                     NotificationCenter.default.post(name: NSNotification.Name.SABlockedUserListDidChange, object: self, userInfo: ["reportedUid":uid])
                 }
-                os_log("delete BlockedUser")
+                sa_log_v2("delete BlockedUser")
             }
         }
     }
@@ -517,7 +517,7 @@ class SACoreDataManager {
                     }
                     NotificationCenter.default.post(name: NSNotification.Name.SABlockedThreadListDidChange, object: self, userInfo: ["tid":tid])
                 }
-                os_log("delete BlockedThread")
+                sa_log_v2("delete BlockedThread")
             }
         }
     }

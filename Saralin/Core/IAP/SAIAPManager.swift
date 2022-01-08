@@ -66,7 +66,7 @@ class SAIAPManager: NSObject, SKProductsRequestDelegate, SKPaymentTransactionObs
     }
     
     func request(_ request: SKRequest, didFailWithError error: Error) {
-        os_log("request products failed with error: %@", log: .ui, type: .info, error as CVarArg)
+        sa_log_v2("request products failed with error: %@", log: .ui, type: .info, error as CVarArg)
         iapProcessingActivityController?.hide(completion: {
             self.showIAPFailAlert()
         })
@@ -77,29 +77,29 @@ class SAIAPManager: NSObject, SKProductsRequestDelegate, SKPaymentTransactionObs
         for transaction in transactions {
             switch transaction.transactionState {
             case .purchasing:
-                os_log("iap purchasing", log: .ui, type: .info)
+                sa_log_v2("iap purchasing", log: .ui, type: .info)
                 break
             case .purchased:
                 iapProcessingActivityController?.hide(completion: {
                     self.showIAPSuccessAlert()
                 })
                 SKPaymentQueue.default().finishTransaction(transaction)
-                os_log("iap succeeded", log: .ui, type: .info)
+                sa_log_v2("iap succeeded", log: .ui, type: .info)
             break// purchase succeeded
             case .failed:
                 iapProcessingActivityController?.hide(completion: {
                     self.showIAPFailAlert()
                 })
                 SKPaymentQueue.default().finishTransaction(transaction)
-                os_log("iap failed", log: .ui, type: .info)
+                sa_log_v2("iap failed", log: .ui, type: .info)
             break// purchase failed
             case .restored:
                 iapProcessingActivityController?.hide(completion: nil)
                 SKPaymentQueue.default().finishTransaction(transaction)
-                os_log("iap restored", log: .ui, type: .info)
+                sa_log_v2("iap restored", log: .ui, type: .info)
                 break
             case .deferred:
-                os_log("iap deferred", log: .ui, type: .info)
+                sa_log_v2("iap deferred", log: .ui, type: .info)
                 break
             @unknown default:
                 fatalError()

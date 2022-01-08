@@ -236,7 +236,7 @@ extension URL {
         if let aURL = component.url {
             return aURL
         } else {
-            os_log("urlByReplacingQuery failed", log: .utility, type: .debug)
+            sa_log_v2("urlByReplacingQuery failed", log: .utility, type: .debug)
             return self
         }
     }
@@ -270,7 +270,7 @@ extension URL {
         
         if (components.last!.hasPrefix("thread-")) {
             guard components.last!.components(separatedBy: "-").count >= 3 else {
-                os_log("failed", log: .utility, type: .debug)
+                sa_log_v2("failed", log: .utility, type: .debug)
                 return self
             }
             
@@ -285,12 +285,12 @@ extension URL {
             if let aURL = URL(string: mobileUrl) {
                 return aURL
             } else {
-                os_log("failed", log: .utility, type: .debug)
+                sa_log_v2("failed", log: .utility, type: .debug)
                 return self
             }
         } else if (components.last!.hasPrefix("space-")) {
             guard components.last!.components(separatedBy: "-").count >= 3 else {
-                os_log("failed", log: .utility, type: .debug)
+                sa_log_v2("failed", log: .utility, type: .debug)
                 return self
             }
             
@@ -302,12 +302,12 @@ extension URL {
             if let aURL = URL(string: mobileUrl) {
                 return aURL
             } else {
-                os_log("failed", log: .utility, type: .debug)
+                sa_log_v2("failed", log: .utility, type: .debug)
                 return self
             }
         } else if (components.last!.hasPrefix("forum-")) {
             guard components.last!.components(separatedBy: "-").count >= 3 else {
-                os_log("failed", log: .utility, type: .debug)
+                sa_log_v2("failed", log: .utility, type: .debug)
                 return self
             }
             
@@ -320,7 +320,7 @@ extension URL {
             if let aURL = URL(string: mobileUrl) {
                 return aURL
             } else {
-                os_log("failed", log: .utility, type: .debug)
+                sa_log_v2("failed", log: .utility, type: .debug)
                 return self
             }
         }

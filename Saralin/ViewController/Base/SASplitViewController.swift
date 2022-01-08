@@ -43,7 +43,7 @@ class SASplitViewController: UISplitViewController, UISplitViewControllerDelegat
     }
 
     deinit {
-        NotificationCenter.default.removeObserver(self, name: Notification.Name.SAUserPreferenceChangedNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: Notification.Name.SAUserPreferenceChanged, object: nil)
     }
 
     override func viewThemeDidChange(_ newTheme:SATheme) {

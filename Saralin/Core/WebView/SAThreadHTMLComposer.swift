@@ -78,7 +78,7 @@ class SAThreadHTMLComposer {
     
     class func appendTail(threadInfo:[String:AnyObject], postList: [[String:AnyObject]], completion: ((String, NSError?) -> Void)?) {
         guard !postList.isEmpty else {
-            os_log("empty post list", log: .webView, type: .error)
+            sa_log_v2("empty post list", log: .webView, type: .error)
             DispatchQueue.main.async {
                 completion?("", nil)
             }
@@ -97,7 +97,7 @@ class SAThreadHTMLComposer {
     
     class func prepare(threadInfo: [String:AnyObject], postList: [[String:AnyObject]], completion: ((String, NSError?) -> Void)?) {
         guard !postList.isEmpty else {
-            os_log("empty post list", log: .webView, type: .error)
+            sa_log_v2("empty post list", log: .webView, type: .error)
             DispatchQueue.main.async {
                 completion?("", nil)
             }
@@ -110,7 +110,7 @@ class SAThreadHTMLComposer {
         let blockedUserIDs = coreDataManager.cache?.blockedUserIDs ?? []
         if blockedUserIDs.isEmpty {
             // FIXME: This maybe empty
-            os_log("blocked user ids is empty", type: .info)
+            sa_log_v2("blocked user ids is empty", type: .info)
         }
         
         let url = AppController.current.userGroupInfoConfigFileURL

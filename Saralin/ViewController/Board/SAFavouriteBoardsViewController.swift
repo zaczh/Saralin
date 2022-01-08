@@ -285,7 +285,7 @@ class SAFavouriteBoardsViewController: SABaseTableViewController {
             
             let url = SAGlobalConfig().forum_base_url + "forum.php?mod=viewthread&tid=\(tid)&page=1&mobile=1"
             
-            os_log("url: %@", log: .ui, type: .debug, url)
+            sa_log_v2("url: %@", log: .ui, type: .debug, url)
             if let URL = URL(string: url) {
                 return SAThreadContentViewController(url: URL)
             }
@@ -397,14 +397,14 @@ extension SAFavouriteBoardsViewController: UIContextMenuInteractionDelegate {
                         }
                         
                         if error == nil {
-                            os_log("已取消收藏")
+                            sa_log_v2("已取消收藏")
                             self.tableView.beginUpdates()
                             self.favoriteThreadsData.remove(at: indexPath.row)
                             self.tableView.deleteRows(at: [indexPath], with: .automatic)
                             self.tableView.endUpdates()
                             activity.hideAndShowResult(of: true, info: NSLocalizedString("OPERATION_SUCCEEDED", comment: ""), completion: nil)
                         } else {
-                            os_log("取消收藏失败 error: %@", type: .error, error! as CVarArg)
+                            sa_log_v2("取消收藏失败 error: %@", type: .error, error! as CVarArg)
                             activity.hideAndShowResult(of: false, info: NSLocalizedString("OPERATION_FAILED", comment: ""), completion: nil)
                         }
                     })

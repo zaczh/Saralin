@@ -11,6 +11,7 @@ import UIKit
 
 class SAPasteboardMonitor: NSObject {
     private var lastHandledURL: URL?
+    private var lastChangeCount: Int = 0
     override init() {
         super.init()
         NotificationCenter.default.addObserver(forName: UIPasteboard.changedNotification, object: nil, queue: nil) { [weak self] (notification) in
@@ -26,6 +27,7 @@ class SAPasteboardMonitor: NSObject {
                 self?.doCheck()
             }
         }
+        lastChangeCount = UIPasteboard.general.changeCount
     }
     
     private func doCheck() {
@@ -34,6 +36,12 @@ class SAPasteboardMonitor: NSObject {
         }
         
         let pasteboard = UIPasteboard.general
+        if pasteboard.changeCount <= lastChangeCount {
+            return
+        }
+        
+        lastChangeCount = pasteboard.changeCount
+        
         if pasteboard.hasURLs {
             processURLs()
             return

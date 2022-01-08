@@ -69,7 +69,7 @@ class SABaseViewController: UIViewController {
     // MARK: theming
     override func viewThemeDidChange(_ newTheme:SATheme) {
         super.viewThemeDidChange(newTheme)
-        view.backgroundColor = newTheme.backgroundColor.sa_toColor()
+        viewIfLoaded?.backgroundColor = newTheme.backgroundColor.sa_toColor()
         viewIfLoaded?.themeDidUpdate(newTheme)
         for vc in children {
             vc.viewThemeDidChange(newTheme)

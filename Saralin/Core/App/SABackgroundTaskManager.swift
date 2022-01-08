@@ -11,11 +11,17 @@ import WebKit
 import CoreData
 import OSLog
 
+extension Notification.Name {
+    public static let SABackgroundTaskDidFinish = Notification.Name.init(rawValue: "SABackgroundTaskDidFinish")
+}
+
 class SABackgroundTaskManager {
     private var timer: Timer!
     private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = UIBackgroundTaskIdentifier.invalid
     private var currentBackgroundFetchResult: UIBackgroundFetchResult = .noData
     private var backgroundTaskCompletion: ((UIBackgroundFetchResult) -> Void)?
+    
+    // public
     var unreadDirectMessageCount = 0
     
     private var globalConfig: SAGlobalConfig! = {
@@ -33,8 +39,8 @@ class SABackgroundTaskManager {
     }
     
     func start() {
-        if let timer = timer {
-            timer.invalidate()
+        if let _ = timer {
+            return
         }
         
         // setup timer. Timer will not fire when app is in background
@@ -53,7 +59,7 @@ class SABackgroundTaskManager {
             return
         }
         
-        os_log("app bg fetch timer fires", log: .ui, type: .info)
+        sa_log_v2("app bg fetch timer fires", log: .ui, type: .info)
         startBackgroundTask { (result) in
             
         }
@@ -61,7 +67,7 @@ class SABackgroundTaskManager {
     
     func startBackgroundTask(with completionHandler: @escaping ((UIBackgroundFetchResult) -> Void)) {
         if backgroundTaskIdentifier != UIBackgroundTaskIdentifier.invalid {
-            os_log("app bg fetch: a job is already running", log: .ui, type: .info)
+            sa_log_v2("app bg fetch: a job is already running", log: .ui, type: .info)
             completionHandler(.noData)
             return
         }
@@ -110,7 +116,9 @@ class SABackgroundTaskManager {
         self.backgroundTaskCompletion?(self.currentBackgroundFetchResult)
         self.backgroundTaskCompletion = nil
         self.currentBackgroundFetchResult = .noData
-        os_log("app bg fetch finished", log: .network, type: .info)
+        application.applicationIconBadgeNumber = unreadDirectMessageCount
+        sa_log_v2("app bg fetch finished with remain time: %@", log: .network, type: .info, NSNumber(value: application.backgroundTimeRemaining))
+        NotificationCenter.default.post(name: .SABackgroundTaskDidFinish, object: self)
     }
     
     func clearDiskCache(completion: (() -> Void)?) {
@@ -135,7 +143,7 @@ class SABackgroundTaskManager {
         // count pages
         urlSession.getFavoriteThreads(page: 1, completion: { (object, error) in
             guard error == nil else {
-                os_log("parsing favorite threads data error: %@", log: .network, type: .error, error!)
+                sa_log_v2("parsing favorite threads data error: %@", log: .network, type: .error, error!)
                 dispatch_async_main {
                     completionHandler(.failed)
                 }
@@ -143,7 +151,7 @@ class SABackgroundTaskManager {
             }
             
             guard let object = object as? [String:Any] else {
-                os_log("parsing favorite threads data error bad response", log: .network, type: .error)
+                sa_log_v2("parsing favorite threads data error bad response", log: .network, type: .error)
                 dispatch_async_main {
                     completionHandler(.failed)
                 }
@@ -151,7 +159,7 @@ class SABackgroundTaskManager {
             }
             
             guard let variables = object["Variables"] as? [String:Any] else {
-                os_log("parsing favorite threads data error variables is nil", log: .network, type: .error)
+                sa_log_v2("parsing favorite threads data error variables is nil", log: .network, type: .error)
                 dispatch_async_main {
                     completionHandler(.failed)
                 }
@@ -159,7 +167,7 @@ class SABackgroundTaskManager {
             }
             
             guard let perpageStr = variables["perpage"] as? String, let countStr = variables["count"] as? String else {
-                os_log("parsing favorite threads data error no page info", log: .network, type: .error)
+                sa_log_v2("parsing favorite threads data error no page info", log: .network, type: .error)
                 dispatch_async_main {
                     completionHandler(.failed)
                 }
@@ -176,7 +184,7 @@ class SABackgroundTaskManager {
                 group.enter()
                 self.urlSession.getFavoriteThreads(page: i + 1, completion: { (obj, error) in
                     guard error == nil, let object = obj as? [String:Any], let variables = object["Variables"] as? [String:Any] else {
-                        os_log("parsing favorite threads data error no page info", log: .network, type: .error)
+                        sa_log_v2("parsing favorite threads data error no page info", log: .network, type: .error)
                         group.leave()
                         return
                     }
@@ -196,7 +204,7 @@ class SABackgroundTaskManager {
     private func handleFavoritesResponse(data: [String:Any], completion:(() -> Void)?) {
         let variables = data
         guard let list = variables["list"] as? [[String:Any]] else {
-            os_log("parsing favorite threads data error: not array type", log: .network, type: .error)
+            sa_log_v2("parsing favorite threads data error: not array type", log: .network, type: .error)
             completion?()
             return
         }
@@ -208,7 +216,7 @@ class SABackgroundTaskManager {
             let favid = item["favid"] as? String
             let replies = item["replies"] as? String
             guard let replyCount = Int(replies ?? "0") else {
-                os_log("replies is bad or nil", log: .network, type: .error)
+                sa_log_v2("replies is bad or nil", log: .network, type: .error)
                 group.leave()
                 continue
             }
@@ -216,7 +224,7 @@ class SABackgroundTaskManager {
             let author = item["author"] as? String
             let dateline = item["dateline"] as? String
             guard let datelineInt = Int(dateline ?? "0") else {
-                os_log("dateline is bad or nil", log: .network, type: .error)
+                sa_log_v2("dateline is bad or nil", log: .network, type: .error)
                 group.leave()
                 continue
             }
@@ -259,7 +267,7 @@ class SABackgroundTaskManager {
     // the completionHandler MUST BE executed before return
     // TODO: filter older thread in this list
     fileprivate func fetchWatchingListThreadsInBackground(_ completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        os_log("begin fetching watching list in background", log: .ui, type: .info)
+        sa_log_v2("begin fetching watching list in background", log: .ui, type: .info)
         
         if Account().isGuest {
             completionHandler(.noData)
@@ -273,7 +281,7 @@ class SABackgroundTaskManager {
             let sort = NSSortDescriptor(key: "timeadded", ascending: false)
             fetch.sortDescriptors = [sort]
             guard let objects = try? context.fetch(fetch) else {
-                os_log("fetching watching list in background failed", log: .ui, type: .error)
+                sa_log_v2("fetching watching list in background failed", log: .ui, type: .error)
                 completionHandler(.noData)
                 return
             }
@@ -298,7 +306,7 @@ class SABackgroundTaskManager {
                         UNUserNotificationCenter.current().add(notificationRequest) { (error : Error?) in
                             if let error = error {
                                 // Handle any errors
-                                os_log("error presenting local notification: %@", log: .ui, type: .error, error as NSError)
+                                sa_log_v2("error presenting local notification: %@", log: .ui, type: .error, error as NSError)
                                 return
                             }
                         }
@@ -387,7 +395,7 @@ class SABackgroundTaskManager {
     }
     
     func fetchDirectMessageInBackground(completion: (([PrivateMessageSummary], Error?) -> Void)?) {
-        os_log("begin fetching direct message list in background", log: .ui, type: .info)
+        sa_log_v2("begin fetching direct message list in background", log: .ui, type: .info)
         // get all messages at once
         DispatchQueue.global().async {
             var allMessages: [PrivateMessageSummary] = []
@@ -485,7 +493,7 @@ class SABackgroundTaskManager {
                 obj.lastupdate = dict.lastupdate.sa_toDateFrom1970SecondsDate()
                 obj.message = dict.message
                 obj.tousername = dict.tousername
-                os_log("update existing record DirectMessage", log: .database, type: .debug)
+                sa_log_v2("update existing record DirectMessage", log: .database, type: .debug)
                 group.leave()
             }, create: { (obj) in
                 obj.uid = Account().uid
@@ -500,7 +508,7 @@ class SABackgroundTaskManager {
                 obj.tousername = dict.tousername
                 
                 group.leave()
-                os_log("insert new record DirectMessage", log: .database, type: .debug)
+                sa_log_v2("insert new record DirectMessage", log: .database, type: .debug)
             }, completion: nil)
         })
         
@@ -525,7 +533,7 @@ class SABackgroundTaskManager {
             UNUserNotificationCenter.current().add(notificationRequest) { (error : Error?) in
                 if let error = error {
                     // Handle any errors
-                    os_log("error presenting local notification: %@", log: .ui, type: .error, error as NSError)
+                    sa_log_v2("error presenting local notification: %@", log: .ui, type: .error, error as NSError)
                     return
                 }
             }
@@ -562,7 +570,7 @@ class SABackgroundTaskManager {
             }
             
             guard error == nil else {
-                os_log("dailyCheckIn error: %@", error! as CVarArg)
+                sa_log_v2("dailyCheckIn error: %@", error! as CVarArg)
                 dispatch_async_main {
                     completion?(false)
                 }
@@ -570,7 +578,7 @@ class SABackgroundTaskManager {
             }
             
             guard let data = data else {
-                os_log("dailyCheckIn empty data")
+                sa_log_v2("dailyCheckIn empty data")
                 dispatch_async_main {
                     completion?(false)
                 }
@@ -579,7 +587,7 @@ class SABackgroundTaskManager {
             
             let str = String(data: data, encoding: String.Encoding.utf8)!
             guard let parser = try? HTMLParser.init(string: str) else {
-                os_log("dailyCheckIn parser initializing failed")
+                sa_log_v2("dailyCheckIn parser initializing failed")
                 dispatch_async_main {
                     completion?(false)
                 }
@@ -598,7 +606,7 @@ class SABackgroundTaskManager {
                 let parent = el.parent()
                 if parent.nodetype() == HTMLHrefNode {
                     guard let checkInUrl = parent.getAttributeNamed("href") else {
-                        os_log("dailyCheckIn empty data")
+                        sa_log_v2("dailyCheckIn empty data")
                         dispatch_async_main {
                             completion?(false)
                         }
@@ -606,7 +614,7 @@ class SABackgroundTaskManager {
                     }
                     
                     guard let url = URL.init(string: self.globalConfig.forum_base_url + checkInUrl) else {
-                        os_log("dailyCheckIn bad url")
+                        sa_log_v2("dailyCheckIn bad url")
                         dispatch_async_main {
                             completion?(false)
                         }
@@ -617,7 +625,7 @@ class SABackgroundTaskManager {
                     
                     self.urlSession.dataTask(with: url) { (data, response, error) in
                         guard error == nil else {
-                            os_log("dailyCheckIn error: %@", error! as CVarArg)
+                            sa_log_v2("dailyCheckIn error: %@", error! as CVarArg)
                             dispatch_async_main {
                                 completion?(false)
                             }
@@ -625,7 +633,7 @@ class SABackgroundTaskManager {
                         }
                         
                         guard let data = data else {
-                            os_log("dailyCheckIn empty data")
+                            sa_log_v2("dailyCheckIn empty data")
                             dispatch_async_main {
                                 completion?(false)
                             }
@@ -634,7 +642,7 @@ class SABackgroundTaskManager {
                         
                         let str = String(data: data, encoding: String.Encoding.utf8)!
                         guard let parser = try? HTMLParser.init(string: str) else {
-                            os_log("dailyCheckIn parser initializing failed")
+                            sa_log_v2("dailyCheckIn parser initializing failed")
                             dispatch_async_main {
                                 completion?(false)
                             }
@@ -648,7 +656,7 @@ class SABackgroundTaskManager {
                                     // <p>已签到,请不要重新签到！</p>
                                     // 成功签到
                                     if content.contains("成功") || content.contains("已签到") {
-                                        os_log("dailyCheckIn succeeded")
+                                        sa_log_v2("dailyCheckIn succeeded")
                                         dispatch_async_main {
                                             Account().lastDayCheckIn = Date()
                                             completion?(true)
@@ -659,7 +667,7 @@ class SABackgroundTaskManager {
                             }
                         }
                         
-                        os_log("dailyCheckIn failed")
+                        sa_log_v2("dailyCheckIn failed")
                         dispatch_async_main {
                             completion?(false)
                         }
@@ -681,14 +689,14 @@ class SABackgroundTaskManager {
         if let date = userDefaults.value(forKey: key) as? Date, date.timeIntervalSinceNow < -5 * 24 * 60 * 60 {
             userDefaults.set(Date() as AnyObject, forKey: key)
             clearDiskCache(completion: nil)
-            os_log("cleared disk cache", log: .ui, type: .info)
+            sa_log_v2("cleared disk cache", log: .ui, type: .info)
         }
     }
     
     func removeLogFilesIfNeeded() {
         let fm = FileManager.default
         guard let dirEnu = fm.enumerator(atPath: sa_log_file_directoy) else {
-            os_log("fail to enumerate at log file dir", log: .ui, type: .info)
+            sa_log_v2("fail to enumerate at log file dir", log: .ui, type: .info)
             return
         }
         
@@ -711,7 +719,7 @@ class SABackgroundTaskManager {
         
         for dir in deletedFiles {
             try? fm.removeItem(atPath: dir as String)
-            os_log("delete log file at: %@", log: .ui, type: .info, dir)
+            sa_log_v2("delete log file at: %@", log: .ui, type: .info, dir)
         }
     }
 }

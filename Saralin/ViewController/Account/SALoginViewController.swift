@@ -99,13 +99,13 @@ class SALoginViewController: SABaseViewController, UITableViewDataSource, UITabl
         let securityQuesionId = cells[1].textField.tag
         guard let username = cells[0].textField.text,
               let password = cells[3].textField.text else {
-            os_log("login form info not full", log: .account, type: .info)
+            sa_log_v2("login form info not full", log: .account, type: .info)
             return
         }
         
         let securityAnswer = cells[2].textField.text ?? ""
         if securityQuesionId != 0 && securityAnswer.isEmpty {
-            os_log("login form info not full", log: .account, type: .info)
+            sa_log_v2("login form info not full", log: .account, type: .info)
             return
         }
         
@@ -114,7 +114,7 @@ class SALoginViewController: SABaseViewController, UITableViewDataSource, UITabl
         sessionConfig.timeoutIntervalForRequest = 15
         urlSession = URLSession.init(configuration: sessionConfig)
         UIApplication.shared.showNetworkIndicator()
-        os_log("delete account cookie before doing login", log: .account, type: .info)
+        sa_log_v2("delete account cookie before doing login", log: .account, type: .info)
         AppController.current.getService(of: SAAccountManager.self)!.clearCookie {
             self.urlSession.login(username: username, password: password, questionid: "\(securityQuesionId)", answer: securityAnswer) { [weak self] (content, error) in
                 let failing : ((String?) -> Void) = { (reason) in
@@ -137,13 +137,13 @@ class SALoginViewController: SABaseViewController, UITableViewDataSource, UITabl
                 }
                 
                 guard let parser = try? HTMLParser.init(string: str) else {
-                    os_log("[Login] login parser initializing failed")
+                    sa_log_v2("[Login] login parser initializing failed")
                     failing("无法识别服务器返回数据格式。")
                     return
                 }
                 
                 if parser.body()?.children().count ?? 0 == 0 {
-                    os_log("[Login] login xml format not recognized")
+                    sa_log_v2("[Login] login xml format not recognized")
                     failing("服务器数据格式错误。")
                     return
                 }
@@ -158,7 +158,7 @@ class SALoginViewController: SABaseViewController, UITableViewDataSource, UITabl
                     "if(typeof errorhandle_login==\'function\') {errorhandle_login(\'登录失败，您还可以尝试 3 次\', {\'loginperm\':\'3\'});}]]>"
                     */
                     
-                    os_log("[Login] login failed")
+                    sa_log_v2("[Login] login failed")
                     if rootContent.contains("errorhandle_login") {
                         let tips_start = rootContent.range(of: "errorhandle_login(\'")!.upperBound
                         var tips_end = tips_start
@@ -177,7 +177,7 @@ class SALoginViewController: SABaseViewController, UITableViewDataSource, UITabl
                             return
                         }
                         
-                        os_log("no tips info.")
+                        sa_log_v2("no tips info.")
                     }
                     
                     failing("服务器返回数据缺少关键信息。")
@@ -271,13 +271,13 @@ class SALoginViewController: SABaseViewController, UITableViewDataSource, UITabl
     private func parseUserInfoObj(_ obj: AnyObject, objv2: AnyObject, credential: CredentialInfo) {
         let error = AppController.current.getService(of: SAAccountManager.self)!.parseAccountInfoResponse(obj, loginV2Response: objv2, credential: credential)
         if error != nil {
-            os_log("[Login Web] parse account info failed error: %@", log: .ui, type: .error, error! as CVarArg)
+            sa_log_v2("[Login Web] parse account info failed error: %@", log: .ui, type: .error, error! as CVarArg)
             self.loginFailed(nil)
             return
         }
         
         self.loginSucceeded()
-        os_log("[Login] xhr result OK", log: .ui, type: .info)
+        sa_log_v2("[Login] xhr result OK", log: .ui, type: .info)
     }
     
     private var cells: [FormCell] = []
@@ -364,7 +364,7 @@ class SALoginViewController: SABaseViewController, UITableViewDataSource, UITabl
     }
     
     deinit {
-        os_log("[Login] deinit", log: .ui, type: .info)
+        sa_log_v2("[Login] deinit", log: .ui, type: .info)
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UITextField.textDidChangeNotification, object: nil)
@@ -427,14 +427,14 @@ class SALoginViewController: SABaseViewController, UITableViewDataSource, UITabl
     private func loginSucceeded() {
         if UIApplication.shared.supportsMultipleScenes {
             guard let sceneSession = self.view.window?.windowScene?.session else {
-                os_log("request scene session destruction no session", log: .ui, type: .error)
+                sa_log_v2("request scene session destruction no session", log: .ui, type: .error)
                 return
             }
             
             let options = UIWindowSceneDestructionRequestOptions()
             options.windowDismissalAnimation = .commit
             UIApplication.shared.requestSceneSessionDestruction(sceneSession, options: options, errorHandler: { (error) in
-                os_log("request scene session destruction returned: %@", error.localizedDescription)
+                sa_log_v2("request scene session destruction returned: %@", error.localizedDescription)
             })
         } else {
             navigationController?.presentingViewController?.dismiss(animated: true, completion: nil)
@@ -518,7 +518,7 @@ class SALoginViewController: SABaseViewController, UITableViewDataSource, UITabl
     @objc func handleRegisterButtonItemClick(_ sender: AnyObject) {
         let url = URL(string: SAGlobalConfig().register_url)!
         UIApplication.shared.open(url, options: [:]) { (succeeded) in
-            os_log("[Login] register open", log: .ui, type: .info)
+            sa_log_v2("[Login] register open", log: .ui, type: .info)
         }
     }
     

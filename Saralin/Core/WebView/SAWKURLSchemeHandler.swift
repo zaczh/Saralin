@@ -77,18 +77,18 @@ class SAWKURLSchemeHandler: NSObject, WKURLSchemeHandler {
     func webView(_ webView: WKWebView, start urlSchemeTask: WKURLSchemeTask) {
         guard let url = urlSchemeTask.request.url else {
             makeTaskFail(task: urlSchemeTask)
-            os_log("no url scheme request", log: .webView, type: .error)
+            sa_log_v2("no url scheme request", log: .webView, type: .error)
             return
         }
         
         if url.host == SAURLSchemeHostType.image.rawValue {
-            os_log("responds with image url", log: .webView, type: .debug, url as CVarArg)
+            sa_log_v2("responds with image url", log: .webView, type: .debug, url as CVarArg)
             guard let imageKey = url.sa_queryString("url"), let resourceURL = URL(string: imageKey) else {
                 makeTaskFail(task: urlSchemeTask)
                 return
             }
             guard let data = delegate?.schemeHandlerRequestGetSavedImageData(self, fromURL: resourceURL) else {
-                os_log("get downloaded image to disk failed url: %@", log: .webView, type: .error, url as CVarArg)
+                sa_log_v2("get downloaded image to disk failed url: %@", log: .webView, type: .error, url as CVarArg)
                 makeTaskFail(task: urlSchemeTask)
                 return
             }
@@ -108,21 +108,21 @@ class SAWKURLSchemeHandler: NSObject, WKURLSchemeHandler {
         }
         
         if url.host == SAURLSchemeHostType.failure.rawValue {
-            os_log("responds with fail url", log: .webView, type: .error, url as CVarArg)
+            sa_log_v2("responds with fail url", log: .webView, type: .error, url as CVarArg)
             let placeholderImageUrl = Bundle.main.url(forResource: "placeholderfail", withExtension: "png")!
             responseTo(task: urlSchemeTask, withLocalFileURL: placeholderImageUrl, resourceURL: placeholderImageUrl)
             return
         }
         
         if url.host == SAURLSchemeHostType.attachment.rawValue {
-            os_log("responds with attachment url", log: .webView, type: .error, url as CVarArg)
+            sa_log_v2("responds with attachment url", log: .webView, type: .error, url as CVarArg)
             let placeholderImageUrl = Bundle.main.url(forResource: "placeholder_attachment", withExtension: "png")!
             responseTo(task: urlSchemeTask, withLocalFileURL: placeholderImageUrl, resourceURL: placeholderImageUrl)
             return
         }
         
         if url.host == SAURLSchemeHostType.imageFormatNotSupported.rawValue {
-            os_log("responds with attachment url", log: .webView, type: .error, url as CVarArg)
+            sa_log_v2("responds with attachment url", log: .webView, type: .error, url as CVarArg)
             let placeholderImageUrl = Bundle.main.url(forResource: "placeholder_format_not_supported", withExtension: "png")!
             responseTo(task: urlSchemeTask, withLocalFileURL: placeholderImageUrl, resourceURL: placeholderImageUrl)
             return
@@ -130,7 +130,7 @@ class SAWKURLSchemeHandler: NSObject, WKURLSchemeHandler {
         
         // can only handle one of those host types
         if url.host != SAURLSchemeHostType.loading.rawValue {
-            os_log("not loading or failure state. url: %@", log: .webView, type: .error, url as CVarArg)
+            sa_log_v2("not loading or failure state. url: %@", log: .webView, type: .error, url as CVarArg)
             makeTaskFail(task: urlSchemeTask)
             return
         }
@@ -138,7 +138,7 @@ class SAWKURLSchemeHandler: NSObject, WKURLSchemeHandler {
         guard let imgURLEncoded = url.sa_queryString("url")?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
             let resourceURL = URL.init(string: imgURLEncoded) else {
             makeTaskFail(task: urlSchemeTask)
-            os_log("url scheme no url query. url is: %@", log: .webView, type: .error, url as CVarArg)
+            sa_log_v2("url scheme no url query. url is: %@", log: .webView, type: .error, url as CVarArg)
             return
         }
         
@@ -149,13 +149,13 @@ class SAWKURLSchemeHandler: NSObject, WKURLSchemeHandler {
         
         guard let _ = resourceURL.host else {
             makeTaskFail(task: urlSchemeTask)
-            os_log("url scheme no host. url is : %@", log: .webView, type: .error, resourceURL as CVarArg)
+            sa_log_v2("url scheme no host. url is : %@", log: .webView, type: .error, resourceURL as CVarArg)
             return
         }
         
         if let cachedResponse = URLCache.shared.cachedResponse(for: URLRequest(url: resourceURL)) {
             if let mimetype = cachedResponse.response.mimeType, mimetype.contains("image") {
-                os_log("hit image cache", log: .webView, type: .info)
+                sa_log_v2("hit image cache", log: .webView, type: .info)
                 guard let _ = UIImage(data: cachedResponse.data) else {
                     let placeholderImageUrl = Bundle.main.url(forResource: "placeholder_format_not_supported", withExtension: "png")!
                     responseTo(task: urlSchemeTask, withLocalFileURL: placeholderImageUrl, resourceURL: placeholderImageUrl)
@@ -168,7 +168,7 @@ class SAWKURLSchemeHandler: NSObject, WKURLSchemeHandler {
                 urlSchemeTask.didFinish()
                 
                 guard let _ = delegate?.schemeHandlerRequestSaveImageDataToDisk(self, data: cachedResponse.data, fromURL: resourceURL) else {
-                    os_log("save downloaded file to disk failed url: %@", log: .webView, type: .error, url as CVarArg)
+                    sa_log_v2("save downloaded file to disk failed url: %@", log: .webView, type: .error, url as CVarArg)
                     return
                 }
                 return
@@ -185,13 +185,13 @@ class SAWKURLSchemeHandler: NSObject, WKURLSchemeHandler {
         let urlSessionTask = urlSession.dataTask(with: request, completionHandler: { [weak self] (data, response, error) in
             UIApplication.shared.hideNetworkIndicator()
             guard let delegate = self?.delegate else {
-                os_log("delegate is nil", log: .webView, type: .info)
+                sa_log_v2("delegate is nil", log: .webView, type: .info)
                 return
             }
             
             let failureUrl = URL(string: "\(sa_wk_url_scheme)://\(SAURLSchemeHostType.failure.rawValue)?url=\(resourceURL.absoluteString.sa_formURLEncoded())")!
             guard let response = response as? HTTPURLResponse, let data = data else {
-                os_log("failed to load: %@", log: .webView, type: .error, resourceURL as CVarArg)
+                sa_log_v2("failed to load: %@", log: .webView, type: .error, resourceURL as CVarArg)
                 dispatch_async_main {
                     delegate.schemeHandlerRequestReloadHTMLPlaceholderImageTag(self, fromURL: url, toURL: failureUrl)
                 }
@@ -199,7 +199,7 @@ class SAWKURLSchemeHandler: NSObject, WKURLSchemeHandler {
             }
             
             if response.statusCode < 200 || response.statusCode > 299 {
-                os_log("failed to load: %@", log: .webView, type: .error, resourceURL as CVarArg)
+                sa_log_v2("failed to load: %@", log: .webView, type: .error, resourceURL as CVarArg)
                 dispatch_async_main {
                     delegate.schemeHandlerRequestReloadHTMLPlaceholderImageTag(self, fromURL: url, toURL: failureUrl)
                 }
@@ -217,15 +217,15 @@ class SAWKURLSchemeHandler: NSObject, WKURLSchemeHandler {
             
             if let mimetype = response.mimeType, !mimetype.contains("image") {
                 // not image file
-                os_log("not image file url: %@", log: .webView, type: .error, resourceURL as CVarArg)
+                sa_log_v2("not image file url: %@", log: .webView, type: .error, resourceURL as CVarArg)
                 let urlEncoded = resourceURL.absoluteString.sa_formURLEncoded()
                 guard !urlEncoded.isEmpty else {
-                    os_log("bad resourceURL: %@", log: .webView, type: .error, resourceURL as CVarArg)
+                    sa_log_v2("bad resourceURL: %@", log: .webView, type: .error, resourceURL as CVarArg)
                     return
                 }
                 
                 guard let _ = delegate.schemeHandlerRequestSaveFileDataToDisk(self, data: data, fromURL: resourceURL) else {
-                    os_log("save downloaded file to disk failed url: %@", log: .webView, type: .error, url as CVarArg)
+                    sa_log_v2("save downloaded file to disk failed url: %@", log: .webView, type: .error, url as CVarArg)
                     return
                 }
                 
@@ -239,11 +239,11 @@ class SAWKURLSchemeHandler: NSObject, WKURLSchemeHandler {
             
             // save image to cache directory
             guard let _ = delegate.schemeHandlerRequestSaveImageDataToDisk(self, data: data, fromURL: resourceURL) else {
-                os_log("save downloaded image to disk failed url: %@", log: .webView, type: .error, url as CVarArg)
+                sa_log_v2("save downloaded image to disk failed url: %@", log: .webView, type: .error, url as CVarArg)
                 return
             }
             
-            os_log("saved downloaded image to disk image url: %@", log: .webView, type: .info, resourceURL as CVarArg)
+            sa_log_v2("saved downloaded image to disk image url: %@", log: .webView, type: .info, resourceURL as CVarArg)
             let urlQuery = resourceURL.absoluteString.sa_formURLEncoded()
             let imageUrl = URL.init(string: "\(sa_wk_url_scheme)://\(SAURLSchemeHostType.image.rawValue)?url=\(urlQuery)")!
             dispatch_async_main {
@@ -256,15 +256,15 @@ class SAWKURLSchemeHandler: NSObject, WKURLSchemeHandler {
     
     func webView(_ webView: WKWebView, stop urlSchemeTask: WKURLSchemeTask) {
         let url = urlSchemeTask.request.url?.absoluteString ?? ""
-        os_log("url scheme task stopped request: %@", log: .webView, type: .info, url)
+        sa_log_v2("url scheme task stopped request: %@", log: .webView, type: .info, url)
     }
     
     deinit {
-        os_log("url scheme handler deinit", log: .webView, type: .info)
+        sa_log_v2("url scheme handler deinit", log: .webView, type: .info)
     }
     
     private func responseTo(task: WKURLSchemeTask, withLocalFileURL localEmojiURL: URL, resourceURL: URL) {
-        os_log("url scheme task responded with local file: %@", localEmojiURL.lastPathComponent)
+        sa_log_v2("url scheme task responded with local file: %@", localEmojiURL.lastPathComponent)
         guard let data = try? Data.init(contentsOf: localEmojiURL) else {
             let error = NSError.init(domain: SAGeneralErrorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey:"File Not Found at url: \(resourceURL.absoluteString)"])
             task.didFailWithError(error)

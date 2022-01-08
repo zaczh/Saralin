@@ -81,8 +81,8 @@ extension URLSession {
      */
     @discardableResult
     func login(username: String, password: String, questionid: String?, answer: String?, completion: ((AnyObject?, NSError?) -> Void)?) -> URLSessionTask? {
-        let refererUrl = URL(string: "https://bbs.saraba1st.com/2b/thread-1956764-1-1.html")!
-        let formHashUrl = URL(string: "https://bbs.saraba1st.com/2b/member.php?mod=logging&action=login&infloat=yes&handlekey=login&inajax=1&ajaxtarget=fwin_content_login")!
+        let refererUrl = URL(string: globalConfig.forum_base_url + "thread-1956764-1-1.html")!
+        let formHashUrl = URL(string: globalConfig.forum_base_url + "member.php?mod=logging&action=login&infloat=yes&handlekey=login&inajax=1&ajaxtarget=fwin_content_login")!
         return getFormHash(url: formHashUrl) { [weak self] (formhash) in
             guard let self = self else {
                 return
@@ -98,7 +98,7 @@ extension URLSession {
             guard let aurl = URL(string: url, relativeTo: URL(string: self.globalConfig.forum_base_url)!) else {
                 fatalError()
             }
-            os_log("login url: %@", log: .network, type: .debug, aurl as CVarArg)
+            sa_log_v2("login url: %@", log: .network, type: .debug, aurl as CVarArg)
             
             var request = URLRequest(url: aurl)
             request.httpMethod = "POST"
@@ -153,9 +153,9 @@ extension URLSession {
      */
     //returns a json object
     @discardableResult
-    func loginV2(username: String, password: String, questionid: String?, answer: String, completion: ((AnyObject?, NSError?) -> Void)?) -> URLSessionTask? {
-        let aurl = URL(string: "https://app.saraba1st.com/2b/api/app/user/login")!
-        os_log("loginV2 url: %@", log: .network, type: .debug, aurl as CVarArg)
+    func loginV2(username: String, password: String, questionid: String, answer: String, completion: ((AnyObject?, NSError?) -> Void)?) -> URLSessionTask? {
+        let aurl = URL(string: globalConfig.forum_app_api_domain + "/user/login")!
+        sa_log_v2("loginV2 url: %@", log: .network, type: .debug, aurl as CVarArg)
         
         var request = URLRequest(url: aurl)
         let boundary = "---------------------------\(request.hashValue)"
@@ -164,7 +164,7 @@ extension URLSession {
          request.httpMethod = "POST"
          
          let data = NSMutableData()
-         let parameters = [("placeholder", "\n"), ("username", username), ("password", password)]
+         let parameters = [("placeholder", "\n"), ("username", username), ("password", password), ("questionid", questionid), ("answer", answer)]
          for (name, value) in parameters {
              data.append("--\(boundary)\r\n".data(using: String.Encoding.utf8)!)
              data.append("Content-Disposition: form-data; name=\"\(name)\"\r\n\r\n".data(using: String.Encoding.utf8)!)
@@ -190,7 +190,7 @@ extension URLSession {
         guard let aurl = URL(string: url, relativeTo: URL(string: globalConfig.forum_base_url)!) else {
             fatalError()
         }
-        os_log("auth url: %@", log: .network, type: .debug, aurl as CVarArg)
+        sa_log_v2("auth url: %@", log: .network, type: .debug, aurl as CVarArg)
         
         var request = URLRequest(url: aurl)
         request.setValue("max-age=0", forHTTPHeaderField: "Cache-Control")
@@ -215,7 +215,7 @@ extension URLSession {
         guard let aurl = URL(string: url, relativeTo: URL(string: globalConfig.forum_base_url)!) else {
             fatalError()
         }
-        os_log("getTopicList url: %@", log: .network, type: .debug, aurl as CVarArg)
+        sa_log_v2("getTopicList url: %@", log: .network, type: .debug, aurl as CVarArg)
         
         var request = URLRequest(url: aurl)
         request.setValue("max-age=0", forHTTPHeaderField: "Cache-Control")
@@ -233,8 +233,8 @@ extension URLSession {
     
     @discardableResult
     func getPollInfo(of tid: String, completion: ((AnyObject?, NSError?) -> Void)?) -> URLSessionTask? {
-        let aurl = URL(string: "https://app.saraba1st.com/api/app/poll/poll")!
-        os_log("getPoll url: %@", log: .network, type: .debug, aurl as CVarArg)
+        let aurl = URL(string: globalConfig.forum_app_api_domain + "/poll/poll")!
+        sa_log_v2("getPoll url: %@", log: .network, type: .debug, aurl as CVarArg)
         var request = URLRequest(url: aurl)
         request.setValue(globalConfig.pc_useragent_string, forHTTPHeaderField: "User-Agent")
         let boundary = "---------------------------\(request.hashValue)"
@@ -266,8 +266,8 @@ extension URLSession {
     
     @discardableResult
     func getPollOptions(of tid: String, completion: ((AnyObject?, NSError?) -> Void)?) -> URLSessionTask? {
-        let aurl = URL(string: "https://app.saraba1st.com/2b/api/app/poll/options")!
-        os_log("getPoll url: %@", log: .network, type: .debug, aurl as CVarArg)
+        let aurl = URL(string: globalConfig.forum_app_api_domain + "/poll/options")!
+        sa_log_v2("getPoll url: %@", log: .network, type: .debug, aurl as CVarArg)
         var request = URLRequest(url: aurl)
         request.setValue(globalConfig.pc_useragent_string, forHTTPHeaderField: "User-Agent")
         let boundary = "---------------------------\(request.hashValue)"
@@ -298,8 +298,8 @@ extension URLSession {
     }
     
     func sendPollOption(of tid: String, options: String, completion: ((AnyObject?, NSError?) -> Void)?) -> URLSessionTask? {
-        let aurl = URL(string: "https://app.saraba1st.com/2b/api/app/poll/vote")!
-        os_log("sendPollOption url: %@", log: .network, type: .debug, aurl as CVarArg)
+        let aurl = URL(string: globalConfig.forum_app_api_domain + "/poll/vote")!
+        sa_log_v2("sendPollOption url: %@", log: .network, type: .debug, aurl as CVarArg)
         var request = URLRequest(url: aurl)
         request.setValue(globalConfig.pc_useragent_string, forHTTPHeaderField: "User-Agent")
         let boundary = "---------------------------\(request.hashValue)"
@@ -331,11 +331,8 @@ extension URLSession {
     
     @discardableResult
     func getBoardsSummary(completion: ((AnyObject?, NSError?) -> Void)?) -> URLSessionTask? {
-        let url = "2b/api/app/forum/all"
-        guard let aurl = URL(string: url, relativeTo: URL(string: globalConfig.forum_app_api_domain)!) else {
-            fatalError()
-        }
-        os_log("getTopicList url: %@", log: .network, type: .debug, aurl as CVarArg)
+        let aurl = URL(string: globalConfig.forum_app_api_domain + "/forum/all")!
+        sa_log_v2("getTopicList url: %@", log: .network, type: .debug, aurl as CVarArg)
         var request = URLRequest(url: aurl)
         request.setValue(globalConfig.pc_useragent_string, forHTTPHeaderField: "User-Agent")
         let boundary = "---------------------------\(request.hashValue)"
@@ -367,7 +364,7 @@ extension URLSession {
     /// - Parameter completion: <#completion description#>
     @discardableResult
     func getThreadsOf(uid: String, completion: ((AnyObject?, NSError?) -> Void)?) -> URLSessionTask? {
-        os_log("getThreadsOf uid: %@", log: .network, type: .debug, uid as CVarArg)
+        sa_log_v2("getThreadsOf uid: %@", log: .network, type: .debug, uid as CVarArg)
         guard !uid.isEmpty else {
             let error = NSError(domain: SAHTTPAPIErrorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey:"Need login."])
             self.handleObjectResult(nil, error: error, completion: completion)
@@ -395,7 +392,7 @@ extension URLSession {
     ///   - completion: the body of html, or error if error occured (completion handler was not called on main thread)
     @discardableResult
     func getUserInfoOf(uid: String, completion: ((AnyObject?, NSError?) -> Void)?) -> URLSessionTask? {
-        os_log("getUserInfoOf uid: %@", log: .network, type: .debug, uid as CVarArg)
+        sa_log_v2("getUserInfoOf uid: %@", log: .network, type: .debug, uid as CVarArg)
         guard !uid.isEmpty else {
             let error = NSError(domain: SAHTTPAPIErrorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey:"Need login."])
             self.handleObjectResult(nil, error: error, completion: completion)
@@ -433,7 +430,7 @@ extension URLSession {
         guard let aurl = URL(string: url, relativeTo: URL(string: globalConfig.forum_base_url)!) else {
             fatalError()
         }
-        os_log("searchThreads url: %@", log: .network, type: .debug, aurl as CVarArg)
+        sa_log_v2("searchThreads url: %@", log: .network, type: .debug, aurl as CVarArg)
         
         return getFormHash(url: aurl) { (formhash) in
             if let formhash = formhash, !formhash.isEmpty {
@@ -463,10 +460,10 @@ extension URLSession {
                 guard let aurl = URL(string: url, relativeTo: URL(string: globalConfig.forum_base_url)!) else {
                     fatalError()
                 }
-                os_log("searchThreads load more url: %@", log: .network, type: .debug, aurl as CVarArg)
+                sa_log_v2("searchThreads load more url: %@", log: .network, type: .debug, aurl as CVarArg)
                 request.url = aurl
             } else {
-                os_log("searchThreads no more data", log: .network, type: .debug)
+                sa_log_v2("searchThreads no more data", log: .network, type: .debug)
                 let obj = ["results":[] as [[String:String]]] as AnyObject
                 self.handleObjectResult(obj, error: nil, completion: completion)
                 return nil
@@ -575,7 +572,7 @@ extension URLSession {
         guard let aurl = URL(string: url, relativeTo: URL(string: globalConfig.forum_base_url)!) else {
             fatalError()
         }
-        os_log("getTopicContent url: %@", log: .network, type: .debug, aurl as CVarArg)
+        sa_log_v2("getTopicContent url: %@", log: .network, type: .debug, aurl as CVarArg)
         
         var request = URLRequest(url: aurl)
         request.setValue(globalConfig.pc_useragent_string, forHTTPHeaderField: "User-Agent")
@@ -609,7 +606,7 @@ extension URLSession {
         guard let aurl = URL(string: url, relativeTo: URL(string: globalConfig.forum_base_url)!) else {
             fatalError()
         }
-        os_log("getHistoryMessage url: %@", log: .network, type: .debug, aurl as CVarArg)
+        sa_log_v2("getHistoryMessage url: %@", log: .network, type: .debug, aurl as CVarArg)
         
         var request = URLRequest(url: aurl)
         request.setValue(globalConfig.pc_useragent_string, forHTTPHeaderField: "User-Agent")
@@ -637,7 +634,7 @@ extension URLSession {
         guard let aurl = URL(string: url, relativeTo: URL(string: globalConfig.forum_base_url)!) else {
             fatalError()
         }
-        os_log("getComposedThreads url: %@", log: .network, type: .debug, aurl as CVarArg)
+        sa_log_v2("getComposedThreads url: %@", log: .network, type: .debug, aurl as CVarArg)
         
         var request = URLRequest(url: aurl)
         request.setValue(globalConfig.pc_useragent_string, forHTTPHeaderField: "User-Agent")
@@ -665,7 +662,7 @@ extension URLSession {
         guard let aurl = URL(string: url, relativeTo: URL(string: globalConfig.forum_base_url)!) else {
             fatalError()
         }
-        os_log("getMessageList url: %@", log: .network, type: .debug, aurl as CVarArg)
+        sa_log_v2("getMessageList url: %@", log: .network, type: .debug, aurl as CVarArg)
         
         var request = URLRequest(url: aurl)
         request.setValue(globalConfig.pc_useragent_string, forHTTPHeaderField: "User-Agent")
@@ -693,7 +690,7 @@ extension URLSession {
         guard let aurl = URL(string: url, relativeTo: URL(string: globalConfig.forum_base_url)!) else {
             fatalError()
         }
-        os_log("sendMessageToUid url: %@", log: .network, type: .debug, aurl as CVarArg)
+        sa_log_v2("sendMessageToUid url: %@", log: .network, type: .debug, aurl as CVarArg)
         
         var request = URLRequest(url: aurl)
         request.setValue(globalConfig.pc_useragent_string, forHTTPHeaderField: "User-Agent")
@@ -729,7 +726,7 @@ extension URLSession {
         guard let aurl = URL(string: url, relativeTo: URL(string: globalConfig.forum_base_url)!) else {
             fatalError()
         }
-        os_log("sendMessage url: %@", log: .network, type: .debug, aurl as CVarArg)
+        sa_log_v2("sendMessage url: %@", log: .network, type: .debug, aurl as CVarArg)
         
         var request = URLRequest(url: aurl)
         request.setValue(globalConfig.pc_useragent_string, forHTTPHeaderField: "User-Agent")
@@ -795,7 +792,7 @@ extension URLSession {
         guard let aurl = URL(string: url, relativeTo: URL(string: globalConfig.forum_base_url)!) else {
             fatalError()
         }
-        os_log("reportAbuse url: %@", log: .network, type: .debug, aurl as CVarArg)
+        sa_log_v2("reportAbuse url: %@", log: .network, type: .debug, aurl as CVarArg)
         
         var request = URLRequest(url: aurl)
         request.httpMethod = "POST"
@@ -829,7 +826,7 @@ extension URLSession {
         guard let aurl = URL(string: url, relativeTo: URL(string: globalConfig.forum_base_url)!) else {
             fatalError()
         }
-        os_log("getHotThreads url: %@", log: .network, type: .debug, aurl as CVarArg)
+        sa_log_v2("getHotThreads url: %@", log: .network, type: .debug, aurl as CVarArg)
         
         var request = URLRequest(url: aurl)
         request.setValue(globalConfig.pc_useragent_string, forHTTPHeaderField: "User-Agent")
@@ -851,7 +848,7 @@ extension URLSession {
         guard let aurl = URL(string: url, relativeTo: URL(string: globalConfig.forum_base_url)!) else {
             fatalError()
         }
-        os_log("getForumBoardInfo url: %@", log: .network, type: .debug, aurl as CVarArg)
+        sa_log_v2("getForumBoardInfo url: %@", log: .network, type: .debug, aurl as CVarArg)
         
         var request = URLRequest(url: aurl)
         request.setValue(globalConfig.pc_useragent_string, forHTTPHeaderField: "User-Agent")
@@ -874,7 +871,7 @@ extension URLSession {
         guard let aurl = URL(string: url, relativeTo: URL(string: globalConfig.forum_base_url)!) else {
             fatalError()
         }
-        os_log("getAccountInfo url: %@", log: .network, type: .debug, aurl as CVarArg)
+        sa_log_v2("getAccountInfo url: %@", log: .network, type: .debug, aurl as CVarArg)
         
         var request = URLRequest(url: aurl)
         request.setValue(globalConfig.pc_useragent_string, forHTTPHeaderField: "User-Agent")
@@ -973,7 +970,7 @@ extension URLSession {
     @discardableResult
     func submitComposingThreadForm(to fid: String, queryParam: [String:String], attachment: UIImage?, completion: ((AnyObject?, NSError?) -> Void)?) -> URLSessionTask? {
         let url = Foundation.URL(string: globalConfig.forum_base_url + "forum.php?mod=post&action=newthread&fid=\(fid)&extra=&topicsubmit=yes&mobile=yes")!
-        os_log("uploadImage url: %@", log: .network, type: .debug, url as CVarArg)
+        sa_log_v2("uploadImage url: %@", log: .network, type: .debug, url as CVarArg)
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -1027,18 +1024,17 @@ extension URLSession {
     ///   - progress:
     ///   - completion:
     @discardableResult
-    func uploadImage(to forum: String, image: UIImage, progress: ((Float, NSError?) -> Void)?, completion: ((AnyObject?, NSError?) -> Void)?) -> URLSessionTask? {
+    func uploadImage(to fid: String, tid: String, image: UIImage, progress: ((Float, NSError?) -> Void)?, completion: ((AnyObject?, NSError?) -> Void)?) -> URLSessionTask? {
         guard !Account().isGuest else {
             let error = NSError(domain: SAHTTPAPIErrorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey:"Need login."])
             self.handleObjectResult(nil, error: error, completion: completion)
             return nil
         }
-        
-        let url = "api/mobile/index.php?module=forumupload&version=1&fid=\(forum)&simple=1&mobile=no"
+        let url = "misc.php?mod=swfupload&action=swfupload&operation=upload&fid=\(fid)"
         guard let aurl = URL(string: url, relativeTo: URL(string: globalConfig.forum_base_url)!) else {
             fatalError()
         }
-        os_log("uploadImage url: %@", log: .network, type: .debug, aurl as CVarArg)
+        sa_log_v2("uploadImage url: %@", log: .network, type: .debug, aurl as CVarArg)
         
         var request = URLRequest(url: aurl)
         request.httpMethod = "POST"
@@ -1048,6 +1044,10 @@ extension URLSession {
         let boundary = CFUUIDCreateString(nil, uuid) as String
         request.setValue("multipart/form-data; charset=utf-8; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         
+        let refererStr = globalConfig.forum_base_url + "forum.php?mod=post&action=reply&fid=\(fid)&extra=&tid=\(tid)"
+        request.setValue(refererStr, forHTTPHeaderField: "Referer")
+        request.setValue(globalConfig.mobile_useragent_string, forHTTPHeaderField: "User-Agent")
+
         let data = NSMutableData()
         
         //uid
@@ -1112,7 +1112,7 @@ extension URLSession {
         guard let aurl = URL(string: url, relativeTo: URL(string: globalConfig.forum_base_url)!) else {
             fatalError()
         }
-        os_log("favorite url: %@", log: .network, type: .debug, aurl as CVarArg)
+        sa_log_v2("favorite url: %@", log: .network, type: .debug, aurl as CVarArg)
         
         var request = URLRequest(url: aurl)
         request.httpMethod = "POST"
@@ -1150,7 +1150,7 @@ extension URLSession {
         guard let aurl = URL(string: url, relativeTo: URL(string: globalConfig.forum_base_url)!) else {
             fatalError()
         }
-        os_log("favorite url: %@", log: .network, type: .debug, aurl as CVarArg)
+        sa_log_v2("favorite url: %@", log: .network, type: .debug, aurl as CVarArg)
         
         let uid = Account().uid
         
@@ -1229,7 +1229,7 @@ extension URLSession {
         guard let aurl = URL(string: url, relativeTo: URL(string: globalConfig.forum_base_url)!) else {
             fatalError()
         }
-        os_log("getFavoriteThreads url: %@", log: .network, type: .debug, aurl as CVarArg)
+        sa_log_v2("getFavoriteThreads url: %@", log: .network, type: .debug, aurl as CVarArg)
 
         var request = URLRequest(url: aurl)
         request.setValue("max-age=0", forHTTPHeaderField: "Cache-Control")
@@ -1259,7 +1259,7 @@ extension URLSession {
         guard let aurl = URL(string: url, relativeTo: URL(string: globalConfig.forum_base_url)!) else {
             fatalError()
         }
-        os_log("reply url: %@", log: .network, type: .debug, aurl as CVarArg)
+        sa_log_v2("reply url: %@", log: .network, type: .debug, aurl as CVarArg)
         
         var request = URLRequest(url: aurl)
         request.httpMethod = "POST"
@@ -1297,7 +1297,7 @@ extension URLSession {
             return nil
         }
         
-        os_log("submitForm url: %@", log: .network, type: .debug, actionURL as CVarArg)
+        sa_log_v2("submitForm url: %@", log: .network, type: .debug, actionURL as CVarArg)
         
         var request = URLRequest(url: actionURL)
         request.httpMethod = "POST"
@@ -1355,7 +1355,7 @@ extension URLSession {
         guard let aurl = URL(string: url, relativeTo: URL(string: globalConfig.forum_base_url)!) else {
             fatalError()
         }
-        os_log("editThread url: %@", log: .network, type: .debug, aurl as CVarArg)
+        sa_log_v2("editThread url: %@", log: .network, type: .debug, aurl as CVarArg)
         
         var request = URLRequest(url: aurl)
         request.httpMethod = "POST"
@@ -1488,9 +1488,9 @@ extension URLSession {
     // data is json
     fileprivate func handleJsonResult(_ response:  URLResponse?, data: Data?, error: NSError?, completion: ((AnyObject?, NSError?) -> Void)?) -> Void {
         if let error = error {
-            os_log("HTTP Request Error: %@", log: .network, type: .error, error as CVarArg)
+            sa_log_v2("HTTP Request Error: %@", log: .network, type: .error, error as CVarArg)
             if error.code == -1202 {
-                os_log("invalid cert error: %@", log: .network, type: .error, error as CVarArg)
+                sa_log_v2("invalid cert error: %@", log: .network, type: .error, error as CVarArg)
             }
             
             let callbackObj = CallbackObject.init(callback: completion, object: nil, error: error)
@@ -1514,7 +1514,7 @@ extension URLSession {
     // data is HTML
     fileprivate func handleHTMLResult(_ response:  URLResponse?, data: Data?, error: NSError?, completion: ((AnyObject?, NSError?) -> Void)?) -> Void {
         if error != nil {
-            os_log("HTTP Request Error: %@", log: .network, type: .error, error! as CVarArg)
+            sa_log_v2("HTTP Request Error: %@", log: .network, type: .error, error! as CVarArg)
             let callbackObj = CallbackObject.init(callback: completion, object: nil, error: error)
             RunLoop.main.perform(#selector(executeCallback(_:)), target: self, argument: callbackObj, order: 0, modes: [RunLoop.Mode.default])
             return
@@ -1540,7 +1540,7 @@ extension URLSession {
     // data is a user defined object
     fileprivate func handleObjectResult(_ object: AnyObject?, error: NSError?, completion: ((AnyObject?, NSError?) -> Void)?) -> Void {
         if error != nil {
-            os_log("HTTP Request Error: %@", log: .network, type: .error, error! as CVarArg)
+            sa_log_v2("HTTP Request Error: %@", log: .network, type: .error, error! as CVarArg)
             let callbackObj = CallbackObject.init(callback: completion, object: nil, error: error)
             RunLoop.main.perform(#selector(executeCallback(_:)), target: self, argument: callbackObj, order: 0, modes: [RunLoop.Mode.default])
             return

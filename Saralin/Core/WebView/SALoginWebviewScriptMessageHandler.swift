@@ -18,7 +18,7 @@ class SALoginWebviewScriptMessageHandler: NSObject, WKScriptMessageHandler {
     
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         guard let body = message.body as? [String:AnyObject] else {
-            os_log("[ScriptHandler] bad script message", type: .error)
+            sa_log_v2("[ScriptHandler] bad script message", type: .error)
             return
         }
         

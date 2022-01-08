@@ -75,13 +75,13 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
     private func getThreadInfo(completion: @escaping((ThreadSummary?) -> Void)) {
         webView.evaluateJavaScript("threadInfo;") { (object, error) in
             guard error == nil else {
-                os_log("webview javascript error: %@", type: .error, error!.localizedDescription)
+                sa_log_v2("webview javascript error: %@", type: .error, error!.localizedDescription)
                 completion(nil)
                 return
             }
             
             guard let thread = object as? [String:AnyObject] else {
-                os_log("webview thread info bad", type: .error)
+                sa_log_v2("webview thread info bad", type: .error)
                 completion(nil)
                 return
             }
@@ -102,7 +102,7 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
     }
     
     deinit {
-        os_log("SAThreadContentViewController deinit", log: .ui, type: .debug)
+        sa_log_v2("SAThreadContentViewController deinit", log: .ui, type: .debug)
         removeHTMLFiles()
         if let session = urlSession {
             session.invalidateAndCancel()
@@ -184,7 +184,7 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
             } else {
                 loadDB { [weak self] in
                     if self?.favoriteRecordInDB != nil {
-                        os_log("this thread also exist in online favorite list", log: .ui, type: .info)
+                        sa_log_v2("this thread also exist in online favorite list", log: .ui, type: .info)
                     }
                     self?.loadHTMLFile()
                 }
@@ -197,12 +197,18 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
             let moreItem: UIBarButtonItem = { [weak self] () in
                 let menu = UIMenu(title: NSLocalizedString("THREAD_ACTION_CHOOSE", comment: "Please choose an action"), identifier: UIMenu.Identifier(SAToolbarItemIdentifierReply.rawValue), children: [
                     UIAction.init(title: "跳转分页", handler: { (action) in
-                        self?.jumpBetweenPages()
+                        self?.jumpTo(page: 0)
                     }),
-                    UIAction.init(title: "刷新", handler: { (action) in
+                    UIAction.init(title: "跳到首页", image: UIImage(systemName: "backward"), handler: { (action) in
+                        self?.jumpTo(page: -1)
+                    }),
+                    UIAction.init(title: "跳到末页", image: UIImage(systemName: "forward"), handler: { (action) in
+                        self?.jumpTo(page: -2)
+                    }),
+                    UIAction.init(title: "刷新", image: UIImage(systemName: "arrow.clockwise"), handler: { (action) in
                         self?.loadHTMLFile()
                     }),
-                    UIAction.init(title: "回复", handler: { (action) in
+                    UIAction.init(title: "回复", image: UIImage(systemName: "arrowshape.turn.up.left"), handler: { (action) in
                         self?.replyToMainThread()
                     })
                 ])
@@ -377,6 +383,16 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
         }
     }
     
+    override func viewWillResignActive() {
+        super.viewWillResignActive()
+        if isViewVisible {
+            if loadingController.state == .finished {
+                recordThreadViewHistory()
+                updateWatchingListDB(createIfNotExist: false)
+            }
+        }
+    }
+    
     override func viewThemeDidChange(_ newTheme:SATheme) {
         super.viewThemeDidChange(newTheme)
         quoteFloorJumpView.updateWith(theme: newTheme)
@@ -386,13 +402,12 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
         if let label = bottomRefreshStack.arrangedSubviews[1] as? UILabel {
             label.textColor = newTheme.textColor.sa_toColor()
         }
-        reloadPage()
     }
     
     @objc func refresh(_ sender: AnyObject) {
         loadDB { [weak self] in
             if self?.favoriteRecordInDB != nil {
-                os_log("this thread also exist in online favorite list", log: .ui, type: .info)
+                sa_log_v2("this thread also exist in online favorite list", log: .ui, type: .info)
             }
             self?.loadHTMLFile()
         }
@@ -423,7 +438,7 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
     }
     
     @objc func scrollToComment(_ sender: AnyObject) {
-        self.jumpBetweenPages()
+        self.jumpTo(page: 0)
     }
     
     override func viewFontDidChange(_ newTheme: SATheme) {
@@ -433,24 +448,22 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
     
     func reloadPage() {
         guard let _ = webView.url else {
-            os_log("no url was loaded", log: .ui, type: .info)
+            sa_log_v2("no url was loaded", log: .ui, type: .info)
             return
         }
         
-        updateCSSFile()
-        
         if webView.isLoading {
-            os_log("is loading, run later", log: .ui, type: .info)
+            sa_log_v2("is loading, run later", log: .ui, type: .info)
             let handler: ValueChangeHandler = ("loading", { (webView) in
                 webView.evaluateJavaScript("reloadCSS();") { (obj, error) in
-                    os_log("reloadPage", log: .ui, type: .info)
+                    sa_log_v2("reloadPage", log: .ui, type: .info)
                 }
             })
             webviewKeyValueChangeRunOnceHandlers.append(handler)
         } else {
-            os_log("not loading, run immediately", log: .ui, type: .info)
+            sa_log_v2("not loading, run immediately", log: .ui, type: .info)
             webView.evaluateJavaScript("reloadCSS();") { (obj, error) in
-                os_log("reloadPage", log: .ui, type: .info)
+                sa_log_v2("reloadPage", log: .ui, type: .info)
             }
         }
     }
@@ -488,7 +501,7 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
 
     private func loadDB(completion:(() -> Void)?) {
         guard let tid = self.url?.sa_queryString("tid") else {
-            os_log("save viewedthread tid is nil, not saved", log: .ui, type: .debug)
+            sa_log_v2("save viewedthread tid is nil, not saved", log: .ui, type: .debug)
             completion?()
             return
         }
@@ -560,7 +573,7 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
             guard let threadData = threadData else { return }
         
             guard !threadData.fid.isEmpty && !threadData.tid.isEmpty else {
-                os_log("save viewedthread fid is nil or tid is nil, not saved", log: .ui, type: .debug)
+                sa_log_v2("save viewedthread fid is nil or tid is nil, not saved", log: .ui, type: .debug)
                 return
             }
             
@@ -572,7 +585,7 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
             let floor = threadData.floor
             guard floor > 0 else {return}
             
-            os_log("record ThreadViewHistory floor: %@", log: .ui, type: .debug, NSNumber(value: floor))
+            sa_log_v2("record ThreadViewHistory floor: %@", log: .ui, type: .debug, NSNumber(value: floor))
             
             // because coredata saving could be in background thread
             let webviewYOffset = Float(self.webView!.scrollView.contentOffset.y)
@@ -614,7 +627,7 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
                     viewedThread.lastviewreplycount = NSNumber(value: replies)
                     self?.historyRecordInDB = viewedThread
                 }, completion: nil)
-                os_log("save viewedthread", log: .ui, type: .debug)
+                sa_log_v2("save viewedthread", log: .ui, type: .debug)
                 
                 if !tid.isEmpty {
                     AppController.current.getService(of: SACoreDataManager.self)!.cache?.viewedThreadIDs.append(tid)
@@ -627,7 +640,7 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
         let fm = FileManager.default
         let timeinterval = CFAbsoluteTimeGetCurrent()
         guard let tid = self.url?.sa_queryString("tid") else {
-            os_log("prepareDirectory tid is nil", log: .ui, type: .debug)
+            sa_log_v2("prepareDirectory tid is nil", log: .ui, type: .debug)
             return
         }
         
@@ -666,25 +679,20 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
         htmlTemplateContent = htmlTemplateContent.replacingOccurrences(of: "${CSS_FILE_TIMESTAMP}", with: "\(Int(Date().timeIntervalSince1970 * 1000))")
         htmlTemplateContent = htmlTemplateContent.replacingOccurrences(of: "${REPLIES_PER_PAGE}", with: "\(SAGlobalConfig().number_of_replies_per_page)")
         try? htmlTemplateContent.write(toFile: htmlFilePath, atomically: false, encoding: .utf8)
-
-        self.fileURL = Foundation.URL.init(fileURLWithPath: htmlFilePath)
-        self.fileDirectoryURL = Foundation.URL.init(fileURLWithPath: htmlFileDirectory)
-    }
-    
-    // replace css
-    private func updateCSSFile() {
+        
+        // update css template
         let cssFilePath = Bundle.main.path(forResource: "base", ofType: "css")
         var css = try! String(contentsOfFile: cssFilePath!)
         
         // font and color
         let activeTheme = Theme()
-        
+        let darkTheme = SATheme.darkTheme
+        let whiteTheme = SATheme.whiteTheme
+
         let avatarSize = ceil(UIFont.sa_preferredFont(forTextStyle: UIFont.TextStyle.body).pointSize * 2 + 8)
         let showsAvatar = Account().preferenceForkey(SAAccount.Preference.thread_view_shows_avatar) as! Bool
         css = css.replacingOccurrences(of: "${avatar-display-style}", with: showsAvatar ? "block":"none")
         css = css.replacingOccurrences(of: "${avatar-image-size}", with: "\(avatarSize)px")
-        css = css.replacingOccurrences(of: "${background-color}", with: (activeTheme.backgroundColor))
-        css = css.replacingOccurrences(of: "${foreground-color}", with: (activeTheme.foregroundColor))
         css = css.replacingOccurrences(of: "${normal-font-size}", with: String(describing: floor(UIFont.sa_preferredFont(forTextStyle: UIFont.TextStyle.body).pointSize/96 * 72)) + "pt")
         css = css.replacingOccurrences(of: "${small-font-size}", with: String(describing: floor(UIFont.sa_preferredFont(forTextStyle: UIFont.TextStyle.subheadline).pointSize/96 * 72)) + "pt")
 
@@ -695,21 +703,8 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
             css = css.replacingOccurrences(of: "${icon-invert-percent}", with: "100%")
         }
 
-        css = css.replacingOccurrences(of: "${thread-title-color}", with: (activeTheme.tableHeaderTextColor))
         css = css.replacingOccurrences(of: "${thread-title-font-size}", with: String(describing: floor(UIFont.sa_preferredFont(forTextStyle: UIFont.TextStyle.headline).pointSize/96 * 72)) + "pt")
-        css = css.replacingOccurrences(of: "${text-color}", with: (activeTheme.textColor))
-        css = css.replacingOccurrences(of: "${link-color}", with: (activeTheme.htmlLinkColor))
-        css = css.replacingOccurrences(of: "${header-background-color}", with: (activeTheme.tableCellHighlightColor))
-        css = css.replacingOccurrences(of: "${block-quote-text-color}", with: (activeTheme.tableCellGrayedTextColor))
-        css = css.replacingOccurrences(of: "${block-quote-background-color}", with: (activeTheme.htmlBlockQuoteBackgroundColor))
-        
-        if #available(iOS 13.0, *) {
-            css = css.replacingOccurrences(of: "${table-cell-seperator-color}", with: UIColor.separator.sa_toHtmlCssColorFunction())
-        } else {
-            css = css.replacingOccurrences(of: "${table-cell-seperator-color}", with: activeTheme.tableCellSeperatorColor.sa_toColor().sa_toHtmlCssColorFunction())
-        }
-        css = css.replacingOccurrences(of: "${table-cell-grayed-text-color}", with: (activeTheme.tableCellGrayedTextColor))
-        
+  
         #if targetEnvironment(macCatalyst)
             css = css.replacingOccurrences(of: "${ipad-body-style}", with: "margin:0 auto;\n    max-width: \(SAContentViewControllerReadableAreaMaxWidth)px;")
             css = css.replacingOccurrences(of: "${img-max-width}", with: "\(SAContentViewControllerReadableAreaMaxWidth * 2/3)px")
@@ -722,30 +717,59 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
             }
         #endif
         
-        try? FileManager.default.removeItem(at: fileDirectoryURL.appendingPathComponent("base.css"))
-        FileManager.default.createFile(atPath: fileDirectoryURL.path.appending("/base.css"), contents: css.data(using: String.Encoding.utf8), attributes: nil)
+        // light theme
+        css = css.replacingOccurrences(of: "${background-color}", with: (whiteTheme.backgroundColor))
+        css = css.replacingOccurrences(of: "${foreground-color}", with: (whiteTheme.foregroundColor))
+        css = css.replacingOccurrences(of: "${thread-title-color}", with: (whiteTheme.tableHeaderTextColor))
+        css = css.replacingOccurrences(of: "${text-color}", with: (whiteTheme.textColor))
+        css = css.replacingOccurrences(of: "${link-color}", with: (whiteTheme.htmlLinkColor))
+        css = css.replacingOccurrences(of: "${header-background-color}", with: (whiteTheme.tableCellHighlightColor))
+        css = css.replacingOccurrences(of: "${block-quote-text-color}", with: (whiteTheme.tableCellGrayedTextColor))
+        css = css.replacingOccurrences(of: "${block-quote-background-color}", with: (whiteTheme.htmlBlockQuoteBackgroundColor))
+        css = css.replacingOccurrences(of: "${table-cell-seperator-color}", with: UIColor.separator.sa_toHtmlCssColorFunction())
+        
+        // dark theme
+        css = css.replacingOccurrences(of: "${background-color-dark}", with: (darkTheme.backgroundColor))
+        css = css.replacingOccurrences(of: "${foreground-color-dark}", with: (darkTheme.foregroundColor))
+        css = css.replacingOccurrences(of: "${thread-title-color-dark}", with: (darkTheme.tableHeaderTextColor))
+        css = css.replacingOccurrences(of: "${text-color-dark}", with: (darkTheme.textColor))
+        css = css.replacingOccurrences(of: "${link-color-dark}", with: (darkTheme.htmlLinkColor))
+        css = css.replacingOccurrences(of: "${header-background-color-dark}", with: (darkTheme.tableCellHighlightColor))
+        css = css.replacingOccurrences(of: "${block-quote-text-color-dark}", with: (darkTheme.tableCellGrayedTextColor))
+        css = css.replacingOccurrences(of: "${block-quote-background-color-dark}", with: (darkTheme.htmlBlockQuoteBackgroundColor))
+        css = css.replacingOccurrences(of: "${table-cell-seperator-color-dark}", with: UIColor.separator.sa_toHtmlCssColorFunction())
+        
+        if #available(iOS 13.0, *) {
+            css = css.replacingOccurrences(of: "${table-cell-seperator-color-dark}", with: UIColor.separator.sa_toHtmlCssColorFunction())
+        } else {
+            css = css.replacingOccurrences(of: "${table-cell-seperator-color-dark}", with: darkTheme.tableCellSeperatorColor.sa_toColor().sa_toHtmlCssColorFunction())
+        }
+        css = css.replacingOccurrences(of: "${table-cell-grayed-text-color-dark}", with: (darkTheme.tableCellGrayedTextColor))
+        
+        try? FileManager.default.removeItem(atPath: htmlFileDirectory.appending("/base.css"))
+        FileManager.default.createFile(atPath: htmlFileDirectory.appending("/base.css"), contents: css.data(using: String.Encoding.utf8), attributes: nil)
+
+        self.fileURL = Foundation.URL.init(fileURLWithPath: htmlFilePath)
+        self.fileDirectoryURL = Foundation.URL.init(fileURLWithPath: htmlFileDirectory)
     }
     
     private func loadDummyHTMLFile() {
         let content = try! String.init(contentsOf: dummyHTMLFileURL!)
-        updateCSSFile()
         do {
             try content.write(to: fileURL, atomically: true, encoding: String.Encoding.utf8)
         } catch {
-            os_log("write html to file failed error: %@", log: .ui, type: .error, error as CVarArg)
+            sa_log_v2("write html to file failed error: %@", log: .ui, type: .error, error as CVarArg)
             return
         }
         _ = self.webView?.loadFileURL(fileURL, allowingReadAccessTo: fileDirectoryURL)
     }
     
     private func loadHTMLFile() {
-        updateCSSFile()
         let url = fileURL!.sa_urlByReplacingQuery("floor", value: "\(historyRecordInDB?.lastviewfloor?.intValue ?? 1)").sa_urlByReplacingQuery("tid", value: self.url!.sa_queryString("tid")!)
         _ = self.webView?.loadFileURL(url, allowingReadAccessTo: fileDirectoryURL)
     }
     
     private func loadHTMLFilesAt(floor: Int) {
-        updateCSSFile()
         let url = fileURL!.sa_urlByReplacingQuery("floor", value: "\(floor)").sa_urlByReplacingQuery("tid", value: self.url!.sa_queryString("tid")!)
         _ = self.webView?.loadFileURL(url, allowingReadAccessTo: fileDirectoryURL)
     }
@@ -753,7 +777,7 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
     private func scrollWebPageTo(floor: Int, completion: (() -> Void)?) {
         self.webView?.evaluateJavaScript("scrollToFloor('\(floor)')", completionHandler: { (result, error) in
             if error != nil {
-                os_log("error when scroll to last postition: %@", log: .ui, type: .debug, error! as NSError)
+                sa_log_v2("error when scroll to last postition: %@", log: .ui, type: .debug, error! as NSError)
             }
             completion?()
         })
@@ -783,7 +807,7 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
         }
         
         guard let tid = self.url?.sa_queryString("tid") else {
-            os_log("save viewedthread tid is nil, not saved", log: .ui, type: .debug)
+            sa_log_v2("save viewedthread tid is nil, not saved", log: .ui, type: .debug)
             return
         }
         
@@ -934,7 +958,7 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
                     let newReplyCount = Int(replyCount)!
                     if newReplyCount > threadInfo.replies {
                         self.doBottomRefreshing() // recursive
-                        os_log("recursive bottom refreshing", log: .ui, type: .info)
+                        sa_log_v2("recursive bottom refreshing", log: .ui, type: .info)
                         return
                     }
                     
@@ -950,9 +974,9 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
                     let script = "appendPostListContent(\"\(content.sa_escapedStringForJavaScriptInput())\");"
                     self.webView?.evaluateJavaScript(script, completionHandler: { [weak self] (result, error) in
                         if error == nil {
-                            os_log("append postlist ok", log: .ui, type: .info)
+                            sa_log_v2("append postlist ok", log: .ui, type: .info)
                         } else  {
-                            os_log("append postlist error", log: .ui, type: .info)
+                            sa_log_v2("append postlist error", log: .ui, type: .info)
                         }
                         self?.bottomRefresherDidRefresh()
                     })
@@ -988,7 +1012,7 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
     }
     
     private func showShareActivity(_ sender: AnyObject) {
-        os_log("clicked share button", log: .ui, type: .debug)
+        sa_log_v2("clicked share button", log: .ui, type: .debug)
         let shareBarItem = navigationItem.rightBarButtonItems?.first
         getThreadInfo { (threadData) in
             guard let threadData = threadData else { return }
@@ -1012,7 +1036,7 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
             let activityController = UIActivityViewController(activityItems: items, applicationActivities: applications)
             activityController.excludedActivityTypes = [.saveToCameraRoll, .addToReadingList,.assignToContact, .print]
             activityController.completionWithItemsHandler = { (activityType, completed, returnedItems, activityError) in
-                os_log("share completed returned: %@", returnedItems ?? "")
+                sa_log_v2("share completed returned: %@", returnedItems ?? "")
             }
             
             #if targetEnvironment(macCatalyst)
@@ -1050,7 +1074,7 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
                     let options = UIScene.ActivationRequestOptions()
                     options.requestingScene = self.view.window?.windowScene
                     UIApplication.shared.requestSceneSessionActivation(AppController.current.findSceneSession(), userActivity: userActivity, options: options) { (error) in
-                        os_log("request new scene returned: %@", error.localizedDescription)
+                        sa_log_v2("request new scene returned: %@", error.localizedDescription)
                     }
                 } else {
                     // Fallback on earlier versions
@@ -1250,7 +1274,9 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
         }
     }
     
-    func jumpBetweenPages() {
+    /// Jump between pages
+    /// - Parameter page: 0: select jump page number -1: jump to first page, -2: jump to last page
+    func jumpTo(page: Int) {
         getThreadInfo { [weak self] (threadData) in
             guard let threadData = threadData else { return }
             let replies = threadData.replies
@@ -1258,6 +1284,17 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
 
             let totalPages = Int(ceil(Double(replies)/Double(SAGlobalConfig().number_of_replies_per_page)))
             let currentPage = Int(ceil(Double(nowfloor)/Double(SAGlobalConfig().number_of_replies_per_page)))
+            
+            if page == -1 {
+                self?.loadHTMLFilesAt(floor: 0)
+                return
+            }
+            
+            if page == -2 {
+                let nowfloor = (totalPages - 1) * SAGlobalConfig().number_of_replies_per_page + 1
+                self?.loadHTMLFilesAt(floor: nowfloor)
+                return
+            }
 
             let alert = UIAlertController(title: "输入页码：", message: nil, preferredStyle: .alert)
             alert.popoverPresentationController?.barButtonItem = self?.navigationItem.rightBarButtonItem
@@ -1458,7 +1495,7 @@ extension SAThreadContentViewController {
                     let options = UIScene.ActivationRequestOptions()
                     options.requestingScene = self.view.window?.windowScene
                     UIApplication.shared.requestSceneSessionActivation(AppController.current.findSceneSession(), userActivity: userActivity, options: options) { (error) in
-                        os_log("request new scene returned: %@", error.localizedDescription)
+                        sa_log_v2("request new scene returned: %@", error.localizedDescription)
                     }
                     return
                 }
@@ -1478,7 +1515,7 @@ extension SAThreadContentViewController {
         assert(toURL.scheme == sa_wk_url_scheme)
         let str = fromURL.absoluteString.sa_escapedStringForJavaScriptInput()
         let toParam = "\"\(toURL.absoluteString.sa_escapedStringForJavaScriptInput())\""
-        os_log("from: %@ to: %@", log: .ui, type: .info, fromURL as CVarArg, toURL as CVarArg)
+        sa_log_v2("from: %@ to: %@", log: .ui, type: .info, fromURL as CVarArg, toURL as CVarArg)
         webView.evaluateJavaScript("reloadHTMLImgTags(\"\(str)\", \(toParam));", completionHandler: nil)
     }
     
@@ -1549,7 +1586,7 @@ extension SAThreadContentViewController: SAWKURLSchemeHandlerDelegate {
         let downloadedImageDir = dir.appendingPathComponent(imageSavingSubDirName)
         if !fm.fileExists(atPath: downloadedImageDir.path) {
             // maybe this page was removed
-            os_log("will not save because dir not found", log: .ui, type: .error)
+            sa_log_v2("will not save because dir not found", log: .ui, type: .error)
             return nil
         }
         
@@ -1587,7 +1624,7 @@ extension SAThreadContentViewController: SAWKURLSchemeHandlerDelegate {
         let downloadedImageDir = dir.appendingPathComponent(imageSavingSubDirName)
         if !fm.fileExists(atPath: downloadedImageDir.path) {
             // maybe this page was removed
-            os_log("will not save because dir not found", log: .ui, type: .error)
+            sa_log_v2("will not save because dir not found", log: .ui, type: .error)
             return nil
         }
         
@@ -1636,7 +1673,7 @@ extension SAThreadContentViewController: UIContextMenuInteractionDelegate {
             }
             
             let action1 = UIAction(title: "跳转分页") { [weak self] _ in
-                self?.jumpBetweenPages()
+                self?.jumpTo(page: 0)
             }
             
             let action2 = UIAction(title: "刷新") { [weak self] _ in

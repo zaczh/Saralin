@@ -12,9 +12,9 @@ class SAThemeManager {
     var activeTheme: SATheme!
     
     init() {
-        NotificationCenter.default.addObserver(self, selector: #selector(handleUserLoggedIn(_:)), name: Notification.Name.SAUserLoggedInNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(handleUserLoggedOut(_:)), name: Notification.Name.SAUserLoggedOutNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(handleUserPreferenceChange(_:)), name: Notification.Name.SAUserPreferenceChangedNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleUserLoggedIn(_:)), name: Notification.Name.SAUserLoggedIn, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleUserLoggedOut(_:)), name: Notification.Name.SAUserLoggedOut, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleUserPreferenceChange(_:)), name: Notification.Name.SAUserPreferenceChanged, object: nil)
         
         loadUserTheme()
     }
@@ -132,11 +132,15 @@ class SAThemeManager {
         if UITraitCollection.current.userInterfaceStyle == .light {
             // change to day
             let toTheme = SATheme.whiteTheme
-            switchToNewTheme(toTheme)
+            if activeTheme.identifier != toTheme.identifier {
+                switchToNewTheme(toTheme)
+            }
         } else if UITraitCollection.current.userInterfaceStyle == .dark {
             // change to night
             let toTheme = SATheme.darkTheme
-            switchToNewTheme(toTheme)
+            if activeTheme.identifier != toTheme.identifier {
+                switchToNewTheme(toTheme)
+            }
         }
     }
 }

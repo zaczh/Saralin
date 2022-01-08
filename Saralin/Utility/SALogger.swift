@@ -30,20 +30,21 @@ extension OSLogType {
     static let allTypes: [OSLogType] = [.default, .debug, .info, .error, .fault]
 }
 
-extension OSLog {
-    static let ui = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "UI")
-    static let debugging = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Debugging")
-    static let utility = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Utility")
-    static let network = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Network")
-    static let database = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Database")
-    static let webView = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "WebView")
-    static let account = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Account")
-    static let cookie = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Cookie")
-    static let keychain = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Keychain")
-    static let search = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Search")
-    static let config = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Config")
-    static let cloudkit = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Cloudkit")
-    
+enum SALogger {
+    case `default`// = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Default")
+    case ui // Logger(subsystem: Bundle.main.bundleIdentifier!, category: "UI")
+    case debugging // Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Debugging")
+    case utility // Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Utility")
+    case network // Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Network")
+    case database // Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Database")
+    case webView // Logger(subsystem: Bundle.main.bundleIdentifier!, category: "WebView")
+    case account // Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Account")
+    case cookie // Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Cookie")
+    case keychain // Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Keychain")
+    case search // Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Search")
+    case config // Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Config")
+    case cloudkit // Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Cloudkit")
+
     func getCategory() -> String {
         switch self {
         case .ui:
@@ -70,6 +71,37 @@ extension OSLog {
             return "Cloudkit"
         default:
             return "Default"
+        }
+    }
+    
+    func getLogger() -> Logger {
+        switch self {
+        case .ui:
+            return Logger(subsystem: Bundle.main.bundleIdentifier!, category: "UI")
+        case .debugging:
+            return Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Debugging")
+        case .utility:
+            return Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Utility")
+        case .network:
+            return Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Network")
+        case .database:
+            return Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Database")
+        case .webView:
+            return Logger(subsystem: Bundle.main.bundleIdentifier!, category: "WebView")
+        case .account:
+            return Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Account")
+        case .cookie:
+            return Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Cookie")
+        case .keychain:
+            return Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Keychain")
+        case .search:
+            return Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Search")
+        case .config:
+            return Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Config")
+        case .cloudkit:
+            return Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Cloudkit")
+        default:
+            return Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Default")
         }
     }
 }
@@ -110,11 +142,12 @@ private let _pid = ProcessInfo.processInfo.processIdentifier
 ///   - log: the os log object
 ///   - type: the log type
 ///   - args: the args
-func sa_save_log(_ message: StaticString, file: String = #file, line: Int = #line, column: Int = #column, function: String = #function, log: OSLog = .default, type: OSLogType = .debug, _ args: CVarArg...) {
+func sa_log_v2(_ message: StaticString, file: String = #file, line: Int = #line, column: Int = #column, function: String = #function, log: SALogger = .default, type: OSLogType = .debug, _ args: CVarArg...) {
     let date = Date()
     var tid: __uint64_t = 0
     pthread_threadid_np(pthread_self(), &tid)
     let logContent = String.init(format: message.description, arguments: args)
+    log.getLogger().log(level: type, "\(logContent)")
     _logQueue.async {
         let dateComponents = NSCalendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second, .nanosecond, .timeZone], from: date)
         

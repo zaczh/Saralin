@@ -16,7 +16,7 @@ class SACookieManager {
     private var lastTimeRefreshCookieLock = NSLock()
     init() {
         let center = NotificationCenter.default
-        logoutNotificationObject = center.addObserver(forName: Notification.Name.SAUserLoggedOutNotification, object: nil, queue: nil, using: { [weak self] (notification) in
+        logoutNotificationObject = center.addObserver(forName: Notification.Name.SAUserLoggedOut, object: nil, queue: nil, using: { [weak self] (notification) in
             guard let self = self else {
                 return
             }
@@ -25,7 +25,7 @@ class SACookieManager {
             self.lastTimeRefreshCookieLock.unlock()
         })
         
-        loginNotificationObject = center.addObserver(forName: Notification.Name.SAUserLoggedInNotification, object: nil, queue: nil, using: { [weak self] (notification) in
+        loginNotificationObject = center.addObserver(forName: Notification.Name.SAUserLoggedIn, object: nil, queue: nil, using: { [weak self] (notification) in
             guard let self = self else {
                 return
             }
@@ -73,7 +73,7 @@ class SACookieManager {
             return
         }
         lastTimeRefreshCookieLock.unlock()
-        os_log("refresh cookie", log: .cookie, type: .info)
+        sa_log_v2("refresh cookie", log: .cookie, type: .info)
         
         var request = URLRequest(url: URL(string: SAGlobalConfig().forum_url)!)
         request.setValue(SAGlobalConfig().pc_useragent_string, forHTTPHeaderField: "User-Agent");

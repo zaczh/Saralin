@@ -48,7 +48,7 @@ struct SAGlobalConfig {
     // avatar domain may be different from forum
     let avatar_base_url = "https://avatar.saraba1st.com/"
     
-    let forum_app_api_domain = "https://app.saraba1st.com/"
+    let forum_app_api_domain = "https://app.saraba1st.com/2b/api/app"
 
     var profile_url_template: String { return forum_base_url + "space-uid-%{UID}.html" }
     

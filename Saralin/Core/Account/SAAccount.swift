@@ -246,7 +246,7 @@ class SAAccount: NSObject, NSSecureCoding {
         preferences[someKey.rawValue] = someValue
         preferencesLock.unlock()
         AppController.current.getService(of: SAAccountManager.self)!.saveActiveAccount()
-        let notification = Notification(name: Notification.Name.SAUserPreferenceChangedNotification, object: self, userInfo: [SAAccount.Preference.changedPreferenceNameKey:someKey])
+        let notification = Notification(name: Notification.Name.SAUserPreferenceChanged, object: self, userInfo: [SAAccount.Preference.changedPreferenceNameKey:someKey])
         NotificationCenter.default.post(notification)
     }
 }

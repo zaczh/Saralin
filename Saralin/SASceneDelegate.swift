@@ -33,7 +33,7 @@ class SASceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         if let userActivity = session.stateRestorationActivity {
             if !restore(window: window, with: userActivity) {
-                os_log("Failed to restore from %@", log: .ui, type: .fault, userActivity.description)
+                sa_log_v2("Failed to restore from %@", log: .ui, type: .fault, userActivity.description)
             }
         }
     }
@@ -157,7 +157,7 @@ class SASceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         scene.title = nil
         
-        os_log("Failed to continue session from %@", log: .ui, type: .fault, userActivity.description)
+        sa_log_v2("Failed to continue session from %@", log: .ui, type: .fault, userActivity.description)
     }
     
     // MARK: Restoration

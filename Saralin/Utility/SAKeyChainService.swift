@@ -31,12 +31,12 @@ class SAKeyChainService {
         var items: CFTypeRef? = nil
         let status = SecItemCopyMatching(query as CFDictionary, &items)
         if status != errSecSuccess {
-            os_log("keychain SecItemCopyMatching error: %@", log: .keychain, type: .error, NSNumber(value: status))
+            sa_log_v2("keychain SecItemCopyMatching error: %@", log: .keychain, type: .error, NSNumber(value: status))
             return []
         }
         
         guard let arr = items as? Array<CFDictionary> else {
-            os_log("keychain SecItemCopyMatching empty", log: .keychain, type: .info)
+            sa_log_v2("keychain SecItemCopyMatching empty", log: .keychain, type: .info)
             return []
         }
         
@@ -97,7 +97,7 @@ class SAKeyChainService {
         let status = SecItemCopyMatching(query as CFDictionary, &item)
         guard status != errSecItemNotFound else { return nil }
         guard status == errSecSuccess else {
-            os_log("keychain SecItemCopyMatching error: %@", log: .keychain, type: .error, NSNumber(value: status))
+            sa_log_v2("keychain SecItemCopyMatching error: %@", log: .keychain, type: .error, NSNumber(value: status))
             return nil
         }
         
@@ -166,7 +166,7 @@ extension SAKeyChainService {
         let status = SecItemCopyMatching(query as CFDictionary, &item)
         guard status != errSecItemNotFound else { return nil }
         guard status == errSecSuccess else {
-            os_log("keychain SecItemCopyMatching error: %@", log: .keychain, type: .error, NSNumber(value: status))
+            sa_log_v2("keychain SecItemCopyMatching error: %@", log: .keychain, type: .error, NSNumber(value: status))
             return nil
         }
         

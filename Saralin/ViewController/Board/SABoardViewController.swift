@@ -134,7 +134,7 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
         fetchForumLastReloadingDate()
         
         if isRestoredFromArchive {
-            os_log("awake from archive", log: .ui, type: .info)
+            sa_log_v2("awake from archive", log: .ui, type: .info)
             AppController.current.getService(of: SACoreDataManager.self)!.rebuildCache { [weak self] (manager) in
                 guard let self = self else { return }
                 self.tableView.reloadData()
@@ -211,7 +211,7 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
     #endif
     
     deinit {
-        os_log("SABoardViewController deinit")
+        sa_log_v2("SABoardViewController deinit")
         prefetchOperations.removeAll()
     }
     
@@ -284,7 +284,7 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
             strongSelf.filterDataSourceAndReloadData()
         })
         
-        _ = NotificationCenter.default.addObserver(forName: .SAUserLoggedInNotification, object: nil, queue: nil, using: { [weak self] (notification) in
+        _ = NotificationCenter.default.addObserver(forName: .SAUserLoggedIn, object: nil, queue: nil, using: { [weak self] (notification) in
             AppController.current.getService(of: SACoreDataManager.self)!.rebuildCache { [weak self] (manager) in
                 guard let self = self else { return }
                 self.tableView.reloadData()
@@ -341,7 +341,7 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
     
     fileprivate func fetchForumLastReloadingDate() {
         guard let fid = self.fid else {
-            os_log("fetchForumLastViewedDate fid is nil, not save", log: .ui, type: .debug)
+            sa_log_v2("fetchForumLastViewedDate fid is nil, not save", log: .ui, type: .debug)
             return
         }
         
@@ -368,7 +368,7 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
     //MARK: - save thread viewing history
     fileprivate func recordBoardViewingHistory() {
         guard let fid = self.fid else {
-            os_log("recordBoardViewingHistory fid is nil, not save", log: .ui, type: .debug)
+            sa_log_v2("recordBoardViewingHistory fid is nil, not save", log: .ui, type: .debug)
             return
         }
         let name = self.name
@@ -384,7 +384,7 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
             }
         }
         if lastfetchedtid == nil {
-            os_log("no threads fetched, not save", log: .ui, type: .debug)
+            sa_log_v2("no threads fetched, not save", log: .ui, type: .debug)
             return
         }
         
@@ -411,7 +411,7 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
                 viewedBoard.typeid = typeid
                 viewedBoard.name = name
                 viewedBoard.lastfetchedtid = lastfetchedtid
-                os_log("save viewed board %@", log: .ui, type: .error, viewedBoard)
+                sa_log_v2("save viewed board %@", log: .ui, type: .error, viewedBoard)
             }
         }
     }
@@ -430,7 +430,7 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
                 fetch.predicate = NSPredicate(format: "(uid == %@ AND tid == %@)", uid, tid)
                 fetch.sortDescriptors = []
                 guard let objects = try? context.fetch(fetch) else {
-                    os_log("error occured when fetching viewed threads", log: .ui, type: .debug)
+                    sa_log_v2("error occured when fetching viewed threads", log: .ui, type: .debug)
                     completion?(0)
                     return
                 }
@@ -714,7 +714,7 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
         }
         
         guard indexPath.row < dataSource.count else {
-            os_log("index out of range", log: .ui, type: .fault)
+            sa_log_v2("index out of range", log: .ui, type: .fault)
             fillCellWithModel(ViewModel(), cell)
             return cell
         }
@@ -725,10 +725,10 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
             if tid == op.tid {
                 if let viewModel = op.result {
                     fillCellWithModel(viewModel, cell)
-                    os_log("use prefetched data", log: .ui, type: .debug)
+                    sa_log_v2("use prefetched data", log: .ui, type: .debug)
                     return cell
                 }
-                os_log("prefetching not finished yet", log: .ui, type: .info)
+                sa_log_v2("prefetching not finished yet", log: .ui, type: .info)
                 break
             }
         }
@@ -750,7 +750,7 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
         fetchingMoreBegan()
         
         fetchMoreThreadsCompletion { [weak self] (data) in
-            os_log("fetch %@ items", log: .ui, type: .debug, "\(data?.count ?? 0)")
+            sa_log_v2("fetch %@ items", log: .ui, type: .debug, "\(data?.count ?? 0)")
             guard let strongSelf = self else {
                 return
             }
@@ -834,7 +834,7 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard dataSource.count > indexPath.row else {
-            os_log("fatal error dataSource index out of range", log: .ui, type: .error)
+            sa_log_v2("fatal error dataSource index out of range", log: .ui, type: .error)
             return
         }
         let thread = dataSource[indexPath.row] as ThreadSummary
@@ -865,7 +865,7 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
     
     private func threadContentViewControllerForCell(at indexPath: IndexPath) -> SAThreadContentViewController? {
         guard dataSource.count > indexPath.row else {
-            os_log("fatal error dataSource index out of range", log: .ui, type: .error)
+            sa_log_v2("fatal error dataSource index out of range", log: .ui, type: .error)
             return nil
         }
         
@@ -890,7 +890,7 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
     
     private func updateReadStatusForCell(at indexPath: IndexPath, reloadCell: Bool) {
         guard dataSource.count > indexPath.row else {
-            os_log("fatal error dataSource index out of range", log: .ui, type: .error)
+            sa_log_v2("fatal error dataSource index out of range", log: .ui, type: .error)
             return
         }
         var thread = dataSource[indexPath.row]
@@ -950,7 +950,7 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
                 let options = UIScene.ActivationRequestOptions()
                 options.requestingScene = view.window?.windowScene
                 UIApplication.shared.requestSceneSessionActivation(AppController.current.findSceneSession(), userActivity: userActivity, options: options) { (error) in
-                    os_log("request new scene returned: %@", error.localizedDescription)
+                    sa_log_v2("request new scene returned: %@", error.localizedDescription)
                 }
                 return
             }
@@ -1044,7 +1044,7 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
     
     @objc func handleSubForumButtonClick(_ sender: UIBarButtonItem) {
         guard fid != nil && name != nil else {
-            os_log("fid or name is nil", log: .ui, type: .debug)
+            sa_log_v2("fid or name is nil", log: .ui, type: .debug)
             return
         }
         
@@ -1065,7 +1065,7 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
         }
         
         guard forum != nil else {
-            os_log("fatal error forum is nil", log: .ui, type: .debug)
+            sa_log_v2("fatal error forum is nil", log: .ui, type: .debug)
             return
         }
         
@@ -1110,7 +1110,7 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
     override func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
         for indexPath in indexPaths {
             guard dataSource.count > indexPath.row else {
-                os_log("fatal error dataSource index out of range", log: .ui, type: .error)
+                sa_log_v2("fatal error dataSource index out of range", log: .ui, type: .error)
                 continue
             }
             let thread = dataSource[indexPath.row] as ThreadSummary
@@ -1139,7 +1139,7 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
     override func tableView(_ tableView: UITableView, cancelPrefetchingForRowsAt indexPaths: [IndexPath]) {
         for indexPath in indexPaths {
             guard dataSource.count > indexPath.row else {
-                os_log("fatal error dataSource index out of range", log: .ui, type: .error)
+                sa_log_v2("fatal error dataSource index out of range", log: .ui, type: .error)
                 continue
             }
             let thread = dataSource[indexPath.row] as ThreadSummary

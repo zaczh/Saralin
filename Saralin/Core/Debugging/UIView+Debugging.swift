@@ -54,7 +54,7 @@ extension UIView {
                 return
             }
             
-            os_log("maybe a view leak: %@ %p", log: .debugging, type: .fault, classNameStr, view)
+            sa_log_v2("maybe a view leak: %@ %p", log: .debugging, type: .debug, classNameStr, view)
         }
     }
 }
