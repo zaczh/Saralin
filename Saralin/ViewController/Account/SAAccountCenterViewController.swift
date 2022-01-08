@@ -10,8 +10,24 @@ import UIKit
 import WebKit
 
 class SAAccountCenterViewController: SABaseTableViewController {
+    struct TableCell {
+        var title: String
+        var detail: String
+        var description: String
+        var icon: String
+        var clickable: Bool
+        var disclousure: Bool
+        var onDisplay: ((UITableViewCell) -> Void)
+        var handler: ((IndexPath) -> IndexPath?)
+    }
+    
+    struct TableSection {
+        var summary: String
+        var description: String
+        var items: [TableCell]
+    }
 
-    var dataSource: [NSDictionary]! = nil
+    var dataSource: [TableSection]!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,29 +55,59 @@ class SAAccountCenterViewController: SABaseTableViewController {
     
     override func refreshTableViewCompletion(_ completion: ((SALoadingViewController.LoadingResult, NSError?) -> Void)?) {
         dataSource = [
-            ["summary":"",
-             "items":[
-                ["top":"", "title":NSLocalizedString("ACCOUNT_VC_ACCOUNT_DETAIL", comment: "Account Detail"), "detail":"", "clickable":"1", "disclosure":"1", "eventId":"1"]
-                ],
-             "description":""
-            ],
+            TableSection(summary: "", description: "", items: [
+                TableCell(title: NSLocalizedString("ACCOUNT_VC_ACCOUNT_DETAIL", comment: "Account Detail"),
+                          detail: "", description: "", icon: "", clickable: true, disclousure: true, onDisplay: {_ in }, handler: { [weak self] (indexPath) in
+                              if Account().isGuest {
+                                  AppController.current.presentLoginViewController(sender: self, completion: nil)
+                                  return nil
+                              }
+                              return self?.pushAccountInfoPage(indexPath)
+                          })
+            ]),
             
-            ["summary":"",
-             "items":[
-                ["title":NSLocalizedString("ACCOUNT_VC_MY_MESSAGES", comment: "我的私信"), "detail": "", "disclosure":"1", "clickable":"1", "eventId":"15", "icon":"Topic-44", "systemIcon":"text.bubble"],
-                ["title":NSLocalizedString("ACCOUNT_VC_MY_THREADS", comment: "My Threads"), "detail": "", "disclosure":"1", "clickable":"1", "eventId":"16", "icon":"My-Topic-44", "systemIcon":"doc.text"],
-                ["title":NSLocalizedString("ACCOUNT_VC_MY_NOTICES", comment: "My Notices"), "detail": "", "disclosure":"1", "clickable":"1", "eventId":"my-notices", "icon":"alarm", "systemIcon":"alarm"],
-                ["title":NSLocalizedString("ACCOUNT_VC_BLACKLIST", comment: "黑名单"), "detail": "", "disclosure":"1", "clickable":"1", "eventId":"my-blacklist", "icon":"block-44", "systemIcon":"shield.lefthalf.fill"],
-                ],
-             "description":""
-            ],
+            TableSection(summary: "", description: "", items: [
+                TableCell(title: NSLocalizedString("ACCOUNT_VC_MY_MESSAGES", comment: "我的私信"),
+                          detail: "", description: "", icon: "text.bubble", clickable: true, disclousure: true, onDisplay: { [weak self] (cell) in
+                              self?.refreshTabAndCellBadgeValue(cell)
+                          }, handler: { [weak self] (indexPath) in
+                                  if Account().isGuest {
+                                      AppController.current.presentLoginAlert(sender: self, completion: nil)
+                                      return nil
+                                  }
+                                  
+                              return self?.openDMPage(indexPath)
+                          }),
+                TableCell(title: NSLocalizedString("ACCOUNT_VC_MY_THREADS", comment: "My Threads"),
+                          detail: "", description: "", icon: "doc.text", clickable: true, disclousure: true, onDisplay: {_ in }, handler: { [weak self] (indexPath) in
+                                  if Account().isGuest {
+                                      AppController.current.presentLoginAlert(sender: self, completion: nil)
+                                      return nil
+                                  }
+                                  
+                              return self?.openMyThreadsPage(indexPath)
+                          }),
+                TableCell(title: NSLocalizedString("ACCOUNT_VC_MY_NOTICES", comment: "My Notices"),
+                          detail: "", description: "", icon: "alarm", clickable: true, disclousure: true, onDisplay: {_ in }, handler: { [weak self] (indexPath) in
+                                  if Account().isGuest {
+                                      AppController.current.presentLoginAlert(sender: self, completion: nil)
+                                      return nil
+                                  }
+                                  
+                              return self?.openMyNoticesPage(indexPath)
+                          }),
+                TableCell(title: NSLocalizedString("ACCOUNT_VC_BLACKLIST", comment: "Block List"),
+                          detail: "", description: "", icon: "shield.lefthalf.fill", clickable: true, disclousure: true, onDisplay: {_ in }, handler: { [weak self] (indexPath) in
+                              return self?.openBlacklistConfigurePage(indexPath)
+                          }),
+                
+            ]),
             
-            ["summary":"",
-             "items":[
-                ["title":NSLocalizedString("ACCOUNT_VC_ABOUT", comment: "About"), "detail": "", "disclosure":"1", "clickable":"1", "eventId":"11", "icon":"About-44", "systemIcon":"info.circle"]
-                ],
-             "description":""
-            ],
+            TableSection(summary: "", description: "", items: [
+                TableCell(title: NSLocalizedString("ACCOUNT_VC_ABOUT", comment: "About"), detail: "", description: "", icon: "info.circle", clickable: true, disclousure: true, onDisplay: {_ in }, handler: { [weak self] (indexPath) in
+                    return self?.openAboutPage(indexPath)
+                })
+            ])
         ]
         
         if Account().isGuest {
@@ -70,33 +116,33 @@ class SAAccountCenterViewController: SABaseTableViewController {
             return
         }
 
-        Account().checkSmsBindingState { (binded, error) in
-            guard error == nil else {
-                completion?(.fail, error)
-                return
-            }
-            
-            DispatchQueue.main.async {
-                defer {
-                    completion?(.newData, nil)
-                }
-                
-                if binded { return }
-                let bindingEntry: NSDictionary =
-                ["summary":"",
-                 "items":[
-                    ["top":"", "title":NSLocalizedString("ACCOUNT_VC_ACCOUNT_DETAIL", comment: "Account Detail"), "detail":"", "clickable":"1", "disclosure":"1", "eventId":"1"]
-                    ],
-                    "description":NSLocalizedString("ACCOUNT_VC_BIND_SMS", comment: "Bind"),
-                    "description-link-title":"点击绑定",
-                    "description-link-target":"salink://open?target=bindsms"
-                ]
-                
-                self.dataSource[0] = bindingEntry
-                self.reloadData()
-                return
-            }
-        }
+//        Account().checkSmsBindingState { (binded, error) in
+//            guard error == nil else {
+//                completion?(.fail, error)
+//                return
+//            }
+//
+//            DispatchQueue.main.async {
+//                defer {
+//                    completion?(.newData, nil)
+//                }
+//
+//                if binded { return }
+//                let bindingEntry: NSDictionary =
+//                ["summary":"",
+//                 "items":[
+//                    ["top":"", "title":NSLocalizedString("ACCOUNT_VC_ACCOUNT_DETAIL", comment: "Account Detail"), "detail":"", "clickable":"1", "disclosure":"1", "eventId":"1"]
+//                    ],
+//                    "description":NSLocalizedString("ACCOUNT_VC_BIND_SMS", comment: "Bind"),
+//                    "description-link-title":"点击绑定",
+//                    "description-link-target":"salink://open?target=bindsms"
+//                ]
+//
+//                self.dataSource[0] = bindingEntry
+//                self.reloadData()
+//                return
+//            }
+//        }
     }
     
     override func didReceiveMemoryWarning() {
@@ -130,9 +176,9 @@ class SAAccountCenterViewController: SABaseTableViewController {
     // MARK: - tableview
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {        
-        let items = dataSource[indexPath.section]["items"] as! [[String:String]]
-        let eventId = items[indexPath.row]["eventId"]!
-        if handleEvent(eventId, indexPath: indexPath) == nil {
+        let items = dataSource[indexPath.section].items
+        let handler = items[indexPath.row].handler
+        if handler(indexPath) == nil {
             tableView.deselectRow(at: indexPath, animated: true)
         }
     }
@@ -148,10 +194,7 @@ class SAAccountCenterViewController: SABaseTableViewController {
     override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let view = tableView.dequeueReusableHeaderFooterView(withIdentifier: "SAThemedTableHeaderFooterView") as! SAThemedTableHeaderFooterView
         view.delegate = self
-        if let summary = dataSource[section]["summary"] as? String {
-            view.summaryTextView.text = summary
-        }
-        
+        view.summaryTextView.text = dataSource[section].summary
         return view
     }
     
@@ -160,7 +203,7 @@ class SAAccountCenterViewController: SABaseTableViewController {
             return 0
         }
         
-        let items = dataSource[section]["items"] as! [[String:String]]
+        let items = dataSource[section].items
         return items.count
     }
     
@@ -207,28 +250,23 @@ class SAAccountCenterViewController: SABaseTableViewController {
             return cell
         }
         
-        let items = dataSource[indexPath.section]["items"] as! [[String:String]]
-        let title = items[indexPath.row]["title"]
+        let items = dataSource[indexPath.section].items
+        let title = items[indexPath.row].title
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! SAAccountCenterBodyCell
         cell.accessoryView = nil
         
-        if #available(iOS 13.0, *) {
-            if let systemIcon = items[indexPath.row]["systemIcon"] {
-                cell.imageView?.image = UIImage(systemName: systemIcon)
-            }
-        } else if let icon = items[indexPath.row]["icon"] {
-            cell.imageView?.image = UIImage(named: icon)
+        let systemIcon = items[indexPath.row].icon
+        if !systemIcon.isEmpty {
+            cell.imageView?.image = UIImage(systemName: systemIcon)
         }
         
         cell.accessoryType = .disclosureIndicator
 
-        let detail = items[indexPath.row]["detail"]
+        let detail = items[indexPath.row].detail
         cell.textLabel?.text = title
         cell.detailTextLabel!.text = detail
         
-        if indexPath.section == 1 && indexPath.row == 1 {
-            refreshTabAndCellBadgeValue(cell)
-        }
+        items[indexPath.row].onDisplay(cell)
         
         return cell
     }
@@ -245,8 +283,8 @@ class SAAccountCenterViewController: SABaseTableViewController {
     }
     
     override func tableView(_ tableView: UITableView, shouldHighlightRowAt indexPath: IndexPath) -> Bool {
-        let items = dataSource[indexPath.section]["items"] as! [[String:String]]
-        let clickable = items[indexPath.row]["clickable"] != nil && items[indexPath.row]["clickable"]! == "1"
+        let items = dataSource[indexPath.section].items
+        let clickable = items[indexPath.row].clickable
 
         return clickable
     }
@@ -265,9 +303,9 @@ class SAAccountCenterViewController: SABaseTableViewController {
     override func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
         let view = tableView.dequeueReusableHeaderFooterView(withIdentifier: "SAThemedTableHeaderFooterView") as! SAThemedTableHeaderFooterView
         view.delegate = self
-        view.setTitleWith(description: dataSource[section]["description"] as? String,
-                          link: dataSource[section]["description-link-title"] as? String,
-                          url: dataSource[section]["description-link-target"] as? String)
+        view.setTitleWith(description: dataSource[section].description,
+                          link: "",
+                          url: "")
         return view
     }
     
