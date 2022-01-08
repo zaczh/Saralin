@@ -409,7 +409,7 @@ class SAAccountCenterViewController: SABaseTableViewController {
     private func refreshTabAndCellBadgeValue(_ cell: UITableViewCell?) {
         // currently only new direct messages show badge
         let newMsgCount = AppController.current.getService(of: SABackgroundTaskManager.self)!.unreadDirectMessageCount
-        if newMsgCount > 0 {
+        if !Account().isGuest && newMsgCount > 0 {
             tabBarItem.badgeValue = "\(newMsgCount)"
             parent?.tabBarItem.badgeValue = "\(newMsgCount)"
             let buttonDemension = CGFloat(24)
