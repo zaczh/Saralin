@@ -17,6 +17,7 @@ class SAAccountCenterViewController: SABaseTableViewController {
         var icon: String
         var clickable: Bool
         var disclousure: Bool
+        var cellIdentifier: String
         var onDisplay: ((UITableViewCell) -> Void)
         var handler: ((IndexPath) -> IndexPath?)
     }
@@ -24,6 +25,8 @@ class SAAccountCenterViewController: SABaseTableViewController {
     struct TableSection {
         var summary: String
         var description: String
+        var linkTitle: String
+        var linkTarget: String
         var items: [TableCell]
     }
 
@@ -55,9 +58,50 @@ class SAAccountCenterViewController: SABaseTableViewController {
     
     override func refreshTableViewCompletion(_ completion: ((SALoadingViewController.LoadingResult, NSError?) -> Void)?) {
         dataSource = [
-            TableSection(summary: "", description: "", items: [
+            TableSection(summary: "", description: "", linkTitle: "", linkTarget: "", items: [
                 TableCell(title: NSLocalizedString("ACCOUNT_VC_ACCOUNT_DETAIL", comment: "Account Detail"),
-                          detail: "", description: "", icon: "", clickable: true, disclousure: true, onDisplay: {_ in }, handler: { [weak self] (indexPath) in
+                          detail: "", description: "", icon: "", clickable: true, disclousure: true, cellIdentifier: "head", onDisplay: { tableCell in
+                              
+                              let cell = tableCell as! SAAccountCenterHeaderCell
+                              cell.textLabel?.text = nil
+                              cell.detailTextLabel!.text = nil
+                              
+                              cell.customImageView.image = UIImage(named:"noavatar_middle")
+                              cell.checkInHandler = { [weak self] () in
+                                  self?.dailyCheckIn(cell)
+                              }
+                              
+                              if Account().isGuest {
+                                  cell.checkInButton.isHidden = true
+                                  cell.name.text = Account().name
+                                  cell.uin.text = NSLocalizedString("ACCOUNT_VC_CLICK_HERE_TO_LOG_IN", comment: "点击此处登录")
+                              } else {
+                                  cell.checkInButton.isHidden = false
+                                  cell.uin.text = Account().uid
+                                  cell.name.text = Account().name
+                              }
+                              
+                              cell.hasCheckedIn = Account().hasCheckedInToday
+                              
+                              guard let url = Account().avatarImageURL else {
+                                  return
+                              }
+                              
+                              UIApplication.shared.showNetworkIndicator()
+                              URLSession.saCustomized.dataTask(with: url, completionHandler: { (data, response, error) in
+                                  UIApplication.shared.hideNetworkIndicator()
+                                  guard error == nil && data != nil else {
+                                      sa_log_v2("image download failed", log: .ui, type: .error)
+                                      return
+                                  }
+                                  
+                                  if let image = UIImage(data: data!) {
+                                      DispatchQueue.main.async(execute: {
+                                          cell.customImageView.image = image
+                                      })
+                                  }
+                              }).resume()
+                          }, handler: { [weak self] (indexPath) in
                               if Account().isGuest {
                                   AppController.current.presentLoginViewController(sender: self, completion: nil)
                                   return nil
@@ -66,9 +110,9 @@ class SAAccountCenterViewController: SABaseTableViewController {
                           })
             ]),
             
-            TableSection(summary: "", description: "", items: [
+            TableSection(summary: "", description: "", linkTitle: "", linkTarget: "", items: [
                 TableCell(title: NSLocalizedString("ACCOUNT_VC_MY_MESSAGES", comment: "我的私信"),
-                          detail: "", description: "", icon: "text.bubble", clickable: true, disclousure: true, onDisplay: { [weak self] (cell) in
+                          detail: "", description: "", icon: "text.bubble", clickable: true, disclousure: true, cellIdentifier: "cell", onDisplay: { [weak self] (cell) in
                               self?.refreshTabAndCellBadgeValue(cell)
                           }, handler: { [weak self] (indexPath) in
                                   if Account().isGuest {
@@ -79,7 +123,7 @@ class SAAccountCenterViewController: SABaseTableViewController {
                               return self?.openDMPage(indexPath)
                           }),
                 TableCell(title: NSLocalizedString("ACCOUNT_VC_MY_THREADS", comment: "My Threads"),
-                          detail: "", description: "", icon: "doc.text", clickable: true, disclousure: true, onDisplay: {_ in }, handler: { [weak self] (indexPath) in
+                          detail: "", description: "", icon: "doc.text", clickable: true, disclousure: true, cellIdentifier: "cell", onDisplay: {_ in }, handler: { [weak self] (indexPath) in
                                   if Account().isGuest {
                                       AppController.current.presentLoginAlert(sender: self, completion: nil)
                                       return nil
@@ -88,7 +132,7 @@ class SAAccountCenterViewController: SABaseTableViewController {
                               return self?.openMyThreadsPage(indexPath)
                           }),
                 TableCell(title: NSLocalizedString("ACCOUNT_VC_MY_NOTICES", comment: "My Notices"),
-                          detail: "", description: "", icon: "alarm", clickable: true, disclousure: true, onDisplay: {_ in }, handler: { [weak self] (indexPath) in
+                          detail: "", description: "", icon: "alarm", clickable: true, disclousure: true, cellIdentifier: "cell", onDisplay: {_ in }, handler: { [weak self] (indexPath) in
                                   if Account().isGuest {
                                       AppController.current.presentLoginAlert(sender: self, completion: nil)
                                       return nil
@@ -97,14 +141,14 @@ class SAAccountCenterViewController: SABaseTableViewController {
                               return self?.openMyNoticesPage(indexPath)
                           }),
                 TableCell(title: NSLocalizedString("ACCOUNT_VC_BLACKLIST", comment: "Block List"),
-                          detail: "", description: "", icon: "shield.lefthalf.fill", clickable: true, disclousure: true, onDisplay: {_ in }, handler: { [weak self] (indexPath) in
+                          detail: "", description: "", icon: "shield.lefthalf.fill", clickable: true, disclousure: true, cellIdentifier: "cell", onDisplay: {_ in }, handler: { [weak self] (indexPath) in
                               return self?.openBlacklistConfigurePage(indexPath)
                           }),
                 
             ]),
             
-            TableSection(summary: "", description: "", items: [
-                TableCell(title: NSLocalizedString("ACCOUNT_VC_ABOUT", comment: "About"), detail: "", description: "", icon: "info.circle", clickable: true, disclousure: true, onDisplay: {_ in }, handler: { [weak self] (indexPath) in
+            TableSection(summary: "", description: "", linkTitle: "", linkTarget: "", items: [
+                TableCell(title: NSLocalizedString("ACCOUNT_VC_ABOUT", comment: "About"), detail: "", description: "", icon: "info.circle", clickable: true, disclousure: true, cellIdentifier: "cell", onDisplay: {_ in }, handler: { [weak self] (indexPath) in
                     return self?.openAboutPage(indexPath)
                 })
             ])
@@ -116,33 +160,29 @@ class SAAccountCenterViewController: SABaseTableViewController {
             return
         }
 
-//        Account().checkSmsBindingState { (binded, error) in
-//            guard error == nil else {
-//                completion?(.fail, error)
-//                return
-//            }
-//
-//            DispatchQueue.main.async {
-//                defer {
-//                    completion?(.newData, nil)
-//                }
-//
-//                if binded { return }
-//                let bindingEntry: NSDictionary =
-//                ["summary":"",
-//                 "items":[
-//                    ["top":"", "title":NSLocalizedString("ACCOUNT_VC_ACCOUNT_DETAIL", comment: "Account Detail"), "detail":"", "clickable":"1", "disclosure":"1", "eventId":"1"]
-//                    ],
-//                    "description":NSLocalizedString("ACCOUNT_VC_BIND_SMS", comment: "Bind"),
-//                    "description-link-title":"点击绑定",
-//                    "description-link-target":"salink://open?target=bindsms"
-//                ]
-//
-//                self.dataSource[0] = bindingEntry
-//                self.reloadData()
-//                return
-//            }
-//        }
+        Account().checkSmsBindingState { (binded, error) in
+            guard error == nil else {
+                completion?(.fail, error)
+                return
+            }
+
+            DispatchQueue.main.async {
+                defer {
+                    completion?(.newData, nil)
+                }
+
+                if binded { return }
+                
+                let bindingEntry = TableSection(summary: "",
+                                                description: NSLocalizedString("ACCOUNT_VC_BIND_SMS", comment: "Bind"),
+                                                linkTitle: "点击绑定",
+                                                linkTarget: "salink://open?target=bindsms",
+                                                items: self.dataSource[0].items)
+
+                self.dataSource[0] = bindingEntry
+                self.reloadData()
+            }
+        }
     }
     
     override func didReceiveMemoryWarning() {
@@ -208,51 +248,9 @@ class SAAccountCenterViewController: SABaseTableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if indexPath.section == 0 && indexPath.row == 0 {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "head", for: indexPath) as! SAAccountCenterHeaderCell
-            cell.customImageView.image = UIImage(named:"noavatar_middle")
-            cell.checkInHandler = { [weak self] () in
-                self?.dailyCheckIn(cell)
-            }
-            
-            if Account().isGuest {
-                cell.checkInButton.isHidden = true
-                cell.name.text = Account().name
-                cell.uin.text = NSLocalizedString("ACCOUNT_VC_CLICK_HERE_TO_LOG_IN", comment: "点击此处登录")
-            } else {
-                cell.checkInButton.isHidden = false
-                cell.uin.text = Account().uid
-                cell.name.text = Account().name
-            }
-            
-            cell.hasCheckedIn = Account().hasCheckedInToday
-            
-            guard let url = Account().avatarImageURL else {
-                return cell
-            }
-            
-            UIApplication.shared.showNetworkIndicator()
-            URLSession.saCustomized.dataTask(with: url, completionHandler: { (data, response, error) in
-                UIApplication.shared.hideNetworkIndicator()
-                guard error == nil && data != nil else {
-                    sa_log_v2("image download failed", log: .ui, type: .error)
-                    return
-                }
-                
-                if let image = UIImage(data: data!) {
-                    DispatchQueue.main.async(execute: {
-                        cell.customImageView.image = image
-                    })
-                }
-                
-            }).resume()
-            
-            return cell
-        }
-        
         let items = dataSource[indexPath.section].items
         let title = items[indexPath.row].title
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! SAAccountCenterBodyCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: items[indexPath.row].cellIdentifier, for: indexPath)
         cell.accessoryView = nil
         
         let systemIcon = items[indexPath.row].icon
@@ -304,8 +302,8 @@ class SAAccountCenterViewController: SABaseTableViewController {
         let view = tableView.dequeueReusableHeaderFooterView(withIdentifier: "SAThemedTableHeaderFooterView") as! SAThemedTableHeaderFooterView
         view.delegate = self
         view.setTitleWith(description: dataSource[section].description,
-                          link: "",
-                          url: "")
+                          link: dataSource[section].linkTitle,
+                          url: dataSource[section].linkTarget)
         return view
     }
     
@@ -322,51 +320,6 @@ class SAAccountCenterViewController: SABaseTableViewController {
                     cell?.hasCheckedIn = true
                 }
             }
-        }
-    }
-    
-    // MARK: event handling
-    func handleEvent(_ eventId: String, indexPath: IndexPath) -> IndexPath? {
-        switch eventId {
-        case "1":
-            if Account().isGuest {
-                AppController.current.presentLoginViewController(sender: self, completion: nil)
-                return nil
-            }
-            
-            return pushAccountInfoPage(indexPath)
-        case "11":
-            return openAboutPage(indexPath)
-        case "14":
-            return nil
-        case "15":
-            if Account().isGuest {
-                AppController.current.presentLoginAlert(sender: self, completion: nil)
-                return nil
-            }
-            
-            return openDMPage(indexPath)
-        case "16":
-            if Account().isGuest {
-                AppController.current.presentLoginAlert(sender: self, completion: nil)
-                return nil
-            }
-            
-            return openMyThreadsPage(indexPath)
-        case "my-notices":
-            if Account().isGuest {
-                AppController.current.presentLoginAlert(sender: self, completion: nil)
-                return nil
-            }
-            
-            return openMyNoticesPage(indexPath)
-            
-        case "bind_sms_number":
-            return bindSMSNumber(indexPath)
-        case "my-blacklist":
-            return openBlacklistConfigurePage(indexPath)
-        default:
-            return nil;
         }
     }
     
@@ -488,6 +441,6 @@ class SAAccountCenterViewController: SABaseTableViewController {
     }
     
     @objc func handleBackgroundTaskRefreshNotification(_ notification: NSNotification) {
-        refreshTabAndCellBadgeValue(tableView.cellForRow(at: IndexPath(row: 0, section: 1)))
+        reloadData()
     }
 }

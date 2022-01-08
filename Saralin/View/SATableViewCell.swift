@@ -455,12 +455,12 @@ class SAThemedTableHeaderFooterView: UITableViewHeaderFooterView, UITextViewDele
     private var textViewHeightConstraint: NSLayoutConstraint!
     func setTitleWith(description: String?, link: String?, url: String?) {
         let attributedStr = NSMutableAttributedString.init()
-        if let description = description {
+        if let description = description, !description.isEmpty {
             attributedStr.append(NSAttributedString(string: description, attributes: nil))
         }
         attributedStr.addAttributes([NSAttributedString.Key.foregroundColor : Theme().tableCellGrayedTextColor.sa_toColor()], range: NSMakeRange(0, attributedStr.length))
         
-        if let description_link_title = link, let description_link_target = url {
+        if let description_link_title = link, let description_link_target = url, !description_link_title.isEmpty, !description_link_target.isEmpty {
             let link = NSAttributedString(string: " " + description_link_title, attributes: [.underlineStyle: NSNumber.init(value: Int8(NSUnderlineStyle.single.rawValue)), .link:description_link_target, .foregroundColor: UIColor.blue])
             attributedStr.append(link)
         }

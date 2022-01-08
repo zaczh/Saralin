@@ -21,6 +21,8 @@ class SABackgroundTaskManager {
     private var currentBackgroundFetchResult: UIBackgroundFetchResult = .noData
     private var backgroundTaskCompletion: ((UIBackgroundFetchResult) -> Void)?
     
+    private var timeOfStart: Date?
+    
     // public
     var unreadDirectMessageCount = 0
     
@@ -79,6 +81,8 @@ class SABackgroundTaskManager {
         }
         backgroundTaskCompletion = completionHandler
         
+        timeOfStart = Date()
+        
         let group = DispatchGroup()
         group.enter()
         self.fetchWatchingListThreadsInBackground { (result) in
@@ -117,7 +121,8 @@ class SABackgroundTaskManager {
         self.backgroundTaskCompletion = nil
         self.currentBackgroundFetchResult = .noData
         application.applicationIconBadgeNumber = unreadDirectMessageCount
-        sa_log_v2("app bg fetch finished with remain time: %@", log: .network, type: .info, NSNumber(value: application.backgroundTimeRemaining))
+        let time = -timeOfStart!.timeIntervalSinceNow
+        sa_log_v2("app bg fetch finished with running time: %f", log: .network, type: .info, time)
         NotificationCenter.default.post(name: .SABackgroundTaskDidFinish, object: self)
     }
     
