@@ -110,7 +110,7 @@ class SABoardFilterViewController: SAUITableViewController {
         iconLeft.translatesAutoresizingMaskIntoConstraints = false
         header.addSubview(iconLeft)
         header.addConstraint(NSLayoutConstraint(item: iconLeft, attribute: .centerY, relatedBy: .equal, toItem: header, attribute: .centerY, multiplier: 1.0, constant: 0))
-        header.addConstraint(NSLayoutConstraint(item: iconLeft, attribute: .left, relatedBy: .equal, toItem: header, attribute: .left, multiplier: 1.0, constant: 16))
+        header.addConstraint(NSLayoutConstraint(item: iconLeft, attribute: .left, relatedBy: .equal, toItem: header.safeAreaLayoutGuide, attribute: .left, multiplier: 1.0, constant: 16))
         
         let iconRight = UIButton()
         iconRight.isUserInteractionEnabled = false
@@ -125,7 +125,7 @@ class SABoardFilterViewController: SAUITableViewController {
         iconRight.tintColor = UIColor.sa_colorFromHexString(Theme().tableCellTintColor)
         header.addSubview(iconRight)
         header.addConstraint(NSLayoutConstraint(item: iconRight, attribute: .centerY, relatedBy: .equal, toItem: header, attribute: .centerY, multiplier: 1.0, constant: 0))
-        header.addConstraint(NSLayoutConstraint(item: iconRight, attribute: .right, relatedBy: .equal, toItem: header, attribute: .right, multiplier: 1.0, constant: -16))
+        header.addConstraint(NSLayoutConstraint(item: iconRight, attribute: .right, relatedBy: .equal, toItem: header.safeAreaLayoutGuide, attribute: .right, multiplier: 1.0, constant: -16))
         
         let label = UILabel()
         label.font = UIFont.sa_preferredFont(forTextStyle: UIFont.TextStyle.headline)
@@ -141,7 +141,7 @@ class SABoardFilterViewController: SAUITableViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         header.addSubview(label)
         header.addConstraint(NSLayoutConstraint(item: label, attribute: .centerY, relatedBy: .equal, toItem: header, attribute: .centerY, multiplier: 1.0, constant: 0))
-        let labelLeftConstraint = NSLayoutConstraint(item: label, attribute: .left, relatedBy: .equal, toItem: header, attribute: .left, multiplier: 1.0, constant: 16)
+        let labelLeftConstraint = NSLayoutConstraint(item: label, attribute: .left, relatedBy: .equal, toItem: header.safeAreaLayoutGuide, attribute: .left, multiplier: 1.0, constant: 16)
         labelLeftConstraint.isActive = true
         
         let labelCenterConstraint = NSLayoutConstraint(item: label, attribute: .centerX, relatedBy: .equal, toItem: header, attribute: .centerX, multiplier: 1.0, constant: 16)
