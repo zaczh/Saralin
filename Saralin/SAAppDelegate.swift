@@ -39,6 +39,8 @@ class SAAppDelegate: UIResponder, UIApplicationDelegate, UITabBarControllerDeleg
                 
         URLCache.shared.diskCapacity = 1024 * 1024 * 400 //400M
         
+        UIApplication.shared.applicationIconBadgeNumber = 0
+        
         // do the runtime hook
         UIViewController.sa_swizzleMethods()
         UIView.sa_swizzleMethods()

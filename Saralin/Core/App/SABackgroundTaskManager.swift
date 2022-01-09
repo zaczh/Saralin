@@ -83,6 +83,8 @@ class SABackgroundTaskManager {
         
         timeOfStart = Date()
         
+        UIApplication.shared.applicationIconBadgeNumber = 0
+        
         let group = DispatchGroup()
         group.enter()
         self.fetchWatchingListThreadsInBackground { (result) in
