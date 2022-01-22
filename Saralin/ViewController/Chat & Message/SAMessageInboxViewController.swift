@@ -194,6 +194,10 @@ class SAMessageInboxViewController: SABaseTableViewController {
         let conversation = ChatViewController.Conversation(cid: touid, pmid: "", formhash:"", name: toUserName, participants: participants, numberOfMessages:count)
         let chatViewController = ChatViewController(conversation: conversation)
         navigationController?.pushViewController(chatViewController, animated: true)
+        // refresh bg result
+        AppController.current.getService(of: SABackgroundTaskManager.self)?.startBackgroundTask(with: { Result in
+            
+        })
     }
     
     // MARK: - Prefetching
