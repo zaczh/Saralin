@@ -149,7 +149,16 @@ class SASettingViewController: SABaseTableViewController {
     }
     
     @IBAction func handleSettingsClose(_ sender: UIBarButtonItem) {
-        splitViewController?.presentingViewController?.dismiss(animated: true, completion: nil)
+        if UIApplication.shared.supportsMultipleScenes && (Account().preferenceForkey(.enable_multi_windows, defaultValue: false as AnyObject) as! Bool) {
+            if let sceneSession = self.view.window?.windowScene?.session {
+                let options = UIWindowSceneDestructionRequestOptions()
+                UIApplication.shared.requestSceneSessionDestruction(sceneSession, options: options, errorHandler:{ (error) in
+                    sa_log_v2("request scene session destruction returned: %@", error.localizedDescription)
+                })
+            }
+        } else {
+            splitViewController?.presentingViewController?.dismiss(animated: true, completion: nil)
+        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
