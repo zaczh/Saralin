@@ -196,9 +196,8 @@ class SAMessageInboxViewController: SABaseTableViewController {
         navigationController?.pushViewController(chatViewController, animated: true)
         // refresh bg result when viewed new message
         if dict.isnew != 0 {
-            AppController.current.getService(of: SABackgroundTaskManager.self)?.startBackgroundTask(with: { Result in
-                
-            })
+            messages[indexPath.row].isnew = 0
+            AppController.current.getService(of: SABackgroundTaskManager.self)?.startBackgroundTask(with: { _ in })
         }
     }
     
