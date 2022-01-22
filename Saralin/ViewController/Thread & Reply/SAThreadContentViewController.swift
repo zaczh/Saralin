@@ -840,7 +840,7 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
     
     override func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
         super.webViewWebContentProcessDidTerminate(webView)
-        webView.reload()
+        refresh(self)
     }
     
     func openDesktopPage(_ sender: AnyObject) {
