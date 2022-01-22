@@ -442,5 +442,6 @@ class SAAccountCenterViewController: SABaseTableViewController {
     
     @objc func handleBackgroundTaskRefreshNotification(_ notification: NSNotification) {
         reloadData()
+        refreshTabAndCellBadgeValue(nil)
     }
 }
