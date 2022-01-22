@@ -565,7 +565,7 @@ document.addEventListener('scroll', function (event) {
     scrollPosition = getScrollTop();
 
     if (scrollPosition < lastScrollPosition) {
-        if (getScrollTop() < 300) {
+        if (getScrollTop() < 1000) {
             if (isAllDataLoadedUpward) {
                 hideUpLoadingIndicator();
                 return;
@@ -573,7 +573,7 @@ document.addEventListener('scroll', function (event) {
             loadMoreUpward();
         }
     } else {
-        if (document.body.scrollHeight - 300 <= getScrollTop() + window.innerHeight) {
+        if (document.body.scrollHeight - 1000 <= getScrollTop() + window.innerHeight) {
             if (isAllDataLoaded) {
                 hideDownLoadingIndicator();
                 return;
