@@ -20,3 +20,9 @@
 3. Added ability to disable pasteboard probing
 4. Support new iOS 14 Metrics API
 5. Added support for Mac Catalyst
+
+
+## Version 2.8
+1. Fixed vote api issue
+2. Now interfaces are split into storyboards
+3. Thread content page uses modern javascript async API
