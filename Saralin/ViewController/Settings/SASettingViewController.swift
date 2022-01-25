@@ -111,7 +111,7 @@ class SASettingViewController: SABaseTableViewController {
         for i in (0 ..< dataSource.count).reversed() {
             let item = (dataSource[i]["items"] as! [[String:String]]).first
             if let eventId = item?["eventId"], eventId == "enable_multi_windows" {
-                if UIDevice.current.userInterfaceIdiom != .mac {
+                if UIDevice.current.userInterfaceIdiom != .pad {
                     dataSource.remove(at: i)
                 }
             }
