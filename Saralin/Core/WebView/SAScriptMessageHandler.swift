@@ -207,7 +207,7 @@ class SAScriptImageViewHandler: SABaseScriptLogHandler, UIDocumentInteractionCon
             fullSize = UIImage.init(data: data)
         }
         
-        if UIApplication.shared.supportsMultipleScenes && ((Account().preferenceForkey(.enable_multi_windows) as? Bool) ?? false) {
+        if UIApplication.shared.supportsMultipleScenes && (Account().preferenceForkey(.enable_multi_windows, defaultValue: false as AnyObject) as! Bool) {
             var userInfo:[String:AnyObject] = [:]
             userInfo["url"] = realUrl as AnyObject
             userInfo["fullSizeImageData"] = data as AnyObject

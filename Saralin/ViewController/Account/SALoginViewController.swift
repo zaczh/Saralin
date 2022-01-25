@@ -425,7 +425,7 @@ class SALoginViewController: SABaseViewController, UITableViewDataSource, UITabl
     }
     
     private func loginSucceeded() {
-        if UIApplication.shared.supportsMultipleScenes {
+        if UIApplication.shared.supportsMultipleScenes && (Account().preferenceForkey(.enable_multi_windows, defaultValue: false as AnyObject) as! Bool) {
             guard let sceneSession = self.view.window?.windowScene?.session else {
                 sa_log_v2("request scene session destruction no session", log: .ui, type: .error)
                 return

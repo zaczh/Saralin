@@ -940,7 +940,7 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
         }
         
         if #available(iOS 13.0, *) {
-            if UIApplication.shared.supportsMultipleScenes && ((Account().preferenceForkey(.enable_multi_windows) as? Bool) ?? false) {
+            if UIApplication.shared.supportsMultipleScenes && (Account().preferenceForkey(.enable_multi_windows, defaultValue: false as AnyObject) as! Bool) {
                 var userInfo:[String:AnyObject] = [:]
                 userInfo["fid"] = fid  as AnyObject
                 let userActivity = NSUserActivity(activityType: SAActivityType.composeThread.rawValue)

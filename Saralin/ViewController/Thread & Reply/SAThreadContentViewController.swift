@@ -1066,7 +1066,7 @@ class SAThreadContentViewController: SAContentViewController, SAReplyViewControl
             info["author"] = threadData.author as AnyObject?
             
             if #available(iOS 13.0, *) {
-                if UIApplication.shared.supportsMultipleScenes && ((Account().preferenceForkey(.enable_multi_windows) as? Bool) ?? false) {
+                if UIApplication.shared.supportsMultipleScenes && (Account().preferenceForkey(.enable_multi_windows, defaultValue: false as AnyObject) as! Bool) {
                     let userActivity = NSUserActivity(activityType: SAActivityType.replyThread.rawValue)
                     userActivity.isEligibleForHandoff = true
                     userActivity.title = SAActivityType.replyThread.title()
@@ -1487,7 +1487,7 @@ extension SAThreadContentViewController {
             info["quote_textcontent"] = replyContent as AnyObject?
             
             if #available(iOS 13.0, *) {
-                if UIApplication.shared.supportsMultipleScenes && ((Account().preferenceForkey(.enable_multi_windows) as? Bool) ?? false) {
+                if UIApplication.shared.supportsMultipleScenes && (Account().preferenceForkey(.enable_multi_windows, defaultValue: false as AnyObject) as! Bool) {
                     let userActivity = NSUserActivity(activityType: SAActivityType.replyThread.rawValue)
                     userActivity.isEligibleForHandoff = true
                     userActivity.title = SAActivityType.replyThread.title()

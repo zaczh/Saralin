@@ -231,8 +231,6 @@ class SAAccount: NSObject, NSSecureCoding {
             value = 75 as AnyObject
         case .insert_client_signature:
             value = false as AnyObject
-        case .enable_multi_windows:
-            value = true as AnyObject
         default:
             return nil
         }
