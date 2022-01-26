@@ -737,14 +737,14 @@ class AppController: NSObject {
     }
     
     func presentSettingsViewController(_ sender: UIViewController) {
-        if UIDevice.current.userInterfaceIdiom == .mac {
-            let macCatalystExtensionBundlePath = Bundle.main.builtInPlugInsPath! + "/CatalystExtension.bundle"
-            let bundle = Bundle.init(path: macCatalystExtensionBundlePath)!
-            if let cls = bundle.principalClass as? NSObject.Type {
-                cls.perform(NSSelectorFromString("runCommand:object:"), with: "ShowSettingsWindow", with: nil)
-            }
-            return
-        }
+//        if UIDevice.current.userInterfaceIdiom == .mac {
+//            let macCatalystExtensionBundlePath = Bundle.main.builtInPlugInsPath! + "/CatalystExtension.bundle"
+//            let bundle = Bundle.init(path: macCatalystExtensionBundlePath)!
+//            if let cls = bundle.principalClass as? NSObject.Type {
+//                cls.perform(NSSelectorFromString("runCommand:object:"), with: "ShowSettingsWindow", with: nil)
+//            }
+//            return
+//        }
         
         let view = sender.view!
         if UIApplication.shared.supportsMultipleScenes && (Account().preferenceForkey(.enable_multi_windows, defaultValue: false as AnyObject) as! Bool) {

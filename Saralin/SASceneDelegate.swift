@@ -235,6 +235,7 @@ class SASceneDelegate: UIResponder, UIWindowSceneDelegate {
                 newToolBar = NSToolbar(identifier: SAToolbarIdentifierImageViewer)
             case .settings:
                 newToolBar = NSToolbar(identifier: SAToolbarIdentifierSettings)
+                newToolBar!.centeredItemIdentifier = SAToolbarItemIdentifierTitle
             case .main:
                 newToolBar = NSToolbar(identifier: SAToolbarIdentifierMain)
             case .login:

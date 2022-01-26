@@ -174,10 +174,34 @@ class SASettingViewController: SABaseTableViewController {
                 if let t = self.title {
                     item.title = t
                 }
-                break
+            }
+            
+            if item.itemIdentifier.rawValue == SAToolbarItemIdentifierGoBack.rawValue {
+                item.target = self
+                item.action = #selector(self.handleToolbarGoBack(_:))
             }
         }
         #endif
+    }
+    
+    @objc func handleToolbarGoBack(_ sender: AnyObject) {
+        guard let sidebarSplit = view.window?.rootViewController as? UISplitViewController else {
+            if let navigation = view.window?.rootViewController as? UINavigationController {
+                navigation.popViewController(animated: true)
+                return
+            }
+            return
+        }
+        
+        guard let rightNavigation = sidebarSplit.viewControllers.last as? UINavigationController else {
+            return
+        }
+        
+        // check detail
+        if rightNavigation.viewControllers.count > 1 {
+            rightNavigation.popViewController(animated: true)
+            return
+        }
     }
     
     override var showsRefreshControl: Bool {
