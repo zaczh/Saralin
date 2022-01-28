@@ -221,6 +221,8 @@
 /* 注册 Register */
 "REGISTER" = "注册";
 
+"LOGIN_FAILED" = "登录失败";
+
 /* reply wording */
 "REPLY" = "回复";
 

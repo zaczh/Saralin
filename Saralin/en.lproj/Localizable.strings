@@ -177,6 +177,8 @@
 "REGISTER" = "Register";
 "SETTING_VC_TITLE" = "Settings";
 
+"LOGIN_FAILED" = "Login Failed";
+
 "LOGIN_IN_PROGRESS" = "login in progress...";
 
 "AUTO_FILL_ACCOUNT_EXIST" = "Account Exist";
