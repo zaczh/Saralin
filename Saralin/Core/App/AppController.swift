@@ -11,6 +11,7 @@ import UIKit
 import UserNotifications
 import StoreKit
 import OSLog
+import SafariServices
 
 func Theme() -> SATheme {
     return AppController.current.getService(of: SAThemeManager.self)!.activeTheme

@@ -8,6 +8,7 @@
 
 import UIKit
 import WebKit
+import SafariServices
 
 class SAWebLoginViewController: SABaseViewController {
     private var webView: WKWebView!
@@ -225,9 +226,20 @@ class SAWebLoginViewController: SABaseViewController {
     
     @objc func handleRegisterButtonItemClicked(_ sender: AnyObject) {
         let url = Foundation.URL(string: SAGlobalConfig().register_url)!
-        UIApplication.shared.open(url, options: [:]) { (succeeded) in
-            sa_log_v2("[Login] register open", log: .ui, type: .info)
+        
+        let safariViewer = SFSafariViewController(url: url)
+        if #available(iOS 10.0, *) {
+            safariViewer.preferredBarTintColor = Theme().barTintColor.sa_toColor()
+        } else {
+            // Fallback on earlier versions
         }
+        if #available(iOS 10.0, *) {
+            safariViewer.preferredControlTintColor = Theme().globalTintColor.sa_toColor()
+        } else {
+            // Fallback on earlier versions
+        }
+        safariViewer.delegate = self
+        present(safariViewer, animated: true, completion: nil)
     }
 }
 
@@ -251,5 +263,11 @@ extension SAWebLoginViewController: WKUIDelegate {
         alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "OK"), style: .cancel, handler: nil))
         navigationController?.present(alert, animated: true, completion: nil)
         completionHandler()
+    }
+}
+
+extension SAWebLoginViewController: SFSafariViewControllerDelegate {
+    func safariViewController(_ controller: SFSafariViewController, initialLoadDidRedirectTo URL: URL) {
+        sa_log_v2("register page redirect to: %@", log: .account, type: .info, URL.absoluteString)
     }
 }
