@@ -196,9 +196,6 @@ class SAAccount: NSObject, NSSecureCoding {
             preferencesLock.unlock()
         }
         if let value = preferences[key.rawValue] {
-            if key == .enable_multi_windows {
-                return true as AnyObject
-            }
             return value as AnyObject?
         }
         
@@ -233,9 +230,10 @@ class SAAccount: NSObject, NSSecureCoding {
             value = false as AnyObject
         case .enable_multi_windows:
             if UIDevice.current.userInterfaceIdiom != .mac {
-                return nil
+                value = false as AnyObject
+            } else {
+                value = true as AnyObject
             }
-            value = true as AnyObject
         default:
             return nil
         }
