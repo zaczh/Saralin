@@ -101,7 +101,7 @@ class SABoardViewController: SABaseTableViewController, SABoardFilterDelegate {
         
         loadingController.emptyLabelTitle = "你没有权限查看当前板块或者其内容为空。"
         
-        if UIDevice.current.userInterfaceIdiom == .phone {
+        if UIDevice.current.userInterfaceIdiom != .mac {
             let changeOrderItem = UIBarButtonItem(image: UIImage.imageWithSystemName("arrow.up.arrow.down", fallbackName: "Descending-Sorting"),
                                                   primaryAction: nil,
                                                   menu: createChangeOrderMenu())
