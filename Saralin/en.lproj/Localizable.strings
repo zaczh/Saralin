@@ -268,3 +268,5 @@
 "LOGIN_FORM_SECURITY_QUESTION_ANSWER" = "Answer";
 
 "CONTEXT_MENU_TITLE" = "Shortcuts";
+
+"PLACEHOLDER_VC_INFO_TEXT" = "Open a thread from the left sidebar";
