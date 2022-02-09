@@ -1037,6 +1037,7 @@ class AppController: NSObject {
         presentEULAIfNeeded()
         registerThemeAndFontNotifications()
         updateKeychainDeviceIdentifierIfNeeded()
+        registerForServiceCreationNotifications()
     }
     
     func applicationWillTerminate() {
@@ -1105,6 +1106,14 @@ class AppController: NSObject {
     
     func applicationShouldSaveApplicationState(coder: NSCoder) -> Bool {
         return true
+    }
+    
+    private func registerForServiceCreationNotifications() {
+        let nc = NotificationCenter.default
+        nc.addObserver(forName: Notification.Name.SAUserLoggedIn, object: nil, queue: nil) { [weak self] (notification) in
+            self?.backgroundTaskManager.startBackgroundTask(with: { result in
+            })
+        }
     }
     
     private func compare(version1: String, version2: String) -> ComparisonResult {
