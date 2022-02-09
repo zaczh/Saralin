@@ -19,15 +19,14 @@
         <div class="float_left">
         <span class="span_padding"><label onclick="var rect =  this.getBoundingClientRect();window.webkit.messageHandlers.threadaction.postMessage({'action':'quote_reply','rect':'{{' + rect.left + ',' + rect.top + '},{' + rect.width + ',' + rect.height + '}}','replyID':'${REPLY_ID}','threadID':'${THREAD_ID}','floorID':'${FLOOR_ID}','replyTime':'${REPLY_TIME}','forumID':'${FORUM_ID}', 'replyAuthorName':'${AUTHOR_NAME}','authorID':'${AUTHOR_ID}'});return false;">引用</label></span>
     
-        <span class="blocked_author_name"><label onclick="var rect =  this.getBoundingClientRect();window.webkit.messageHandlers.threadaction.postMessage({'action':'block_user','rect':'{{' + rect.left + ',' + rect.top + '},{' + rect.width + ',' + rect.height + '}}','replyID':'${REPLY_ID}','threadID':'${THREAD_ID}','floorID':'${FLOOR_ID}','replyTime':'${REPLY_TIME}','forumID':'${FORUM_ID}', 'replyAuthorName':'${AUTHOR_NAME}','authorID':'${AUTHOR_ID}'});return false;">屏蔽</label></span>
+        <span class="blocked_author_name span_padding"><label onclick="var rect =  this.getBoundingClientRect();window.webkit.messageHandlers.threadaction.postMessage({'action':'block_user','rect':'{{' + rect.left + ',' + rect.top + '},{' + rect.width + ',' + rect.height + '}}','replyID':'${REPLY_ID}','threadID':'${THREAD_ID}','floorID':'${FLOOR_ID}','replyTime':'${REPLY_TIME}','forumID':'${FORUM_ID}', 'replyAuthorName':'${AUTHOR_NAME}','authorID':'${AUTHOR_ID}'});return false;">屏蔽</label></span>
+        
+        <span class="report_abuse"><label onclick="var rect =  this.getBoundingClientRect();window.webkit.messageHandlers.threadaction.postMessage({'action':'report_abuse','rect':'{{' + rect.left + ',' + rect.top + '},{' + rect.width + ',' + rect.height + '}}','replyID':'${REPLY_ID}','threadID':'${THREAD_ID}','floorID':'${FLOOR_ID}','replyTime':'${REPLY_TIME}','forumID':'${FORUM_ID}', 'replyAuthorName':'${AUTHOR_NAME}','authorID':'${AUTHOR_ID}'});return false;">举报</label></span>
         </div>
         
             <div class="float_right">
             <span class="edit_time"><label></label></span>
             </div>
         
-        
-<!--    -->
-<!--        <span class="blocked_author_name"><label onclick="var rect =  this.getBoundingClientRect();window.webkit.messageHandlers.threadaction.postMessage({'action':'report_abuse','rect':'{{' + rect.left + ',' + rect.top + '},{' + rect.width + ',' + rect.height + '}}','replyID':'${REPLY_ID}','threadID':'${THREAD_ID}','floorID':'${FLOOR_ID}','replyTime':'${REPLY_TIME}','forumID':'${FORUM_ID}', 'replyAuthorName':'${AUTHOR_NAME}','authorID':'${AUTHOR_ID}'});return false;">举报</label></span>-->
     </div>
 </div>
